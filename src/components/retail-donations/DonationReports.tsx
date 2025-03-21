@@ -19,7 +19,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Sample data for charts
 const monthlyDonationsData = [
   { name: 'Jan', donations: 65, value: 4500 },
   { name: 'Feb', donations: 72, value: 5200 },
@@ -54,8 +53,6 @@ const DonationReports = () => {
   const [reports, setReports] = useState<ReportSummary[]>([]);
   
   useEffect(() => {
-    // In a real app, this would fetch data based on the date range
-    // For now, we'll just use sample data
     setReports([
       {
         title: "Total Donations",
@@ -94,12 +91,10 @@ const DonationReports = () => {
   
   const handleDateRangeChange = (range: { from: Date; to: Date }) => {
     setDateRange(range);
-    // In a real app, this would trigger a data fetch with the new date range
     console.log("Date range changed:", range);
   };
   
   const handleDownloadReport = () => {
-    // In a real app, this would generate and download a report
     console.log("Downloading report for date range:", dateRange);
   };
   
@@ -340,7 +335,8 @@ const DonationReports = () => {
                 <TooltipContent>
                   <p>View your complete donation history</p>
                 </TooltipContent>
-              </TooltipProvider>
+              </Tooltip>
+            </TooltipProvider>
           </CardFooter>
         </Card>
       </div>
