@@ -9,6 +9,8 @@ import MainLayout from "./components/layout/MainLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Marketplace from "./pages/Marketplace";
+import ProductDetails from "./pages/ProductDetails";
+import Checkout from "./pages/Checkout";
 import Donations from "./pages/Donations";
 import PaperDonations from "./pages/PaperDonations";
 import NotFound from "./pages/NotFound";
@@ -43,6 +45,16 @@ const App = () => (
               <Route path="/marketplace" element={
                 <MainLayout>
                   <Marketplace />
+                </MainLayout>
+              } />
+              <Route path="/product/:id" element={
+                <MainLayout>
+                  <ProductDetails />
+                </MainLayout>
+              } />
+              <Route path="/checkout" element={
+                <MainLayout>
+                  <Checkout />
                 </MainLayout>
               } />
               <Route path="/profile" element={

@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Card, 
   CardContent, 
@@ -25,7 +26,10 @@ import {
   Leaf, 
   ArrowUpDown,
   CircleCheck,
-  PackageCheck
+  PackageCheck,
+  X,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { 
   Select, 
@@ -34,7 +38,10 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 // Mock product data with AI-generated details
 const mockProducts = [
@@ -127,9 +134,18 @@ const mockProducts = [
 interface ProductCardProps {
   product: typeof mockProducts[0];
   onAddToCart: (productId: string) => void;
+  onViewDetails: (productId: string) => void;
+  wishlisted: boolean;
+  onToggleWishlist: (productId: string) => void;
 }
 
-const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+const ProductCard = ({ 
+  product, 
+  onAddToCart, 
+  onViewDetails,
+  wishlisted,
+  onToggleWishlist
+}: ProductCardProps) => {
   const discountPercentage = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
   
   return (
@@ -140,11 +156,14 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
     >
       <Card className="h-full overflow-hidden hover:shadow-md transition-all">
-        <div className="relative">
+        <div 
+          className="relative cursor-pointer"
+          onClick={() => onViewDetails(product.id)}
+        >
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-48 object-cover"
+            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-2 left-2">
             <Badge className="bg-soft-pink text-white">
@@ -166,7 +185,12 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             <Badge variant="outline" className="mb-2">
               {product.category}
             </Badge>
-            <h3 className="font-medium line-clamp-1">{product.name}</h3>
+            <h3 
+              className="font-medium line-clamp-1 hover:text-soft-pink cursor-pointer"
+              onClick={() => onViewDetails(product.id)}
+            >
+              {product.name}
+            </h3>
             <div className="flex justify-between items-center mt-1">
               <div className="flex items-center">
                 <span className="font-bold text-soft-pink">${product.price.toFixed(2)}</span>
@@ -204,8 +228,13 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             <ShoppingCart className="h-4 w-4 mr-1.5" />
             Add to Cart
           </Button>
-          <Button variant="ghost" size="icon" className="shrink-0">
-            <Heart className="h-4 w-4 text-muted-foreground" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="shrink-0"
+            onClick={() => onToggleWishlist(product.id)}
+          >
+            <Heart className={`h-4 w-4 ${wishlisted ? "fill-soft-pink text-soft-pink" : "text-muted-foreground"}`} />
           </Button>
         </CardFooter>
       </Card>
@@ -213,14 +242,254 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   );
 };
 
+const FilterSidebar = ({ 
+  isOpen, 
+  onClose,
+  categoryFilter,
+  setCategoryFilter,
+  conditionFilter,
+  setConditionFilter,
+  priceRange,
+  setPriceRange,
+  sustainabilityFilter,
+  setSustainabilityFilter
+}) => {
+  const [priceValues, setPriceValues] = useState([0, 350]);
+  const [sustainabilityValues, setSustainabilityValues] = useState([0, 100]);
+  
+  useEffect(() => {
+    if (priceRange === "under50") {
+      setPriceValues([0, 50]);
+    } else if (priceRange === "50to100") {
+      setPriceValues([50, 100]);
+    } else if (priceRange === "over100") {
+      setPriceValues([100, 350]);
+    } else {
+      setPriceValues([0, 350]);
+    }
+  }, [priceRange]);
+  
+  useEffect(() => {
+    if (sustainabilityFilter === "high") {
+      setSustainabilityValues([80, 100]);
+    } else if (sustainabilityFilter === "medium") {
+      setSustainabilityValues([50, 80]);
+    } else if (sustainabilityFilter === "low") {
+      setSustainabilityValues([0, 50]);
+    } else {
+      setSustainabilityValues([0, 100]);
+    }
+  }, [sustainabilityFilter]);
+  
+  const handlePriceChange = (values) => {
+    setPriceValues(values);
+    if (values[0] === 0 && values[1] === 350) {
+      setPriceRange("all");
+    } else if (values[1] <= 50) {
+      setPriceRange("under50");
+    } else if (values[0] >= 50 && values[1] <= 100) {
+      setPriceRange("50to100");
+    } else {
+      setPriceRange("over100");
+    }
+  };
+  
+  const handleSustainabilityChange = (values) => {
+    setSustainabilityValues(values);
+    if (values[0] >= 80) {
+      setSustainabilityFilter("high");
+    } else if (values[0] >= 50) {
+      setSustainabilityFilter("medium");
+    } else {
+      setSustainabilityFilter("low");
+    }
+  };
+  
+  const handleReset = () => {
+    setCategoryFilter("all");
+    setConditionFilter("all");
+    setPriceRange("all");
+    setPriceValues([0, 350]);
+    setSustainabilityFilter("all");
+    setSustainabilityValues([0, 100]);
+  };
+  
+  return (
+    <motion.div
+      className={`fixed inset-y-0 left-0 z-50 w-80 bg-background border-r shadow-lg transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      initial={{ x: "-100%" }}
+      animate={{ x: isOpen ? 0 : "-100%" }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+    >
+      <div className="flex flex-col h-full p-4">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-medium">Filter Products</h3>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <div className="space-y-6 flex-grow overflow-y-auto">
+          <div>
+            <h4 className="font-medium mb-3">Categories</h4>
+            <div className="space-y-2">
+              {["all", "clothing", "accessories", "footwear", "outerwear", "sportswear", "formalwear"].map((category) => (
+                <div 
+                  key={category}
+                  className={`flex items-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${categoryFilter === category ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                  onClick={() => setCategoryFilter(category)}
+                >
+                  <span className="capitalize">{category === "all" ? "All Categories" : category}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <div>
+            <h4 className="font-medium mb-3">Condition</h4>
+            <div className="space-y-2">
+              {["all", "new", "like new", "excellent", "good", "fair"].map((condition) => (
+                <div 
+                  key={condition}
+                  className={`flex items-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${conditionFilter === condition ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                  onClick={() => setConditionFilter(condition)}
+                >
+                  <span className="capitalize">{condition === "all" ? "All Conditions" : condition}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <div>
+            <h4 className="font-medium mb-3">Price Range</h4>
+            <div className="px-2">
+              <Slider
+                defaultValue={[0, 350]}
+                max={350}
+                step={10}
+                value={priceValues}
+                onValueChange={handlePriceChange}
+                className="mb-6"
+              />
+              <div className="flex justify-between text-sm">
+                <span>${priceValues[0]}</span>
+                <span>${priceValues[1]}</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "under50" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setPriceRange("under50")}
+              >
+                Under $50
+              </div>
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "50to100" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setPriceRange("50to100")}
+              >
+                $50 - $100
+              </div>
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "over100" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setPriceRange("over100")}
+              >
+                Over $100
+              </div>
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "all" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setPriceRange("all")}
+              >
+                All Prices
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <div>
+            <h4 className="font-medium mb-3">Sustainability Score</h4>
+            <div className="px-2">
+              <Slider
+                defaultValue={[0, 100]}
+                max={100}
+                step={5}
+                value={sustainabilityValues}
+                onValueChange={handleSustainabilityChange}
+                className="mb-6"
+              />
+              <div className="flex justify-between text-sm">
+                <span>{sustainabilityValues[0]}</span>
+                <span>{sustainabilityValues[1]}</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "high" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setSustainabilityFilter("high")}
+              >
+                High (80+)
+              </div>
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "medium" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setSustainabilityFilter("medium")}
+              >
+                Medium (50-80)
+              </div>
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "low" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setSustainabilityFilter("low")}
+              >
+                Low (0-50)
+              </div>
+              <div 
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "all" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => setSustainabilityFilter("all")}
+              >
+                All Scores
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="pt-4 border-t mt-6">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={handleReset}
+          >
+            Reset All Filters
+          </Button>
+          <Button 
+            className="w-full mt-2"
+            onClick={onClose}
+          >
+            Apply Filters
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 const Marketplace = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
+  const [sustainabilityFilter, setSustainabilityFilter] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [activeTab, setActiveTab] = useState("all");
   const [cartItems, setCartItems] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [wishlistedItems, setWishlistedItems] = useState<string[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState(true);
   
   // Filter products based on user selection
   const filterProducts = () => {
@@ -247,17 +516,29 @@ const Marketplace = () => {
         matchesPrice = product.price > 100;
       }
       
+      // Apply sustainability filter
+      let matchesSustainability = true;
+      if (sustainabilityFilter === "high") {
+        matchesSustainability = product.sustainabilityScore >= 80;
+      } else if (sustainabilityFilter === "medium") {
+        matchesSustainability = product.sustainabilityScore >= 50 && product.sustainabilityScore < 80;
+      } else if (sustainabilityFilter === "low") {
+        matchesSustainability = product.sustainabilityScore < 50;
+      }
+      
       // Apply active tab filter
       if (activeTab !== "all") {
         if (activeTab === "trending") {
-          return matchesSearch && matchesCategory && matchesCondition && matchesPrice && product.sustainabilityScore > 80;
+          return matchesSearch && matchesCategory && matchesCondition && matchesPrice && 
+                 matchesSustainability && product.sustainabilityScore > 80;
         } else if (activeTab === "new-arrivals") {
-          return matchesSearch && matchesCategory && matchesCondition && matchesPrice && product.conditionScore > 0.8;
+          return matchesSearch && matchesCategory && matchesCondition && matchesPrice && 
+                 matchesSustainability && product.conditionScore > 0.8;
         }
         return false;
       }
       
-      return matchesSearch && matchesCategory && matchesCondition && matchesPrice;
+      return matchesSearch && matchesCategory && matchesCondition && matchesPrice && matchesSustainability;
     }).sort((a, b) => {
       // Apply sorting
       switch (sortBy) {
@@ -279,11 +560,40 @@ const Marketplace = () => {
   
   const handleAddToCart = (productId: string) => {
     setCartItems(prev => [...prev, productId]);
+    toast.success("Item added to cart", {
+      action: {
+        label: "View Cart",
+        onClick: () => navigate("/checkout"),
+      },
+    });
+  };
+  
+  const handleToggleWishlist = (productId: string) => {
+    if (wishlistedItems.includes(productId)) {
+      setWishlistedItems(prev => prev.filter(id => id !== productId));
+      toast("Removed from wishlist");
+    } else {
+      setWishlistedItems(prev => [...prev, productId]);
+      toast("Added to wishlist");
+    }
+  };
+  
+  const handleViewDetails = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+  
+  const handleToggleShowFilters = () => {
+    setShowFilters(!showFilters);
   };
   
   return (
     <div className="space-y-6 animate-enter">
-      <div className="flex justify-between items-start">
+      <motion.div 
+        className="flex justify-between items-start"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Marketplace</h1>
           <p className="text-muted-foreground">
@@ -291,7 +601,11 @@ const Marketplace = () => {
           </p>
         </div>
         
-        <Button variant="outline" className="relative">
+        <Button 
+          variant="outline" 
+          className="relative"
+          onClick={() => navigate("/checkout")}
+        >
           <ShoppingCart className="h-4 w-4 mr-2" />
           Cart
           {cartItems.length > 0 && (
@@ -300,7 +614,7 @@ const Marketplace = () => {
             </span>
           )}
         </Button>
-      </div>
+      </motion.div>
 
       <Card className="glass-morphism">
         <CardHeader>
@@ -360,85 +674,189 @@ const Marketplace = () => {
                   </SelectContent>
                 </Select>
                 
-                <Button variant="outline" size="icon">
+                <Button 
+                  variant={showFilters ? "default" : "outline"} 
+                  size="icon"
+                  onClick={handleToggleShowFilters}
+                  className={showFilters ? "bg-soft-pink text-white" : ""}
+                >
                   <Sliders className="h-4 w-4" />
                 </Button>
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-4 pb-4">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <div className="flex items-center">
-                    <Tag className="h-3.5 w-3.5 mr-1.5" />
-                    <span>{categoryFilter === "all" ? "All Categories" : categoryFilter}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="clothing">Clothing</SelectItem>
-                  <SelectItem value="accessories">Accessories</SelectItem>
-                  <SelectItem value="footwear">Footwear</SelectItem>
-                  <SelectItem value="outerwear">Outerwear</SelectItem>
-                  <SelectItem value="sportswear">Sportswear</SelectItem>
-                  <SelectItem value="formalwear">Formalwear</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Sidebar Filters for Large Screens */}
+              <div className="hidden lg:block">
+                <Card className="sticky top-4">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Filters</CardTitle>
+                    <CardDescription>Refine your search</CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    <div>
+                      <div 
+                        className="flex items-center justify-between cursor-pointer py-1"
+                        onClick={() => setExpandedCategories(!expandedCategories)}
+                      >
+                        <h4 className="font-medium">Categories</h4>
+                        {expandedCategories ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
+                      
+                      <AnimatePresence>
+                        {expandedCategories && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="space-y-1 mt-2">
+                              {["all", "clothing", "accessories", "footwear", "outerwear", "sportswear", "formalwear"].map((category) => (
+                                <div 
+                                  key={category}
+                                  className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${categoryFilter === category ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                                  onClick={() => setCategoryFilter(category)}
+                                >
+                                  <span className="capitalize">{category === "all" ? "All Categories" : category}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h4 className="font-medium mb-2">Condition</h4>
+                      <div className="space-y-1">
+                        {["all", "new", "like new", "excellent", "good", "fair"].map((condition) => (
+                          <div 
+                            key={condition}
+                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${conditionFilter === condition ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                            onClick={() => setConditionFilter(condition)}
+                          >
+                            <span className="capitalize">{condition === "all" ? "All Conditions" : condition}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h4 className="font-medium mb-2">Price Range</h4>
+                      <div className="space-y-1">
+                        {[
+                          { value: "all", label: "All Prices" },
+                          { value: "under50", label: "Under $50" },
+                          { value: "50to100", label: "$50 to $100" },
+                          { value: "over100", label: "Over $100" }
+                        ].map((option) => (
+                          <div 
+                            key={option.value}
+                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${priceRange === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                            onClick={() => setPriceRange(option.value)}
+                          >
+                            <span>{option.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h4 className="font-medium mb-2">Sustainability</h4>
+                      <div className="space-y-1">
+                        {[
+                          { value: "all", label: "All Scores" },
+                          { value: "high", label: "High (80+)" },
+                          { value: "medium", label: "Medium (50-80)" },
+                          { value: "low", label: "Low (0-50)" }
+                        ].map((option) => (
+                          <div 
+                            key={option.value}
+                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${sustainabilityFilter === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                            onClick={() => setSustainabilityFilter(option.value)}
+                          >
+                            <span>{option.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <Button 
+                      variant="outline" 
+                      className="w-full text-sm"
+                      onClick={() => {
+                        setCategoryFilter("all");
+                        setConditionFilter("all");
+                        setPriceRange("all");
+                        setSustainabilityFilter("all");
+                      }}
+                    >
+                      Reset All Filters
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
               
-              <Select value={conditionFilter} onValueChange={setConditionFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <div className="flex items-center">
-                    <Filter className="h-3.5 w-3.5 mr-1.5" />
-                    <span>{conditionFilter === "all" ? "All Conditions" : conditionFilter}</span>
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Conditions</SelectItem>
-                  <SelectItem value="new">New with Tags</SelectItem>
-                  <SelectItem value="like new">Like New</SelectItem>
-                  <SelectItem value="excellent">Excellent</SelectItem>
-                  <SelectItem value="good">Good</SelectItem>
-                  <SelectItem value="fair">Fair</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Mobile Filters */}
+              <FilterSidebar 
+                isOpen={showFilters}
+                onClose={() => setShowFilters(false)}
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                conditionFilter={conditionFilter}
+                setConditionFilter={setConditionFilter}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                sustainabilityFilter={sustainabilityFilter}
+                setSustainabilityFilter={setSustainabilityFilter}
+              />
               
-              <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-[150px]">
-                  <div className="flex items-center">
-                    <DollarSign className="h-3.5 w-3.5 mr-1.5" />
-                    <span>Price Range</span>
+              {/* Product Grid */}
+              <div className="lg:col-span-3">
+                {filteredProducts.length > 0 ? (
+                  <>
+                    <div className="mb-4">
+                      <p className="text-sm text-muted-foreground">
+                        Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      <AnimatePresence>
+                        {filteredProducts.map((product) => (
+                          <ProductCard
+                            key={product.id}
+                            product={product}
+                            onAddToCart={handleAddToCart}
+                            onViewDetails={handleViewDetails}
+                            wishlisted={wishlistedItems.includes(product.id)}
+                            onToggleWishlist={handleToggleWishlist}
+                          />
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <PackageCheck className="h-16 w-16 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-1">No products found</h3>
+                    <p className="text-center text-muted-foreground">
+                      Try adjusting your filters or search terms to find what you're looking for.
+                    </p>
                   </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under50">Under $50</SelectItem>
-                  <SelectItem value="50to100">$50 to $100</SelectItem>
-                  <SelectItem value="over100">Over $100</SelectItem>
-                </SelectContent>
-              </Select>
+                )}
+              </div>
             </div>
-            
-            {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <AnimatePresence>
-                  {filteredProducts.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={handleAddToCart}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12">
-                <PackageCheck className="h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-1">No products found</h3>
-                <p className="text-center text-muted-foreground">
-                  Try adjusting your filters or search terms to find what you're looking for.
-                </p>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

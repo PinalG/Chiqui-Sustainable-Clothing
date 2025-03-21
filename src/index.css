@@ -80,10 +80,70 @@
 
 @layer utilities {
   .glass-morphism {
-    @apply backdrop-blur-lg bg-white/10 border border-white/20 shadow-lg;
+    @apply backdrop-blur-sm bg-background/90 border border-border/50 shadow-lg;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-md bg-white/40 border border-white/20 shadow-xl;
+  }
+  
+  .glass-dark {
+    @apply backdrop-blur-lg bg-black/30 border border-white/10;
   }
   
   .text-balance {
     text-wrap: balance;
   }
+  
+  .text-gradient {
+    @apply bg-gradient-to-br from-soft-pink via-soft-pink/80 to-soft-pink/60 bg-clip-text text-transparent;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(176, 176, 176, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(176, 176, 176, 0.8);
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+  background-size: 1000px 100%;
+}
+
+.smooth-transition {
+  transition: all 0.3s ease-in-out;
 }
