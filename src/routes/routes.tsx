@@ -1,36 +1,12 @@
-import React from "react";
+
+import React, { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { UserRole } from "@/types/AuthTypes";
-
-// Pages
-import Index from "@/pages/Index";
-import Login from "@/pages/auth/Login";
-import Signup from "@/pages/auth/Signup";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
-import Dashboard from "@/pages/Dashboard";
-import Marketplace from "@/pages/Marketplace";
-import ProductDetails from "@/pages/ProductDetails";
-import Donations from "@/pages/Donations";
-import RetailDonations from "@/pages/RetailDonations";
-import Rewards from "@/pages/Rewards";
-import UserProfile from "@/pages/UserProfile";
+import { LazyComponent } from "@/components/ui/lazy-component";
 import NotFound from "@/pages/NotFound";
-import Checkout from "@/pages/Checkout";
-
-// Admin Pages
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import ReportingDashboard from "@/pages/admin/ReportingDashboard";
-import UserManagement from "@/pages/admin/UserManagement";
-
-// Settings Pages
-import SettingsPage from "@/pages/settings/SettingsPage";
-import PrivacyPage from "@/pages/settings/PrivacyPage";
-
-// Logistics Page
-import Logistics from "@/pages/logistics/Logistics";
 
 // Lazy loaded components
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
