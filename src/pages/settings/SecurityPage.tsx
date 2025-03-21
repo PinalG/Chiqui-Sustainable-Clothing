@@ -1,11 +1,10 @@
-
 import React from "react";
 import { 
   Shield, 
   LockKeyhole, 
   UserRound, 
   KeyRound, 
-  FingerPrint, 
+  Fingerprint, 
   CircleUserRound
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,7 +55,7 @@ const SecurityPage = () => {
             <span>Account</span>
           </TabsTrigger>
           <TabsTrigger value="sessions" className="flex items-center">
-            <FingerPrint className="h-4 w-4 mr-2" />
+            <Fingerprint className="h-4 w-4 mr-2" />
             <span>Sessions</span>
           </TabsTrigger>
         </TabsList>
