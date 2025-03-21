@@ -15,7 +15,9 @@ import {
   Truck,
   Square,
   DollarSign,
-  MapPin
+  MapPin,
+  QrCode,
+  Scan
 } from "lucide-react";
 import { 
   Select, 
@@ -24,84 +26,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data for inventory items
-const mockInventory = [
-  {
-    id: "INV00123",
-    batchName: "Spring Collection 2023",
-    category: "clothing",
-    items: 42,
-    value: 1250.50,
-    location: "Main Warehouse - Section A",
-    space: 120,
-    status: "available",
-    createdAt: "2023-04-15T10:30:00Z",
-    image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    id: "INV00124",
-    batchName: "Summer Accessories",
-    category: "accessories",
-    items: 68,
-    value: 2340.75,
-    location: "Main Warehouse - Section B",
-    space: 85,
-    status: "available",
-    createdAt: "2023-04-16T14:45:00Z",
-    image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop",
-  },
-  {
-    id: "INV00125",
-    batchName: "Winter Outerwear",
-    category: "outerwear",
-    items: 23,
-    value: 4320.30,
-    location: "Secondary Warehouse",
-    space: 200,
-    status: "available",
-    createdAt: "2023-04-10T09:15:00Z",
-    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936&auto=format&fit=crop",
-  },
-  {
-    id: "INV00126",
-    batchName: "Formal Collection",
-    category: "formalwear",
-    items: 36,
-    value: 5670.80,
-    location: "Main Warehouse - Section C",
-    space: 150,
-    status: "pending",
-    createdAt: "2023-04-18T16:20:00Z",
-    image: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=1974&auto=format&fit=crop",
-  },
-  {
-    id: "INV00127",
-    batchName: "Athletic Wear",
-    category: "sportswear",
-    items: 54,
-    value: 1890.40,
-    location: "Main Warehouse - Section A",
-    space: 110,
-    status: "sold",
-    createdAt: "2023-04-05T11:10:00Z",
-    image: "https://images.unsplash.com/photo-1556306535-0f09a537f0a3?q=80&w=1970&auto=format&fit=crop",
-  },
-  {
-    id: "INV00128",
-    batchName: "Designer Shoes",
-    category: "footwear",
-    items: 29,
-    value: 3450.60,
-    location: "Secondary Warehouse",
-    space: 75,
-    status: "shipping",
-    createdAt: "2023-04-12T13:25:00Z",
-    image: "https://images.unsplash.com/photo-1560343090-f0409e92791a?q=80&w=1964&auto=format&fit=crop",
-  }
-];
-
-// Status badge component
 const StatusBadge = ({ status }: { status: string }) => {
   switch (status) {
     case "available":
@@ -137,13 +63,91 @@ const StatusBadge = ({ status }: { status: string }) => {
   }
 };
 
-const InventoryManagement = () => {
+const InventoryManagement = ({ onViewQrCode, onScanQrCode }: { 
+  onViewQrCode?: (itemId: string, itemName: string) => void;
+  onScanQrCode?: () => void;
+}) => {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   
-  // Filter and sort inventory items
+  const mockInventory = [
+    {
+      id: "INV00123",
+      batchName: "Spring Collection 2023",
+      category: "clothing",
+      items: 42,
+      value: 1250.50,
+      location: "Main Warehouse - Section A",
+      space: 120,
+      status: "available",
+      createdAt: "2023-04-15T10:30:00Z",
+      image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=2070&auto=format&fit=crop",
+    },
+    {
+      id: "INV00124",
+      batchName: "Summer Accessories",
+      category: "accessories",
+      items: 68,
+      value: 2340.75,
+      location: "Main Warehouse - Section B",
+      space: 85,
+      status: "available",
+      createdAt: "2023-04-16T14:45:00Z",
+      image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop",
+    },
+    {
+      id: "INV00125",
+      batchName: "Winter Outerwear",
+      category: "outerwear",
+      items: 23,
+      value: 4320.30,
+      location: "Secondary Warehouse",
+      space: 200,
+      status: "available",
+      createdAt: "2023-04-10T09:15:00Z",
+      image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936&auto=format&fit=crop",
+    },
+    {
+      id: "INV00126",
+      batchName: "Formal Collection",
+      category: "formalwear",
+      items: 36,
+      value: 5670.80,
+      location: "Main Warehouse - Section C",
+      space: 150,
+      status: "pending",
+      createdAt: "2023-04-18T16:20:00Z",
+      image: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=1974&auto=format&fit=crop",
+    },
+    {
+      id: "INV00127",
+      batchName: "Athletic Wear",
+      category: "sportswear",
+      items: 54,
+      value: 1890.40,
+      location: "Main Warehouse - Section A",
+      space: 110,
+      status: "sold",
+      createdAt: "2023-04-05T11:10:00Z",
+      image: "https://images.unsplash.com/photo-1556306535-0f09a537f0a3?q=80&w=1970&auto=format&fit=crop",
+    },
+    {
+      id: "INV00128",
+      batchName: "Designer Shoes",
+      category: "footwear",
+      items: 29,
+      value: 3450.60,
+      location: "Secondary Warehouse",
+      space: 75,
+      status: "shipping",
+      createdAt: "2023-04-12T13:25:00Z",
+      image: "https://images.unsplash.com/photo-1560343090-f0409e92791a?q=80&w=1964&auto=format&fit=crop",
+    }
+  ];
+
   const filteredInventory = mockInventory
     .filter(item => {
       const matchesSearch = item.batchName.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -171,14 +175,46 @@ const InventoryManagement = () => {
           return 0;
       }
     });
-  
+
   const totalItems = filteredInventory.reduce((sum, item) => sum + item.items, 0);
   const totalValue = filteredInventory.reduce((sum, item) => sum + item.value, 0);
   const totalSpace = filteredInventory.reduce((sum, item) => sum + item.space, 0);
-  
+
+  const handleGenerateQr = (item: typeof mockInventory[0]) => {
+    if (onViewQrCode) {
+      onViewQrCode(item.id, item.batchName);
+    } else {
+      const retailDonationsEvent = new CustomEvent('switch-tab', { 
+        detail: { tab: 'qrcode', itemId: item.id, itemName: item.batchName } 
+      });
+      document.dispatchEvent(retailDonationsEvent);
+      
+      toast({
+        title: "Generate QR Code",
+        description: `Navigating to QR Code generator for ${item.id} - ${item.batchName}`,
+      });
+    }
+  };
+
+  const handleScanQr = () => {
+    if (onScanQrCode) {
+      onScanQrCode();
+    } else {
+      const retailDonationsEvent = new CustomEvent('switch-tab', { 
+        detail: { tab: 'qrscan' } 
+      });
+      document.dispatchEvent(retailDonationsEvent);
+      
+      toast({
+        title: "Scan QR Code",
+        description: "Navigating to QR Code scanner",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card className="glass-morphism">
           <CardContent className="p-4 flex items-center">
             <div className="w-10 h-10 rounded-full bg-soft-pink/10 flex items-center justify-center mr-3">
@@ -216,69 +252,78 @@ const InventoryManagement = () => {
         </Card>
       </div>
       
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
+      <div className="flex flex-col md:flex-row items-start justify-between gap-4 mb-4">
+        <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by batch name or ID..."
-            className="pl-9"
+            className="pl-9 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
-              <div className="flex items-center">
-                <Filter className="h-4 w-4 mr-2" />
-                <span>{categoryFilter ? `Category: ${categoryFilter}` : "All Categories"}</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
-              <SelectItem value="clothing">Clothing</SelectItem>
-              <SelectItem value="accessories">Accessories</SelectItem>
-              <SelectItem value="footwear">Footwear</SelectItem>
-              <SelectItem value="outerwear">Outerwear</SelectItem>
-              <SelectItem value="sportswear">Sportswear</SelectItem>
-              <SelectItem value="formalwear">Formalwear</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <div className="flex items-center">
-                <Filter className="h-4 w-4 mr-2" />
-                <span>{statusFilter ? `Status: ${statusFilter}` : "All Status"}</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
-              <SelectItem value="available">Available</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="sold">Sold</SelectItem>
-              <SelectItem value="shipping">Shipping</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <div className="flex items-center">
-                <ArrowUpDown className="h-4 w-4 mr-2" />
-                <span>Sort By</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="value-high">Highest Value</SelectItem>
-              <SelectItem value="value-low">Lowest Value</SelectItem>
-              <SelectItem value="items-high">Most Items</SelectItem>
-              <SelectItem value="items-low">Least Items</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2 ml-auto" 
+          onClick={handleScanQr}
+        >
+          <Scan className="h-4 w-4" />
+          <span className="hidden sm:inline">Scan QR Code</span>
+        </Button>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-[180px]">
+            <div className="flex items-center">
+              <Filter className="h-4 w-4 mr-2" />
+              <span>{categoryFilter ? `Category: ${categoryFilter}` : "All Categories"}</span>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="clothing">Clothing</SelectItem>
+            <SelectItem value="accessories">Accessories</SelectItem>
+            <SelectItem value="footwear">Footwear</SelectItem>
+            <SelectItem value="outerwear">Outerwear</SelectItem>
+            <SelectItem value="sportswear">Sportswear</SelectItem>
+            <SelectItem value="formalwear">Formalwear</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <div className="flex items-center">
+              <Filter className="h-4 w-4 mr-2" />
+              <span>{statusFilter ? `Status: ${statusFilter}` : "All Status"}</span>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="available">Available</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="sold">Sold</SelectItem>
+            <SelectItem value="shipping">Shipping</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[180px]">
+            <div className="flex items-center">
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+              <span>Sort By</span>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="value-high">Highest Value</SelectItem>
+            <SelectItem value="value-low">Lowest Value</SelectItem>
+            <SelectItem value="items-high">Most Items</SelectItem>
+            <SelectItem value="items-low">Least Items</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -322,7 +367,15 @@ const InventoryManagement = () => {
                 
                 <div className="mt-4 flex justify-between">
                   <Button variant="outline" size="sm">View Details</Button>
-                  <Button variant="ghost" size="sm">Generate QR</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1.5"
+                    onClick={() => handleGenerateQr(item)}
+                  >
+                    <QrCode className="h-3.5 w-3.5" />
+                    QR Code
+                  </Button>
                 </div>
               </CardContent>
             </Card>

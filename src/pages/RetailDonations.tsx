@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PackagePlus, QrCode, DollarSign, ClipboardList, FileText, Info } from "lucide-react";
+import { PackagePlus, QrCode, DollarSign, ClipboardList, FileText, Info, Scan, History } from "lucide-react";
 import RetailDonationForm from "@/components/retail-donations/RetailDonationForm";
 import InventoryManagement from "@/components/retail-donations/InventoryManagement";
 import QrCodeGenerator from "@/components/retail-donations/QrCodeGenerator";
+import QrCodeScanner from "@/components/retail-donations/QrCodeScanner";
+import QrCodeTrackingHistory from "@/components/retail-donations/QrCodeTrackingHistory";
 import TaxBenefitCalculator from "@/components/retail-donations/TaxBenefitCalculator";
 import DonationReports from "@/components/retail-donations/DonationReports";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
@@ -52,7 +54,7 @@ const RetailDonations = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <TabsList className="grid grid-cols-2 md:grid-cols-7 gap-2 md:gap-4">
               <TabsTrigger value="register" className="flex items-center gap-2">
                 <PackagePlus className="h-4 w-4" />
                 <span className="hidden md:inline">Register</span>
@@ -63,7 +65,15 @@ const RetailDonations = () => {
               </TabsTrigger>
               <TabsTrigger value="qrcode" className="flex items-center gap-2">
                 <QrCode className="h-4 w-4" />
-                <span className="hidden md:inline">QR Codes</span>
+                <span className="hidden md:inline">QR Generate</span>
+              </TabsTrigger>
+              <TabsTrigger value="qrscan" className="flex items-center gap-2">
+                <Scan className="h-4 w-4" />
+                <span className="hidden md:inline">QR Scan</span>
+              </TabsTrigger>
+              <TabsTrigger value="qrtrack" className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                <span className="hidden md:inline">QR Track</span>
               </TabsTrigger>
               <TabsTrigger value="tax" className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
@@ -85,6 +95,14 @@ const RetailDonations = () => {
             
             <TabsContent value="qrcode" className="mt-6">
               <QrCodeGenerator />
+            </TabsContent>
+            
+            <TabsContent value="qrscan" className="mt-6">
+              <QrCodeScanner />
+            </TabsContent>
+            
+            <TabsContent value="qrtrack" className="mt-6">
+              <QrCodeTrackingHistory />
             </TabsContent>
             
             <TabsContent value="tax" className="mt-6">
