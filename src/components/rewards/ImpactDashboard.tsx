@@ -1,11 +1,35 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Droplet, Wind, Battery, Clock, ShoppingBag, TrendingUp } from "lucide-react";
+import { Leaf, Droplet, Wind, Battery, Clock, ShoppingBag, TrendingUp, Recycle, Globe, Sun, Cloud, Target } from "lucide-react";
 import { motion } from "framer-motion";
-import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid } from "recharts";
+import { 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie, 
+  Cell, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  LineChart, 
+  Line, 
+  CartesianGrid,
+  AreaChart,
+  Area,
+  ComposedChart
+} from "recharts";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import analytics from "@/lib/analytics";
 
 export const ImpactDashboard = () => {
+  const { toast } = useToast();
+  const [timeframe, setTimeframe] = useState("6m");
+  const [isLoading, setIsLoading] = useState(false);
+  
   // Mock data for charts
   const pieData = [
     { name: "Clothing", value: 45 },
@@ -14,23 +38,41 @@ export const ImpactDashboard = () => {
     { name: "Home", value: 10 },
   ];
   
-  const barData = [
+  const [barData, setBarData] = useState([
     { name: "Jan", kg: 18 },
     { name: "Feb", kg: 24 },
     { name: "Mar", kg: 35 },
     { name: "Apr", kg: 29 },
     { name: "May", kg: 42 },
     { name: "Jun", kg: 38 },
-  ];
+  ]);
   
-  const lineData = [
+  const [lineData, setLineData] = useState([
     { month: "Jan", carbon: 25, water: 30 },
     { month: "Feb", carbon: 35, water: 25 },
     { month: "Mar", carbon: 45, water: 40 },
     { month: "Apr", carbon: 40, water: 35 },
     { month: "May", carbon: 55, water: 50 },
     { month: "Jun", carbon: 60, water: 45 },
-  ];
+  ]);
+  
+  const [resourceData, setResourceData] = useState([
+    { month: "Jan", water: 1250, energy: 320, trees: 2.1 },
+    { month: "Feb", water: 1450, energy: 350, trees: 2.5 },
+    { month: "Mar", water: 1800, energy: 410, trees: 3.2 },
+    { month: "Apr", water: 1650, energy: 380, trees: 2.8 },
+    { month: "May", water: 2100, energy: 450, trees: 3.5 },
+    { month: "Jun", water: 2300, energy: 490, trees: 4.1 },
+  ]);
+  
+  const [comparisonData, setComparisonData] = useState([
+    { month: "Jan", actual: 18, projected: 15 },
+    { month: "Feb", actual: 24, projected: 20 },
+    { month: "Mar", actual: 35, projected: 28 },
+    { month: "Apr", actual: 29, projected: 32 },
+    { month: "May", actual: 42, projected: 38 },
+    { month: "Jun", actual: 38, projected: 42 },
+  ]);
   
   const COLORS = ["#FFC0CB", "#B0B0B0", "#A7D8FF", "#FFD1A3"];
   
@@ -64,9 +106,104 @@ export const ImpactDashboard = () => {
       description: "Kept out of landfills"
     },
   ];
+  
+  useEffect(() => {
+    // Track page view for analytics
+    analytics.trackPageView({
+      path: "/rewards/impact-dashboard",
+      title: "Sustainability Impact Dashboard"
+    });
+    
+    // Simulate loading real-time data
+    fetchImpactData();
+  }, []);
+  
+  const fetchImpactData = async (period = "6m") => {
+    setIsLoading(true);
+    // In a real app, this would be an API call to fetch real-time data
+    // For demo, we'll simulate loading with timeout
+    setTimeout(() => {
+      setIsLoading(false);
+      
+      // Track analytics event
+      analytics.trackEvent({
+        category: "Sustainability",
+        action: "Fetch Impact Data",
+        label: `Period: ${period}`
+      });
+      
+      if (period === "1y") {
+        // Provide more data for 1-year view
+        setBarData([
+          { name: "Jan", kg: 18 }, { name: "Feb", kg: 24 }, { name: "Mar", kg: 35 },
+          { name: "Apr", kg: 29 }, { name: "May", kg: 42 }, { name: "Jun", kg: 38 },
+          { name: "Jul", kg: 45 }, { name: "Aug", kg: 52 }, { name: "Sep", kg: 48 },
+          { name: "Oct", kg: 56 }, { name: "Nov", kg: 61 }, { name: "Dec", kg: 68 }
+        ]);
+        
+        setLineData([
+          { month: "Jan", carbon: 25, water: 30 }, { month: "Feb", carbon: 35, water: 25 },
+          { month: "Mar", carbon: 45, water: 40 }, { month: "Apr", carbon: 40, water: 35 },
+          { month: "May", carbon: 55, water: 50 }, { month: "Jun", carbon: 60, water: 45 },
+          { month: "Jul", carbon: 65, water: 55 }, { month: "Aug", carbon: 72, water: 60 },
+          { month: "Sep", carbon: 68, water: 58 }, { month: "Oct", carbon: 78, water: 65 },
+          { month: "Nov", carbon: 85, water: 70 }, { month: "Dec", carbon: 92, water: 75 }
+        ]);
+        
+        toast({
+          title: "Data Updated",
+          description: "Showing 12-month sustainability impact"
+        });
+      } else {
+        // Default 6-month view
+        setBarData([
+          { name: "Jan", kg: 18 }, { name: "Feb", kg: 24 }, { name: "Mar", kg: 35 },
+          { name: "Apr", kg: 29 }, { name: "May", kg: 42 }, { name: "Jun", kg: 38 }
+        ]);
+        
+        setLineData([
+          { month: "Jan", carbon: 25, water: 30 }, { month: "Feb", carbon: 35, water: 25 },
+          { month: "Mar", carbon: 45, water: 40 }, { month: "Apr", carbon: 40, water: 35 },
+          { month: "May", carbon: 55, water: 50 }, { month: "Jun", carbon: 60, water: 45 }
+        ]);
+        
+        toast({
+          title: "Data Updated",
+          description: "Showing 6-month sustainability impact"
+        });
+      }
+    }, 1000);
+  };
+  
+  const handleTimeframeChange = (period) => {
+    setTimeframe(period);
+    fetchImpactData(period);
+  };
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Your Sustainability Impact</h2>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant={timeframe === "6m" ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleTimeframeChange("6m")}
+            disabled={isLoading}
+          >
+            6 Months
+          </Button>
+          <Button
+            variant={timeframe === "1y" ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleTimeframeChange("1y")}
+            disabled={isLoading}
+          >
+            1 Year
+          </Button>
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {impactStats.map((stat, index) => {
           const Icon = stat.icon;
@@ -100,7 +237,7 @@ export const ImpactDashboard = () => {
       </div>
       
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 mb-6">
+        <TabsList className="w-full grid grid-cols-5 mb-6">
           <TabsTrigger value="overview" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
             <TrendingUp className="mr-2 h-4 w-4" />
             Overview
@@ -112,6 +249,14 @@ export const ImpactDashboard = () => {
           <TabsTrigger value="resources" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
             <Droplet className="mr-2 h-4 w-4" />
             Resource Savings
+          </TabsTrigger>
+          <TabsTrigger value="projected" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
+            <Target className="mr-2 h-4 w-4" />
+            Projections
+          </TabsTrigger>
+          <TabsTrigger value="global" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
+            <Globe className="mr-2 h-4 w-4" />
+            Global Impact
           </TabsTrigger>
         </TabsList>
         
@@ -224,24 +369,149 @@ export const ImpactDashboard = () => {
               <CardContent>
                 <div className="h-[400px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={lineData}>
+                    <ComposedChart data={resourceData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
+                      <XAxis dataKey="month" />
+                      <YAxis yAxisId="left" orientation="left" stroke="#A7D8FF" />
+                      <YAxis yAxisId="right" orientation="right" stroke="#FFC0CB" />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="water" yAxisId="left" fill="#A7D8FF" stroke="#A7D8FF" fillOpacity={0.3} name="Water (L)" />
+                      <Bar dataKey="energy" yAxisId="right" fill="#FFC0CB" name="Energy (kWh)" />
+                      <Line type="monotone" dataKey="trees" yAxisId="right" stroke="#B0B0B0" strokeWidth={2} name="Trees Equivalent" />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <Droplet className="mr-2 h-4 w-4 text-blue-500" />
+                      Water Saved
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      Your donations have saved approximately 5,280 liters of water, enough for 88 showers.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-soft-pink/5 rounded-lg">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <Battery className="mr-2 h-4 w-4 text-soft-pink" />
+                      Energy Conserved
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      You've helped save 410 kWh of energy, enough to power a home for 14 days.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <Recycle className="mr-2 h-4 w-4 text-green-500" />
+                      Textile Waste Reduced
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      Your actions have prevented 24 items from entering landfills, extending their lifecycle.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="projected" className="mt-0">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center">
+                  <Target className="mr-2 h-4 w-4 text-soft-pink" />
+                  Impact Projections
+                </CardTitle>
+                <CardDescription>Projected vs. actual environmental impact</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={comparisonData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
                       <XAxis dataKey="month" />
                       <YAxis />
                       <Tooltip />
-                      <Line type="monotone" dataKey="water" stroke="#A7D8FF" strokeWidth={2} dot={{ r: 4 }} name="Water (L)" />
-                      <Line type="monotone" dataKey="carbon" stroke="#FFC0CB" strokeWidth={2} dot={{ r: 4 }} name="Energy (kWh)" />
-                    </LineChart>
+                      <Area type="monotone" dataKey="projected" fill="#B0B0B0" stroke="#B0B0B0" fillOpacity={0.3} name="Projected CO₂ Savings (kg)" />
+                      <Line type="monotone" dataKey="actual" stroke="#FFC0CB" strokeWidth={2} dot={{ r: 4 }} name="Actual CO₂ Savings (kg)" />
+                    </ComposedChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-4 p-4 bg-soft-pink/5 rounded-lg">
                   <h4 className="font-medium mb-2 flex items-center">
-                    <Droplet className="mr-2 h-4 w-4 text-blue-500" />
-                    Water Conservation
+                    <TrendingUp className="mr-2 h-4 w-4 text-soft-pink" />
+                    Your Projection Analysis
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    The fashion industry is the second-largest consumer of water. By participating in circular fashion, you've helped save approximately 5,280 liters of water.
+                    Based on your current donation patterns, we project you will save approximately 265 kg of CO₂ in the next 6 months, which is 15% above the average user.
                   </p>
+                  <div className="mt-4 flex justify-center">
+                    <Button className="bg-soft-pink hover:bg-soft-pink/90">
+                      Set Environmental Goals
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="global" className="mt-0">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center">
+                  <Globe className="mr-2 h-4 w-4 text-soft-pink" />
+                  Community Impact
+                </CardTitle>
+                <CardDescription>How your contributions compare to the global community</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="flex flex-col items-center justify-center p-6 bg-soft-pink/5 rounded-lg text-center">
+                    <div className="text-4xl font-bold mb-2">Top 15%</div>
+                    <p className="text-sm text-muted-foreground">
+                      Your sustainability impact ranks in the top 15% of all users on our platform
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center justify-center p-6 bg-soft-pink/5 rounded-lg text-center">
+                    <div className="text-4xl font-bold mb-2">42,850 kg</div>
+                    <p className="text-sm text-muted-foreground">
+                      Total CO₂ emissions saved by our community this year
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={[
+                        { name: "Global Avg", value: 75 },
+                        { name: "Country Avg", value: 92 },
+                        { name: "Your Impact", value: 128 }
+                      ]}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value} kg`, 'CO₂ Saved']} />
+                      <Bar dataKey="value" fill="#FFC0CB" radius={[4, 4, 0, 0]}>
+                        <Cell fill="#B0B0B0" />
+                        <Cell fill="#B0B0B0" />
+                        <Cell fill="#FFC0CB" />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                <div className="mt-4 p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-medium mb-2 flex items-center">
+                    <Users className="mr-2 h-4 w-4 text-green-500" />
+                    Join Our Community Challenges
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Participate in monthly sustainability challenges to increase your impact and earn special rewards.
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    View Active Challenges
+                  </Button>
                 </div>
               </CardContent>
             </Card>

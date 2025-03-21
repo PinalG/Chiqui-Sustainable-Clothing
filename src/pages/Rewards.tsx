@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Award, Gift, Trophy, Leaf, Share2, Users, HelpCircle } from "lucide-react";
@@ -9,9 +9,18 @@ import { RewardsTier } from "@/components/rewards/RewardsTier";
 import { ImpactDashboard } from "@/components/rewards/ImpactDashboard";
 import { SocialSharing } from "@/components/rewards/SocialSharing";
 import { EducationalContent } from "@/components/rewards/EducationalContent";
+import { useLocation } from "react-router-dom";
 
 const Rewards = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("tiers");
+  
+  useEffect(() => {
+    // Check if navigated from dashboard with specific tab request
+    if (location.state && location.state.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location]);
 
   return (
     <div className="container mx-auto py-6 px-4 space-y-6">

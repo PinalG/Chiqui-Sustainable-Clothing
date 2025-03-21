@@ -80,6 +80,61 @@ class AnalyticsService {
     }, 300);
   }
   
+  // Track sustainability impact specifically
+  trackSustainabilityImpact(metrics: {
+    co2Saved?: number;
+    waterSaved?: number;
+    energySaved?: number;
+    itemsRecycled?: number;
+  }) {
+    if (!this.initialized) {
+      this.queue.push({
+        type: 'event',
+        data: {
+          category: 'Sustainability',
+          action: 'Impact Metrics',
+          label: JSON.stringify(metrics)
+        }
+      });
+      return;
+    }
+    
+    console.log('Sustainability Impact Metrics:', metrics);
+    
+    // Track each metric individually for better analytics
+    if (metrics.co2Saved) {
+      this.trackEvent({
+        category: 'Sustainability',
+        action: 'CO2 Saved',
+        value: metrics.co2Saved
+      });
+    }
+    
+    if (metrics.waterSaved) {
+      this.trackEvent({
+        category: 'Sustainability',
+        action: 'Water Saved',
+        value: metrics.waterSaved
+      });
+    }
+    
+    if (metrics.energySaved) {
+      this.trackEvent({
+        category: 'Sustainability',
+        action: 'Energy Saved',
+        value: metrics.energySaved
+      });
+    }
+    
+    if (metrics.itemsRecycled) {
+      this.trackEvent({
+        category: 'Sustainability',
+        action: 'Items Recycled',
+        value: metrics.itemsRecycled
+      });
+    }
+  }
+  
   private processQueue() {
     if (!this.initialized || this.queue.length === 0) return;
     
