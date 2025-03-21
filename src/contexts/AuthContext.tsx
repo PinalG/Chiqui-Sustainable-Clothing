@@ -121,6 +121,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserData(null);
   };
 
+  const resetPassword = async (email: string): Promise<void> => {
+    // Modified to return void instead of boolean
+    await authMethods.resetPassword(email);
+    // No return value
+  };
+
   const updateUserPreferences = async (preferences: Partial<UserPreferences>) => {
     const updatedPreferences = await authMethods.updateUserPreferences(user, userData, preferences);
     if (userData) {
@@ -149,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signInWithGoogle,
     logout,
-    resetPassword: authMethods.resetPassword,
+    resetPassword,
     updateUserPreferences,
     updateConsentSettings
   };

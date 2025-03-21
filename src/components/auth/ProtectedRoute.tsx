@@ -1,14 +1,17 @@
 
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
+  children: React.ReactNode;
   allowedRoles?: UserRole[];
   requiresConsentVerification?: boolean;
 }
 
 const ProtectedRoute = ({ 
+  children,
   allowedRoles, 
   requiresConsentVerification = false 
 }: ProtectedRouteProps) => {
@@ -42,8 +45,8 @@ const ProtectedRoute = ({
     return <Navigate to="/settings/privacy" state={{ from: location }} replace />;
   }
 
-  // Render child routes
-  return <Outlet />;
+  // Render children
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

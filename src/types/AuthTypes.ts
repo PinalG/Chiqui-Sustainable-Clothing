@@ -39,7 +39,7 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: (role?: UserRole) => Promise<void>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>; // Changed from Promise<boolean> to Promise<void>
   updateUserPreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
   updateConsentSettings: (settings: Partial<UserData['consentSettings']>) => Promise<void>;
 }

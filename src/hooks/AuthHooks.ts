@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   User,
@@ -218,18 +217,18 @@ export function useAuthMethods() {
     }
   };
   
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (email: string): Promise<void> => {
     try {
       if (process.env.NODE_ENV === 'development') {
         // In development mode, just show a success message
         toast.success("Password reset email sent (mock)");
-        return true;
+        return; // Return void, not boolean
       }
       
       // In production, use real Firebase auth
       await sendPasswordResetEmail(auth, email);
       toast.success("Password reset email sent");
-      return true;
+      return; // Return void, not boolean
     } catch (error: any) {
       toast.error(error.message || "Failed to send password reset email");
       throw error;
