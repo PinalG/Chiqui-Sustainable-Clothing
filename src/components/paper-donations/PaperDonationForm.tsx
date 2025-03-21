@@ -10,8 +10,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, Minus, ImagePlus, PackagePlus } from "lucide-react";
+import { Upload, Plus, Minus, ImagePlus, PackagePlus, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import ImageAnalyzer from "@/components/ai/ImageAnalyzer";
+import { ItemAnalysisResult } from "@/lib/geminiService";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -46,6 +49,11 @@ interface DonationItem {
   quantity: number;
   value: number;
   image?: string;
+  condition?: string;
+  conditionScore?: number;
+  sustainabilityScore?: number;
+  tags?: string[];
+  description?: string;
 }
 
 interface PaperDonationFormProps {
@@ -58,6 +66,8 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
   const [items, setItems] = useState<DonationItem[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAiAnalyzer, setShowAiAnalyzer] = useState(false);
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<ItemAnalysisResult | null>(null);
 
   const form = useForm<DonationFormValues>({
     resolver: zodResolver(donationSchema),
@@ -104,6 +114,23 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
     reader.readAsDataURL(file);
   };
 
+  const handleAiAnalysisComplete = (result: ItemAnalysisResult) => {
+    setAiAnalysisResult(result);
+    
+    // Update form with AI analysis results
+    form.setValue("itemCategory", result.category);
+    form.setValue("estimatedValue", result.estimatedValue);
+    form.setValue("description", result.description);
+    
+    // Hide the AI analyzer
+    setShowAiAnalyzer(false);
+    
+    toast({
+      title: "AI Analysis Applied",
+      description: `Category: ${result.category}, Value: $${result.estimatedValue.toFixed(2)}, Condition: ${result.condition}`,
+    });
+  };
+
   const addItem = (data: DonationFormValues) => {
     const newItem: DonationItem = {
       name: `Item #${items.length + 1}`,
@@ -111,10 +138,16 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
       quantity: data.quantity,
       value: data.estimatedValue,
       image: images.length > 0 ? images[images.length - 1] : undefined,
+      condition: aiAnalysisResult?.condition,
+      conditionScore: aiAnalysisResult?.conditionScore,
+      sustainabilityScore: aiAnalysisResult?.sustainabilityScore,
+      tags: aiAnalysisResult?.tags,
+      description: data.description || aiAnalysisResult?.description,
     };
 
     setItems([...items, newItem]);
     setImages([]);
+    setAiAnalysisResult(null);
 
     // Reset some form fields after adding an item
     form.setValue("itemCategory", "");
@@ -310,36 +343,86 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                 )}
               />
               
-              <div className="space-y-2">
-                <FormLabel>Item Image (Optional)</FormLabel>
-                <div className="flex items-center space-x-4">
-                  <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-soft-pink transition-colors">
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".jpg,.jpeg,.png,.webp"
-                      onChange={handleImageUpload}
-                    />
-                    {images.length > 0 && images[images.length - 1] ? (
-                      <img
-                        src={images[images.length - 1]}
-                        alt="Item preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center text-gray-500">
-                        <ImagePlus className="w-8 h-8 mb-2" />
-                        <span className="text-xs">Upload Image</span>
+              <AnimatePresence>
+                {!showAiAnalyzer && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex justify-between items-center">
+                      <FormLabel>Item Image (Optional)</FormLabel>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setShowAiAnalyzer(true)}
+                        className="gap-1.5 text-soft-pink"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Use AI Analysis
+                      </Button>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-soft-pink transition-colors">
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".jpg,.jpeg,.png,.webp"
+                          onChange={handleImageUpload}
+                        />
+                        {images.length > 0 && images[images.length - 1] ? (
+                          <img
+                            src={images[images.length - 1]}
+                            alt="Item preview"
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center text-gray-500">
+                            <ImagePlus className="w-8 h-8 mb-2" />
+                            <span className="text-xs">Upload Image</span>
+                          </div>
+                        )}
+                      </label>
+                      <div className="flex-1">
+                        <p className="text-sm text-muted-foreground">
+                          Upload an image of the item (max 5MB). This helps in categorization and quality assessment.
+                        </p>
                       </div>
-                    )}
-                  </label>
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">
-                      Upload an image of the item (max 5MB). This helps in categorization and quality assessment.
-                    </p>
-                  </div>
-                </div>
-              </div>
+                    </div>
+                  </motion.div>
+                )}
+                
+                {showAiAnalyzer && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="border border-soft-pink/20 bg-soft-pink/5">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-medium flex items-center">
+                            <Sparkles className="h-4 w-4 mr-2 text-soft-pink" />
+                            AI Image Analysis
+                          </h3>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setShowAiAnalyzer(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                        <ImageAnalyzer onAnalysisComplete={handleAiAnalysisComplete} />
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
               <div className="flex justify-end">
                 <Button 
@@ -404,7 +487,22 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                         <p className="font-medium">{item.category}</p>
                         <p className="text-sm text-muted-foreground">
                           {item.quantity} items • ${item.value.toFixed(2)}
+                          {item.condition && ` • ${item.condition}`}
                         </p>
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex gap-1 mt-1">
+                            {item.tags.slice(0, 2).map((tag, i) => (
+                              <span key={i} className="px-1.5 py-0.5 bg-gray-100 rounded text-xs text-gray-600">
+                                {tag}
+                              </span>
+                            ))}
+                            {item.tags.length > 2 && (
+                              <span className="px-1.5 py-0.5 bg-gray-100 rounded text-xs text-gray-600">
+                                +{item.tags.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <Button

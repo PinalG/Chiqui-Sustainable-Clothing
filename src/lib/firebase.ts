@@ -20,7 +20,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// In development mode, connect to Firebase emulators
+// For development mode, we'll use mock authentication and emulators
 if (process.env.NODE_ENV === 'development') {
   // Set up auth emulator
   try {
@@ -35,4 +35,10 @@ if (process.env.NODE_ENV === 'development') {
   // connectStorageEmulator(storage, 'localhost', 9199);
 }
 
-export { auth, db, storage };
+// Gemini API key - this would normally be secured in a backend environment
+// For development purposes, we use a mock key
+const GEMINI_API_KEY = process.env.NODE_ENV === 'development' 
+  ? "GEMINI_MOCK_KEY_FOR_DEVELOPMENT" 
+  : ""; // In production, this would be fetched securely
+
+export { auth, db, storage, GEMINI_API_KEY };
