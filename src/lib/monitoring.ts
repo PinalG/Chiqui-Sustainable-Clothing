@@ -115,13 +115,21 @@ class MonitoringService {
   private setupPerformanceMonitoring() {
     // Monitor page load performance
     window.addEventListener('load', () => {
-      if (window.performance) {
+      if (window.performance && window.performance.timing) {
         const timing = window.performance.timing;
-        const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
-        const domReadyTime = timing.domComplete - timing.domLoading;
-        
-        this.captureMetric('page_load_time', pageLoadTime);
-        this.captureMetric('dom_ready_time', domReadyTime);
+        // Ensure we have valid timing values before calculating
+        if (timing.loadEventEnd > 0 && timing.navigationStart > 0) {
+          const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
+          const domReadyTime = timing.domComplete - timing.domLoading;
+          
+          // Only capture positive values to avoid incorrect metrics
+          if (pageLoadTime > 0) {
+            this.captureMetric('page_load_time', pageLoadTime);
+          }
+          if (domReadyTime > 0) {
+            this.captureMetric('dom_ready_time', domReadyTime);
+          }
+        }
       }
     });
     

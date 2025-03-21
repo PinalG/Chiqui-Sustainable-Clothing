@@ -10,18 +10,26 @@ export function useAnalytics() {
   
   // Initialize analytics once
   useEffect(() => {
-    analytics.init(user?.uid);
+    try {
+      analytics.init(user?.uid);
+    } catch (error) {
+      console.error("Failed to initialize analytics:", error);
+    }
   }, [user?.uid]);
   
   // Track page views
   useEffect(() => {
-    const path = location.pathname + location.search;
-    
-    analytics.trackPageView({
-      path,
-      title: document.title,
-      referrer: document.referrer,
-    });
+    try {
+      const path = location.pathname + location.search;
+      
+      analytics.trackPageView({
+        path,
+        title: document.title,
+        referrer: document.referrer,
+      });
+    } catch (error) {
+      console.error("Failed to track page view:", error);
+    }
   }, [location.pathname, location.search]);
   
   return analytics;

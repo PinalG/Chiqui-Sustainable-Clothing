@@ -8,11 +8,11 @@ import monitoring from './lib/monitoring';
 // Initialize error monitoring as early as possible
 monitoring.init();
 
-// Report initial load time
-if (window.performance) {
-  const navStart = window.performance.timing.navigationStart;
-  const now = Date.now();
-  monitoring.captureMetric('initial_load_time', now - navStart);
+// Report initial load time safely
+if (window.performance && window.performance.timing) {
+  // We'll let the monitoring service handle this properly at load time
+  // instead of calculating potentially invalid metrics here
+  console.log('Monitoring initialized with performance API available');
 }
 
 // Add error boundary for the entire application
@@ -27,6 +27,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
     monitoring.captureError(error, 'critical', { errorInfo });
   }
 
@@ -54,6 +55,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
+// Render the app with PerformanceProvider to provide monitoring context
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
