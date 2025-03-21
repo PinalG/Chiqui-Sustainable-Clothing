@@ -174,7 +174,7 @@ const ProductCard = ({
             <div className="absolute top-2 right-2">
               <Badge variant="outline" className="bg-white/70 backdrop-blur-sm">
                 <Sparkles className="h-3 w-3 mr-1 text-soft-pink" />
-                AI Verified
+                Verified
               </Badge>
             </div>
           )}
@@ -597,7 +597,7 @@ const Marketplace = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Marketplace</h1>
           <p className="text-muted-foreground">
-            Browse and purchase high-quality AI-verified donated clothing.
+            Browse and purchase high-quality verified donated clothing.
           </p>
         </div>
         
@@ -620,9 +620,9 @@ const Marketplace = () => {
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <CardTitle>AI-Verified Products</CardTitle>
+              <CardTitle>Verified Products</CardTitle>
               <CardDescription>
-                Shop sustainable items verified by AI for quality and authenticity
+                Shop sustainable items verified for quality and authenticity
               </CardDescription>
             </div>
             

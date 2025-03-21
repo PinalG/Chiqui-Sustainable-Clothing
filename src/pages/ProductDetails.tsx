@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -310,7 +311,7 @@ const ProductDetails = () => {
               {product.aiVerified && (
                 <Badge className="bg-white border border-soft-pink text-soft-pink">
                   <Sparkles className="h-3 w-3 mr-1" />
-                  AI Verified
+                  Verified
                 </Badge>
               )}
             </div>
