@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Award, Gift, Sparkles, Star, Crown, ShoppingBag, Truck, Tag } from "lucide-react";
+import { Award, Gift, Sparkles, Star, Crown, ShoppingBag, Truck, Tag, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const RewardsTier = () => {
