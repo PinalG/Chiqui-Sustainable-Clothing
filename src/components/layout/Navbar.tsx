@@ -25,7 +25,7 @@ const Navbar = () => {
           )}
           <div className="flex items-center md:gap-2">
             <span className="text-lg md:text-xl font-bold text-soft-pink">
-              ACDRP
+              Chiqui
             </span>
           </div>
         </div>

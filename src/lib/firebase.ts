@@ -7,9 +7,9 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 // Firebase configuration for development (will be replaced in production)
 const firebaseConfig = {
   apiKey: "demo-key-for-development",
-  authDomain: "acdrp-platform.firebaseapp.com",
-  projectId: "acdrp-platform",
-  storageBucket: "acdrp-platform.appspot.com",
+  authDomain: "chiqui-platform.firebaseapp.com",
+  projectId: "chiqui-platform",
+  storageBucket: "chiqui-platform.appspot.com",
   messagingSenderId: "123456789012",
   appId: "1:123456789012:web:abcdef1234567890"
 };

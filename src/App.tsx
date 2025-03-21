@@ -13,6 +13,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Checkout from "./pages/Checkout";
 import Donations from "./pages/Donations";
 import PaperDonations from "./pages/PaperDonations";
+import Logistics from "./pages/logistics/Logistics";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
@@ -60,6 +61,11 @@ const App = () => (
               <Route path="/profile" element={
                 <MainLayout>
                   <UserProfile />
+                </MainLayout>
+              } />
+              <Route path="/logistics" element={
+                <MainLayout>
+                  <Logistics />
                 </MainLayout>
               } />
             </Route>

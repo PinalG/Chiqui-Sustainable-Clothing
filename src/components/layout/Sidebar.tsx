@@ -1,7 +1,7 @@
 
 import { cn } from '@/lib/utils';
 import { 
-  Home, ShoppingBag, Heart, Users, Tags, 
+  Home, ShoppingBag, Heart, Tags, 
   BarChart2, FileText, Package, Truck, HelpCircle, 
   Menu, X, User
 } from 'lucide-react';
@@ -83,10 +83,10 @@ const Sidebar = () => {
         <div className="flex items-center justify-between h-16 px-4 border-b border-border">
           <div className={cn("flex items-center gap-2", !isSidebarOpen && "md:hidden")}>
             <div className="w-8 h-8 rounded-md bg-soft-pink flex items-center justify-center">
-              <span className="font-bold text-white">AC</span>
+              <span className="font-bold text-white">CH</span>
             </div>
             <span className={cn("font-semibold", !isSidebarOpen && "hidden md:hidden")}>
-              ACDRP
+              Chiqui
             </span>
           </div>
           
@@ -104,7 +104,7 @@ const Sidebar = () => {
           {!isSidebarOpen && !isMobile && (
             <div className="hidden md:flex items-center justify-center w-full">
               <div className="w-8 h-8 rounded-md bg-soft-pink flex items-center justify-center">
-                <span className="font-bold text-white">AC</span>
+                <span className="font-bold text-white">CH</span>
               </div>
             </div>
           )}
@@ -143,7 +143,7 @@ const Sidebar = () => {
             </div>
             <div className={cn("flex-1 truncate", !isSidebarOpen && "hidden")}>
               <div className="text-sm font-medium">Admin User</div>
-              <div className="text-xs text-muted-foreground">admin@acdrp.org</div>
+              <div className="text-xs text-muted-foreground">admin@chiqui.org</div>
             </div>
           </div>
         </div>
