@@ -215,8 +215,8 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [conditionFilter, setConditionFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [conditionFilter, setConditionFilter] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [activeTab, setActiveTab] = useState("all");
@@ -231,10 +231,11 @@ const Marketplace = () => {
                            product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       
       // Apply category filter
-      const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
+      const matchesCategory = categoryFilter === "all" ? true : product.category === categoryFilter;
       
       // Apply condition filter
-      const matchesCondition = conditionFilter ? product.condition.toLowerCase().includes(conditionFilter.toLowerCase()) : true;
+      const matchesCondition = conditionFilter === "all" ? true : 
+        product.condition.toLowerCase().includes(conditionFilter.toLowerCase());
       
       // Apply price range filter
       let matchesPrice = true;
@@ -370,11 +371,11 @@ const Marketplace = () => {
                 <SelectTrigger className="w-[150px]">
                   <div className="flex items-center">
                     <Tag className="h-3.5 w-3.5 mr-1.5" />
-                    <span>{categoryFilter || "All Categories"}</span>
+                    <span>{categoryFilter === "all" ? "All Categories" : categoryFilter}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="clothing">Clothing</SelectItem>
                   <SelectItem value="accessories">Accessories</SelectItem>
                   <SelectItem value="footwear">Footwear</SelectItem>
@@ -388,11 +389,11 @@ const Marketplace = () => {
                 <SelectTrigger className="w-[150px]">
                   <div className="flex items-center">
                     <Filter className="h-3.5 w-3.5 mr-1.5" />
-                    <span>{conditionFilter || "All Conditions"}</span>
+                    <span>{conditionFilter === "all" ? "All Conditions" : conditionFilter}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Conditions</SelectItem>
+                  <SelectItem value="all">All Conditions</SelectItem>
                   <SelectItem value="new">New with Tags</SelectItem>
                   <SelectItem value="like new">Like New</SelectItem>
                   <SelectItem value="excellent">Excellent</SelectItem>
