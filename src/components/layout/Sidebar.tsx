@@ -3,13 +3,14 @@ import { cn } from '@/lib/utils';
 import { 
   Home, ShoppingBag, Heart, Tags, 
   BarChart2, FileText, Package, Truck, HelpCircle, 
-  Menu, X, User, Users
+  Menu, X, User, Users, Settings, Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from './SidebarContext';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -39,6 +40,7 @@ const Sidebar = () => {
   const { isSidebarOpen, toggleSidebar, closeSidebar } = useSidebar();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { userData } = useAuth();
 
   useEffect(() => {
     if (isMobile) {
@@ -46,18 +48,52 @@ const Sidebar = () => {
     }
   }, [location.pathname, isMobile, closeSidebar]);
 
-  const sidebarItems = [
+  // Common sidebar items for all users
+  const commonItems = [
     { icon: Home, label: 'Dashboard', href: '/' },
     { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace' },
+  ];
+  
+  // Role-specific sidebar items
+  const consumerItems = [
     { icon: Heart, label: 'Donations', href: '/donations' },
+  ];
+  
+  const retailerItems = [
     { icon: Tags, label: 'Paper Donations', href: '/paper-donations' },
-    { icon: Users, label: 'Retailers', href: '/retailers' },
     { icon: BarChart2, label: 'Analytics', href: '/analytics' },
     { icon: FileText, label: 'Tax Benefits', href: '/tax-benefits' },
     { icon: Package, label: 'Inventory', href: '/inventory' },
-    { icon: Truck, label: 'Logistics', href: '/logistics' },
-    { icon: HelpCircle, label: 'Support', href: '/support' },
   ];
+  
+  const logisticsItems = [
+    { icon: Truck, label: 'Logistics', href: '/logistics' },
+  ];
+  
+  const adminItems = [
+    { icon: Settings, label: 'Admin Dashboard', href: '/admin/dashboard' },
+    { icon: Users, label: 'User Management', href: '/admin/users' },
+    { icon: FileText, label: 'Reports', href: '/admin/reports' },
+    { icon: Shield, label: 'Permissions', href: '/admin/permissions' },
+  ];
+  
+  // Filter items based on user role
+  let sidebarItems = [...commonItems];
+  
+  if (userData) {
+    if (userData.role === 'consumer') {
+      sidebarItems = [...sidebarItems, ...consumerItems];
+    } else if (userData.role === 'retailer') {
+      sidebarItems = [...sidebarItems, ...retailerItems];
+    } else if (userData.role === 'logistics') {
+      sidebarItems = [...sidebarItems, ...logisticsItems];
+    } else if (userData.role === 'admin') {
+      sidebarItems = [...sidebarItems, ...adminItems];
+    }
+  }
+  
+  // Common support item at the end
+  sidebarItems.push({ icon: HelpCircle, label: 'Support', href: '/support' });
 
   return (
     <>
@@ -142,8 +178,12 @@ const Sidebar = () => {
               <User className="h-5 w-5 text-white" />
             </div>
             <div className={cn("flex-1 truncate", !isSidebarOpen && "hidden")}>
-              <div className="text-sm font-medium">Admin User</div>
-              <div className="text-xs text-muted-foreground">admin@chiqui.org</div>
+              <div className="text-sm font-medium">
+                {userData?.displayName || "Guest User"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {userData?.email || "Not signed in"}
+              </div>
             </div>
           </div>
         </div>

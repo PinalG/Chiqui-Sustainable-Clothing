@@ -19,6 +19,9 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import UserProfile from "./pages/UserProfile";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import ReportingDashboard from "./pages/admin/ReportingDashboard";
 import { UserRole } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -90,14 +93,19 @@ const App = () => (
             
             {/* Routes for admin only */}
             <Route element={<ProtectedRoute allowedRoles={["admin"] as UserRole[]} />}>
+              <Route path="/admin/dashboard" element={
+                <MainLayout>
+                  <AdminDashboard />
+                </MainLayout>
+              } />
               <Route path="/admin/users" element={
                 <MainLayout>
-                  <div>Admin Users Page</div>
+                  <UserManagement />
                 </MainLayout>
               } />
               <Route path="/admin/reports" element={
                 <MainLayout>
-                  <div>Admin Reports Page</div>
+                  <ReportingDashboard />
                 </MainLayout>
               } />
             </Route>
