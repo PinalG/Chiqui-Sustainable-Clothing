@@ -4,9 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import analytics from '@/lib/analytics';
 import monitoring from '@/lib/monitoring';
 
-// Import these but don't use them immediately
-import { useLocation, useNavigationType } from 'react-router-dom';
-
 interface PerformanceContextType {
   trackEvent: (category: string, action: string, label?: string, value?: number) => void;
   trackError: (error: Error | string, severity?: 'low' | 'medium' | 'high' | 'critical') => void;
@@ -23,23 +20,31 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (isInitialized) return;
     
-    analytics.init(user?.uid);
-    monitoring.init(user?.uid);
-    
-    setIsInitialized(true);
-    
-    // Track page load performance
-    if (window.performance) {
-      const timing = window.performance.timing;
-      const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
+    try {
+      analytics.init(user?.uid);
+      monitoring.init(user?.uid);
       
-      if (pageLoadTime > 0) {
-        monitoring.captureMetric('page_load_time', pageLoadTime);
+      setIsInitialized(true);
+      
+      // Track page load performance
+      if (window.performance) {
+        const timing = window.performance.timing;
+        const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
+        
+        if (pageLoadTime > 0) {
+          monitoring.captureMetric('page_load_time', pageLoadTime);
+        }
       }
+    } catch (error) {
+      console.error("Failed to initialize performance monitoring:", error);
     }
     
     return () => {
-      monitoring.shutdown();
+      try {
+        monitoring.shutdown();
+      } catch (error) {
+        console.error("Failed to shutdown monitoring:", error);
+      }
     };
   }, [user?.uid, isInitialized]);
   
@@ -79,34 +84,5 @@ export function usePerformance() {
   return context;
 }
 
-// Create a separate component for router-dependent tracking
-export function RouteChangeTracker() {
-  // These hooks will only be used inside the Router context
-  const location = useLocation();
-  const navigationType = useNavigationType();
-  const { trackMetric } = usePerformance();
-  
-  useEffect(() => {
-    const path = location.pathname + location.search;
-    
-    // Track page view in analytics
-    analytics.trackPageView({
-      path,
-      title: document.title,
-    });
-    
-    // Track route change performance
-    if (window.performance) {
-      const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      
-      if (navigationTiming) {
-        monitoring.captureMetric('route_change_time', navigationTiming.duration, {
-          path,
-          navigationType,
-        });
-      }
-    }
-  }, [location.pathname, location.search, navigationType, trackMetric]);
-  
-  return null;
-}
+// We've completely removed all router dependencies from this component
+// The RouteChangeTracker is now implemented in a separate hook

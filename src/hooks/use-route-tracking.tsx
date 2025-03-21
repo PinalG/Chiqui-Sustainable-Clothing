@@ -3,10 +3,12 @@ import { useEffect } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 import analytics from "@/lib/analytics";
 import monitoring from "@/lib/monitoring";
+import { usePerformance } from "@/contexts/PerformanceContext";
 
 export function useRouteTracking() {
   const location = useLocation();
   const navigationType = useNavigationType();
+  const { trackMetric } = usePerformance();
   
   useEffect(() => {
     try {
@@ -24,7 +26,7 @@ export function useRouteTracking() {
         const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
         
         if (navigationTiming) {
-          monitoring.captureMetric('route_change_time', navigationTiming.duration, {
+          trackMetric('route_change_time', navigationTiming.duration, {
             path,
             navigationType,
           });
@@ -33,5 +35,5 @@ export function useRouteTracking() {
     } catch (error) {
       console.error("Failed to track route change:", error);
     }
-  }, [location.pathname, location.search, navigationType]);
+  }, [location.pathname, location.search, navigationType, trackMetric]);
 }
