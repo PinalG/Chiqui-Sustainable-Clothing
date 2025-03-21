@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { 
   User,
@@ -17,6 +16,14 @@ import { toast } from "sonner";
 
 export type UserRole = "consumer" | "retailer" | "admin" | "logistics";
 
+export interface UserPreferences {
+  language: string;
+  highContrast: boolean;
+  largeText: boolean;
+  reducedMotion: boolean;
+  screenReader: boolean;
+}
+
 interface UserData {
   uid: string;
   email: string | null;
@@ -28,6 +35,13 @@ interface UserData {
   taxId?: string; // For retailers
   sustainabilityScore?: number; // For all users
   rewardsPoints?: number; // For consumers
+  consentSettings?: {
+    marketing: boolean;
+    cookies: boolean;
+    dataSharing: boolean;
+    lastUpdated: number;
+  };
+  preferences?: UserPreferences; // User preferences for accessibility and language
 }
 
 interface AuthContextType {
@@ -39,6 +53,8 @@ interface AuthContextType {
   signInWithGoogle: (role?: UserRole) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  updateUserPreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
+  updateConsentSettings: (settings: Partial<UserData['consentSettings']>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -146,13 +162,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 role: "consumer", // Default role
                 createdAt: Date.now(),
                 sustainabilityScore: 0,
-                rewardsPoints: 0
+                rewardsPoints: 0,
+                consentSettings: {
+                  marketing: false,
+                  cookies: true,
+                  dataSharing: false,
+                  lastUpdated: Date.now()
+                },
+                preferences: {
+                  language: 'en',
+                  highContrast: false,
+                  largeText: false,
+                  reducedMotion: false,
+                  screenReader: false
+                }
               };
               await setDoc(userDocRef, newUserData);
               setUserData(newUserData);
             }
           } catch (error) {
             console.error("Error fetching user data:", error);
+            toast.error("Failed to load user data. Please refresh the page.");
           }
         } else {
           setUserData(null);
@@ -183,7 +213,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const mockUser = createMockUser(email, name);
         setUser(mockUser);
         
-        // Create mock user data
+        // Create mock user data with default consent and preference settings
         const mockUserData: UserData = {
           uid: mockUser.uid,
           email: email,
@@ -193,6 +223,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           createdAt: Date.now(),
           sustainabilityScore: 0,
           rewardsPoints: role === "consumer" ? 100 : 0,
+          consentSettings: {
+            marketing: false,
+            cookies: true,
+            dataSharing: false,
+            lastUpdated: Date.now()
+          },
+          preferences: {
+            language: 'en',
+            highContrast: false,
+            largeText: false,
+            reducedMotion: false,
+            screenReader: false
+          },
           ...additionalData
         };
         
@@ -201,12 +244,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      // In production, use real Firebase auth
+      // In production, use real Firebase auth with stronger password policy
+      if (password.length < 8) {
+        toast.error("Password must be at least 8 characters long");
+        throw new Error("Password must be at least 8 characters long");
+      }
+      
       const result = await createUserWithEmailAndPassword(auth, email, password);
       // Update the user profile with display name
       await updateProfile(result.user, { displayName: name });
       
-      // Create user document in Firestore
+      // Create user document in Firestore with default consent and preference settings
       const userData: UserData = {
         uid: result.user.uid,
         email: result.user.email,
@@ -216,6 +264,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         createdAt: Date.now(),
         sustainabilityScore: 0,
         rewardsPoints: role === "consumer" ? 100 : 0, // Give consumers some initial rewards points
+        consentSettings: {
+          marketing: false,
+          cookies: true,
+          dataSharing: false,
+          lastUpdated: Date.now()
+        },
+        preferences: {
+          language: 'en',
+          highContrast: false,
+          largeText: false,
+          reducedMotion: false,
+          screenReader: false
+        },
         ...additionalData
       };
       
@@ -359,6 +420,83 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUserPreferences = async (preferences: Partial<UserPreferences>) => {
+    if (!user || !userData) {
+      toast.error("You must be logged in to update preferences");
+      throw new Error("User not logged in");
+    }
+
+    try {
+      const updatedPreferences = {
+        ...userData.preferences,
+        ...preferences
+      };
+
+      if (process.env.NODE_ENV === 'development') {
+        // In development, just update the state
+        setUserData({
+          ...userData,
+          preferences: updatedPreferences as UserPreferences
+        });
+        toast.success("Preferences updated successfully");
+        return;
+      }
+
+      // In production, update Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, { preferences: updatedPreferences }, { merge: true });
+      
+      setUserData({
+        ...userData,
+        preferences: updatedPreferences as UserPreferences
+      });
+      
+      toast.success("Preferences updated successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update preferences");
+      throw error;
+    }
+  };
+
+  const updateConsentSettings = async (settings: Partial<UserData['consentSettings']>) => {
+    if (!user || !userData) {
+      toast.error("You must be logged in to update consent settings");
+      throw new Error("User not logged in");
+    }
+
+    try {
+      const updatedSettings = {
+        ...userData.consentSettings,
+        ...settings,
+        lastUpdated: Date.now()
+      };
+
+      if (process.env.NODE_ENV === 'development') {
+        // In development, just update the state
+        setUserData({
+          ...userData,
+          consentSettings: updatedSettings
+        });
+        toast.success("Consent settings updated successfully");
+        return;
+      }
+
+      // In production, update Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, { consentSettings: updatedSettings }, { merge: true });
+      
+      setUserData({
+        ...userData,
+        consentSettings: updatedSettings
+      });
+      
+      toast.success("Consent settings updated successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update consent settings");
+      throw error;
+    }
+  };
+
   const value = {
     user,
     userData,
@@ -367,7 +505,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signInWithGoogle,
     logout,
-    resetPassword
+    resetPassword,
+    updateUserPreferences,
+    updateConsentSettings
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

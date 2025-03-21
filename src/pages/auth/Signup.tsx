@@ -9,17 +9,43 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, User, Building2, Truck } from "lucide-react";
+import { Loader2, User, Building2, Truck, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Password validation with specific requirements
+const passwordSchema = z
+  .string()
+  .min(8, { message: "Password must be at least 8 characters" })
+  .refine((password) => /[A-Z]/.test(password), {
+    message: "Password must contain at least one uppercase letter",
+  })
+  .refine((password) => /[a-z]/.test(password), {
+    message: "Password must contain at least one lowercase letter",
+  })
+  .refine((password) => /[0-9]/.test(password), {
+    message: "Password must contain at least one number",
+  })
+  .refine((password) => /[^A-Za-z0-9]/.test(password), {
+    message: "Password must contain at least one special character",
+  });
 
 const signupSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  password: passwordSchema,
+  confirmPassword: z.string(),
   role: z.enum(["consumer", "retailer", "logistics"]),
   organizationName: z.string().optional(),
   taxId: z.string().optional(),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must accept the Terms and Conditions",
+  }),
+  privacyAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must accept the Privacy Policy",
+  }),
+  marketingConsent: z.boolean().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -55,6 +81,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("consumer");
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -66,20 +93,74 @@ const Signup = () => {
       role: "consumer",
       organizationName: "",
       taxId: "",
+      termsAccepted: false,
+      privacyAccepted: false,
+      marketingConsent: false,
     },
   });
 
   const watchRole = form.watch("role") as UserRole;
+  const watchPassword = form.watch("password");
 
   // Update selectedRole when form role changes
   if (watchRole !== selectedRole) {
     setSelectedRole(watchRole);
   }
 
+  // Evaluate password strength
+  const evaluatePasswordStrength = (password: string) => {
+    if (!password) return 0;
+    
+    let score = 0;
+    
+    // Length check
+    if (password.length >= 8) score += 1;
+    if (password.length >= 12) score += 1;
+    
+    // Character type checks
+    if (/[A-Z]/.test(password)) score += 1;
+    if (/[a-z]/.test(password)) score += 1;
+    if (/[0-9]/.test(password)) score += 1;
+    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+    
+    // Variety check
+    const uniqueChars = new Set(password).size;
+    if (uniqueChars >= 8) score += 1;
+    
+    return Math.min(Math.floor((score / 7) * 100), 100);
+  };
+
+  // Update password strength when password changes
+  if (watchPassword) {
+    const strength = evaluatePasswordStrength(watchPassword);
+    if (strength !== passwordStrength) {
+      setPasswordStrength(strength);
+    }
+  }
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength >= 80) return "Strong";
+    if (passwordStrength >= 50) return "Moderate";
+    return "Weak";
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength >= 80) return "text-green-600";
+    if (passwordStrength >= 50) return "text-yellow-600";
+    return "text-red-600";
+  };
+
   const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
     try {
-      const additionalData: Record<string, any> = {};
+      const additionalData: Record<string, any> = {
+        consentSettings: {
+          marketing: !!data.marketingConsent,
+          cookies: true,
+          dataSharing: false,
+          lastUpdated: Date.now()
+        }
+      };
       
       if (data.role === "retailer" || data.role === "logistics") {
         additionalData.organizationName = data.organizationName;
@@ -109,6 +190,14 @@ const Signup = () => {
       setGoogleLoading(false);
     }
   };
+
+  const passwordCriteria = [
+    { check: /^.{8,}$/, label: "At least 8 characters" },
+    { check: /[A-Z]/, label: "At least one uppercase letter" },
+    { check: /[a-z]/, label: "At least one lowercase letter" },
+    { check: /[0-9]/, label: "At least one number" },
+    { check: /[^A-Za-z0-9]/, label: "At least one special character" },
+  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg p-4">
@@ -187,7 +276,7 @@ const Signup = () => {
                     <FormItem>
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder="John Doe" {...field} autoComplete="name" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -201,7 +290,7 @@ const Signup = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="your@email.com" {...field} />
+                        <Input placeholder="your@email.com" {...field} autoComplete="email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -216,7 +305,7 @@ const Signup = () => {
                       <FormItem>
                         <FormLabel>Organization Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Company Inc." {...field} />
+                          <Input placeholder="Company Inc." {...field} autoComplete="organization" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -247,8 +336,53 @@ const Signup = () => {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="********" {...field} />
+                        <Input 
+                          type="password" 
+                          placeholder="********" 
+                          {...field} 
+                          autoComplete="new-password" 
+                        />
                       </FormControl>
+                      
+                      {/* Password strength meter */}
+                      {field.value && (
+                        <>
+                          <div className="flex justify-between items-center mt-1 mb-1">
+                            <span className="text-xs">Password Strength:</span>
+                            <span className={`text-xs font-medium ${getPasswordStrengthColor()}`}>
+                              {getPasswordStrengthText()}
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${
+                                passwordStrength >= 80 ? 'bg-green-500' : 
+                                passwordStrength >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${passwordStrength}%` }}
+                            />
+                          </div>
+                          
+                          {/* Password criteria checklist */}
+                          <div className="space-y-1 mt-2">
+                            {passwordCriteria.map((criteria, index) => (
+                              <div key={index} className="flex items-center space-x-2">
+                                {criteria.check.test(field.value) ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                                ) : (
+                                  <XCircle className="h-3.5 w-3.5 text-red-500" />
+                                )}
+                                <span className={`text-xs ${
+                                  criteria.check.test(field.value) ? 'text-green-700' : 'text-red-700'
+                                }`}>
+                                  {criteria.label}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      
                       <FormMessage />
                     </FormItem>
                   )}
@@ -261,12 +395,89 @@ const Signup = () => {
                     <FormItem>
                       <FormLabel>Confirm Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="********" {...field} />
+                        <Input 
+                          type="password" 
+                          placeholder="********" 
+                          {...field} 
+                          autoComplete="new-password" 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
+                {/* Consent checkboxes */}
+                <div className="space-y-4 pt-2">
+                  <Alert className="bg-muted/50 border-none">
+                    <AlertCircle className="h-4 w-4 text-soft-pink" />
+                    <AlertDescription className="text-xs">
+                      Please review our terms and privacy policy before creating your account.
+                    </AlertDescription>
+                  </Alert>
+                
+                  <FormField
+                    control={form.control}
+                    name="termsAccepted"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-1">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-sm">
+                            I agree to the <a href="/legal/terms-of-service" className="text-soft-pink hover:underline">Terms of Service</a>
+                          </FormLabel>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="privacyAccepted"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-1">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-sm">
+                            I agree to the <a href="/legal/privacy-policy" className="text-soft-pink hover:underline">Privacy Policy</a>
+                          </FormLabel>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="marketingConsent"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-1">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-sm">
+                            I agree to receive marketing emails and updates
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

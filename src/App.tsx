@@ -22,7 +22,10 @@ import UserProfile from "./pages/UserProfile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ReportingDashboard from "./pages/admin/ReportingDashboard";
+import SettingsPage from "./pages/settings/SettingsPage";
+import PrivacyPage from "./pages/settings/PrivacyPage";
 import { UserRole } from "./contexts/AuthContext";
+import "./styles/accessibility.css";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +74,16 @@ const App = () => (
                   <Logistics />
                 </MainLayout>
               } />
+              <Route path="/settings" element={
+                <MainLayout>
+                  <SettingsPage />
+                </MainLayout>
+              } />
+              <Route path="/settings/privacy" element={
+                <MainLayout>
+                  <PrivacyPage />
+                </MainLayout>
+              } />
             </Route>
             
             {/* Routes for consumers only */}
@@ -83,7 +96,7 @@ const App = () => (
             </Route>
             
             {/* Routes for retailers only */}
-            <Route element={<ProtectedRoute allowedRoles={["retailer"] as UserRole[]} />}>
+            <Route element={<ProtectedRoute allowedRoles={["retailer"] as UserRole[]} requiresConsentVerification={true} />}>
               <Route path="/paper-donations" element={
                 <MainLayout>
                   <PaperDonations />

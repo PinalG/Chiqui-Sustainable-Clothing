@@ -5,9 +5,13 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   allowedRoles?: UserRole[];
+  requiresConsentVerification?: boolean;
 }
 
-const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ 
+  allowedRoles, 
+  requiresConsentVerification = false 
+}: ProtectedRouteProps) => {
   const { user, userData, isLoading } = useAuth();
   const location = useLocation();
 
@@ -28,6 +32,14 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   // Check role-based access if allowedRoles is specified
   if (allowedRoles && userData && !allowedRoles.includes(userData.role)) {
     return <Navigate to="/unauthorized" replace />;
+  }
+
+  // Check if consent verification is required and the user hasn't updated their consent settings
+  if (requiresConsentVerification && 
+      userData && 
+      (!userData.consentSettings || 
+      !userData.consentSettings.lastUpdated)) {
+    return <Navigate to="/settings/privacy" state={{ from: location }} replace />;
   }
 
   // Render child routes

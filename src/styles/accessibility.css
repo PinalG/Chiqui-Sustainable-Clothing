@@ -1,0 +1,93 @@
+
+/* High Contrast Mode */
+html.high-contrast {
+  filter: contrast(1.4);
+}
+
+html.high-contrast body {
+  background-color: white;
+  color: black;
+}
+
+html.high-contrast button,
+html.high-contrast a {
+  outline: 2px solid currentColor;
+}
+
+html.high-contrast input,
+html.high-contrast select,
+html.high-contrast textarea {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
+}
+
+/* Large Text Mode */
+html.large-text {
+  font-size: 120%;
+}
+
+html.large-text h1 {
+  font-size: 2.2em;
+}
+
+html.large-text h2 {
+  font-size: 1.8em;
+}
+
+html.large-text h3 {
+  font-size: 1.5em;
+}
+
+html.large-text button,
+html.large-text input,
+html.large-text a {
+  font-size: 1.1em;
+}
+
+/* Reduced Motion */
+html.reduced-motion * {
+  animation-duration: 0.001s !important;
+  transition-duration: 0.001s !important;
+}
+
+/* Screen Reader Optimizations */
+html.screen-reader .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+html.screen-reader a,
+html.screen-reader button {
+  text-decoration: underline;
+}
+
+html.screen-reader [aria-hidden="true"] {
+  display: none !important;
+}
+
+html.screen-reader table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+/* Focus indicators for better keyboard navigation */
+html:not(.reduced-motion) *:focus {
+  outline: 2px solid rgb(255, 192, 203) !important; /* soft-pink */
+  outline-offset: 2px !important;
+  transition: outline-offset 0.2s ease;
+}
+
+@media (prefers-reduced-motion) {
+  * {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}

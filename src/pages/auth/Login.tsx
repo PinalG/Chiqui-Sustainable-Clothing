@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, AlertCircle, Cookie } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -19,11 +21,29 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+// Function to check for multiple failed login attempts
+const getLoginAttempts = (): number => {
+  const attempts = localStorage.getItem('loginAttempts');
+  return attempts ? parseInt(attempts, 10) : 0;
+};
+
+const incrementLoginAttempts = (): number => {
+  const attempts = getLoginAttempts() + 1;
+  localStorage.setItem('loginAttempts', attempts.toString());
+  return attempts;
+};
+
+const resetLoginAttempts = (): void => {
+  localStorage.removeItem('loginAttempts');
+};
+
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showCookieBanner, setShowCookieBanner] = useState(false);
+  const [lockoutTime, setLockoutTime] = useState<number | null>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -33,13 +53,83 @@ const Login = () => {
     },
   });
 
+  // Check for cookie consent and login attempts on mount
+  useEffect(() => {
+    const hasAcceptedCookies = localStorage.getItem('cookieConsent');
+    if (!hasAcceptedCookies) {
+      setShowCookieBanner(true);
+    }
+
+    // Check if account is locked out
+    const lockoutUntil = localStorage.getItem('lockoutUntil');
+    if (lockoutUntil) {
+      const lockoutTime = parseInt(lockoutUntil, 10);
+      if (lockoutTime > Date.now()) {
+        setLockoutTime(lockoutTime);
+      } else {
+        // Lockout expired
+        localStorage.removeItem('lockoutUntil');
+      }
+    }
+  }, []);
+
+  // Update countdown timer for lockout
+  useEffect(() => {
+    if (!lockoutTime) return;
+
+    const interval = setInterval(() => {
+      if (lockoutTime <= Date.now()) {
+        setLockoutTime(null);
+        localStorage.removeItem('lockoutUntil');
+        clearInterval(interval);
+      } else {
+        setLockoutTime(lockoutTime);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lockoutTime]);
+
+  const acceptCookies = () => {
+    localStorage.setItem('cookieConsent', 'true');
+    setShowCookieBanner(false);
+    toast.success("Cookie preferences saved");
+  };
+
+  const declineCookies = () => {
+    localStorage.setItem('cookieConsent', 'false');
+    setShowCookieBanner(false);
+    toast.success("Cookie preferences saved (minimal cookies)");
+  };
+
   const onSubmit = async (data: LoginFormValues) => {
+    // Check if account is locked out
+    if (lockoutTime && lockoutTime > Date.now()) {
+      const minutes = Math.ceil((lockoutTime - Date.now()) / 60000);
+      toast.error(`Account temporarily locked. Try again in ${minutes} minutes.`);
+      return;
+    }
+
     setIsLoading(true);
     try {
       await signIn(data.email, data.password);
+      resetLoginAttempts(); // Reset attempts on successful login
       navigate("/");
     } catch (error) {
       console.error(error);
+      
+      // Handle failed login attempts
+      const attempts = incrementLoginAttempts();
+      
+      if (attempts >= 5) {
+        // Lock out the account for 15 minutes after 5 failed attempts
+        const lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
+        localStorage.setItem('lockoutUntil', lockoutUntil.toString());
+        setLockoutTime(lockoutUntil);
+        toast.error("Too many failed login attempts. Account locked for 15 minutes.");
+      } else if (attempts >= 3) {
+        toast.error(`Login failed. ${5 - attempts} attempts remaining before lockout.`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -49,6 +139,7 @@ const Login = () => {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
+      resetLoginAttempts(); // Reset attempts on successful login
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -89,6 +180,16 @@ const Login = () => {
           <p className="text-muted-foreground">Transforming Sustainable Retail</p>
         </div>
         
+        {lockoutTime && (
+          <Alert className="mb-4 bg-red-50 border-red-200 text-red-800">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription>
+              Account temporarily locked due to multiple failed login attempts. 
+              Try again in {Math.ceil((lockoutTime - Date.now()) / 60000)} minutes.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Card className="w-full backdrop-blur-sm bg-white/80 border-none shadow-lg animate-fade-up">
           <CardHeader>
             <CardTitle>Sign In</CardTitle>
@@ -106,7 +207,12 @@ const Login = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="your@email.com" {...field} />
+                        <Input 
+                          placeholder="your@email.com" 
+                          {...field} 
+                          aria-label="Email address"
+                          autoComplete="email"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -119,13 +225,23 @@ const Login = () => {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="********" {...field} />
+                        <Input 
+                          type="password" 
+                          placeholder="********" 
+                          {...field} 
+                          aria-label="Password"
+                          autoComplete="current-password"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading || (lockoutTime !== null && lockoutTime > Date.now())}
+                >
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Sign In
                 </Button>
@@ -212,6 +328,7 @@ const Login = () => {
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
               className="w-full"
+              aria-label="Sign in with Google"
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -253,6 +370,40 @@ const Login = () => {
           </CardFooter>
         </Card>
       </div>
+      
+      {/* Cookie Consent Banner */}
+      {showCookieBanner && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-4 shadow-lg border-t border-gray-200 animate-slide-up z-50">
+          <div className="container mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <Cookie className="h-5 w-5 text-soft-pink flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-medium mb-1">This website uses cookies</h3>
+                <p className="text-sm text-muted-foreground">
+                  We use cookies to ensure you get the best experience on our website. 
+                  By using our site, you acknowledge that you have read and understand our 
+                  <a href="/legal/privacy-policy" className="text-soft-pink ml-1 hover:underline">Privacy Policy</a>.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 w-full md:w-auto">
+              <Button 
+                variant="outline" 
+                className="w-1/2 md:w-auto" 
+                onClick={declineCookies}
+              >
+                Decline
+              </Button>
+              <Button 
+                className="w-1/2 md:w-auto"
+                onClick={acceptCookies}
+              >
+                Accept All
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
