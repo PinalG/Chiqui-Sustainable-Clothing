@@ -19,17 +19,21 @@ export function useAnalytics() {
   
   // Track page views
   useEffect(() => {
+    const currentPath = location.pathname + location.search;
+    
     try {
-      const path = location.pathname + location.search;
-      
       analytics.trackPageView({
-        path,
+        path: currentPath,
         title: document.title,
         referrer: document.referrer,
       });
     } catch (error) {
       console.error("Failed to track page view:", error);
     }
+    
+    return () => {
+      // Clean up or finalize tracking for this page view if needed
+    };
   }, [location.pathname, location.search]);
   
   return analytics;

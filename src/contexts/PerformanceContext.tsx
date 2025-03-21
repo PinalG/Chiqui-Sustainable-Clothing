@@ -8,6 +8,7 @@ interface PerformanceContextType {
   trackEvent: (category: string, action: string, label?: string, value?: number) => void;
   trackError: (error: Error | string, severity?: 'low' | 'medium' | 'high' | 'critical') => void;
   trackMetric: (name: string, value: number, metadata?: Record<string, any>) => void;
+  isMonitoringInitialized: boolean;
 }
 
 const PerformanceContext = createContext<PerformanceContextType | null>(null);
@@ -21,6 +22,7 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
     if (isInitialized) return;
     
     try {
+      // Initialize analytics and monitoring with user ID if available
       analytics.init(user?.uid);
       monitoring.init(user?.uid);
       
@@ -67,6 +69,7 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
         trackEvent,
         trackError,
         trackMetric,
+        isMonitoringInitialized: isInitialized
       }}
     >
       {children}
@@ -83,6 +86,3 @@ export function usePerformance() {
   
   return context;
 }
-
-// We've completely removed all router dependencies from this component
-// The RouteChangeTracker is now implemented in a separate hook
