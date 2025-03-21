@@ -9,7 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -53,6 +54,27 @@ const Login = () => {
       console.error(error);
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const fillMockUser = (type: string) => {
+    switch (type) {
+      case 'consumer':
+        form.setValue('email', 'consumer@example.com');
+        form.setValue('password', 'password123');
+        break;
+      case 'retailer':
+        form.setValue('email', 'retailer@example.com');
+        form.setValue('password', 'password123');
+        break;
+      case 'logistics':
+        form.setValue('email', 'logistics@example.com');
+        form.setValue('password', 'password123');
+        break;
+      case 'admin':
+        form.setValue('email', 'admin@example.com');
+        form.setValue('password', 'password123');
+        break;
     }
   };
 
@@ -109,6 +131,72 @@ const Login = () => {
                 </Button>
               </form>
             </Form>
+            
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="demo-accounts">
+                    <AccordionTrigger className="text-sm text-muted-foreground py-2">
+                      <span className="flex items-center">
+                        <Info className="h-4 w-4 mr-2" />
+                        Demo Accounts
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-2 p-2 bg-muted/50 rounded-md text-sm">
+                        <div className="flex justify-between">
+                          <span>Consumer:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('consumer')}
+                          >
+                            Use
+                          </Button>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Retailer:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('retailer')}
+                          >
+                            Use
+                          </Button>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Logistics:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('logistics')}
+                          >
+                            Use
+                          </Button>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Admin:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('admin')}
+                          >
+                            Use
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Password for all accounts: password123
+                        </p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            )}
             
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">

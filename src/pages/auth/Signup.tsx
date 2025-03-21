@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,17 +9,43 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Building2, Truck } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const signupSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  role: z.enum(["consumer", "retailer", "logistics"]),
+  organizationName: z.string().optional(),
+  taxId: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-});
+}).refine(
+  (data) => {
+    if (data.role === "retailer" || data.role === "logistics") {
+      return !!data.organizationName;
+    }
+    return true;
+  },
+  {
+    message: "Organization name is required for retailers and logistics partners",
+    path: ["organizationName"],
+  }
+).refine(
+  (data) => {
+    if (data.role === "retailer") {
+      return !!data.taxId;
+    }
+    return true;
+  },
+  {
+    message: "Tax ID is required for retailers",
+    path: ["taxId"],
+  }
+);
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -28,6 +54,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("consumer");
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -36,13 +63,33 @@ const Signup = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      role: "consumer",
+      organizationName: "",
+      taxId: "",
     },
   });
+
+  const watchRole = form.watch("role") as UserRole;
+
+  // Update selectedRole when form role changes
+  if (watchRole !== selectedRole) {
+    setSelectedRole(watchRole);
+  }
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
     try {
-      await signUp(data.email, data.password, data.name);
+      const additionalData: Record<string, any> = {};
+      
+      if (data.role === "retailer" || data.role === "logistics") {
+        additionalData.organizationName = data.organizationName;
+      }
+      
+      if (data.role === "retailer") {
+        additionalData.taxId = data.taxId;
+      }
+      
+      await signUp(data.email, data.password, data.name, data.role as UserRole, additionalData);
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -54,7 +101,7 @@ const Signup = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(selectedRole);
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -86,6 +133,55 @@ const Signup = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Account Type</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-muted transition-colors">
+                            <RadioGroupItem value="consumer" id="consumer" />
+                            <label htmlFor="consumer" className="flex items-center cursor-pointer w-full">
+                              <User className="mr-2 h-4 w-4 text-soft-pink" />
+                              <div className="flex flex-col">
+                                <span className="font-medium">Consumer</span>
+                                <span className="text-xs text-muted-foreground">Donate and shop sustainable fashion</span>
+                              </div>
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-muted transition-colors">
+                            <RadioGroupItem value="retailer" id="retailer" />
+                            <label htmlFor="retailer" className="flex items-center cursor-pointer w-full">
+                              <Building2 className="mr-2 h-4 w-4 text-soft-pink" />
+                              <div className="flex flex-col">
+                                <span className="font-medium">Retailer</span>
+                                <span className="text-xs text-muted-foreground">Register inventory as paper donations</span>
+                              </div>
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-muted transition-colors">
+                            <RadioGroupItem value="logistics" id="logistics" />
+                            <label htmlFor="logistics" className="flex items-center cursor-pointer w-full">
+                              <Truck className="mr-2 h-4 w-4 text-soft-pink" />
+                              <div className="flex flex-col">
+                                <span className="font-medium">Logistics Partner</span>
+                                <span className="text-xs text-muted-foreground">Facilitate shipping and delivery</span>
+                              </div>
+                            </label>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
@@ -97,6 +193,7 @@ const Signup = () => {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -110,6 +207,39 @@ const Signup = () => {
                     </FormItem>
                   )}
                 />
+
+                {(watchRole === "retailer" || watchRole === "logistics") && (
+                  <FormField
+                    control={form.control}
+                    name="organizationName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Organization Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Company Inc." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {watchRole === "retailer" && (
+                  <FormField
+                    control={form.control}
+                    name="taxId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tax ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="TX-12345678" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <FormField
                   control={form.control}
                   name="password"
@@ -123,6 +253,7 @@ const Signup = () => {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="confirmPassword"
@@ -136,6 +267,7 @@ const Signup = () => {
                     </FormItem>
                   )}
                 />
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Create Account

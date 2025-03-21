@@ -16,6 +16,7 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import UserProfile from "./pages/UserProfile";
+import { UserRole } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +33,7 @@ const App = () => (
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
             
-            {/* Protected Routes */}
+            {/* Routes for all authenticated users */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={
                 <MainLayout>
@@ -44,22 +45,55 @@ const App = () => (
                   <Marketplace />
                 </MainLayout>
               } />
-              <Route path="/donations" element={
-                <MainLayout>
-                  <Donations />
-                </MainLayout>
-              } />
-              <Route path="/paper-donations" element={
-                <MainLayout>
-                  <PaperDonations />
-                </MainLayout>
-              } />
               <Route path="/profile" element={
                 <MainLayout>
                   <UserProfile />
                 </MainLayout>
               } />
             </Route>
+            
+            {/* Routes for consumers only */}
+            <Route element={<ProtectedRoute allowedRoles={["consumer"] as UserRole[]} />}>
+              <Route path="/donations" element={
+                <MainLayout>
+                  <Donations />
+                </MainLayout>
+              } />
+            </Route>
+            
+            {/* Routes for retailers only */}
+            <Route element={<ProtectedRoute allowedRoles={["retailer"] as UserRole[]} />}>
+              <Route path="/paper-donations" element={
+                <MainLayout>
+                  <PaperDonations />
+                </MainLayout>
+              } />
+            </Route>
+            
+            {/* Routes for admin only */}
+            <Route element={<ProtectedRoute allowedRoles={["admin"] as UserRole[]} />}>
+              <Route path="/admin/users" element={
+                <MainLayout>
+                  <div>Admin Users Page</div>
+                </MainLayout>
+              } />
+              <Route path="/admin/reports" element={
+                <MainLayout>
+                  <div>Admin Reports Page</div>
+                </MainLayout>
+              } />
+            </Route>
+            
+            {/* Unauthorized Route */}
+            <Route path="/unauthorized" element={
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center p-6 max-w-md">
+                  <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+                  <p className="mb-4">You don't have permission to access this page.</p>
+                  <a href="/" className="text-soft-pink hover:underline">Return to Home</a>
+                </div>
+              </div>
+            } />
             
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
