@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Scan, Camera, X, Check, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { logQrScan, parseQrCodeData } from "@/lib/qrCodeTracking";
 
 // In a real app, this would be replaced with a proper QR code scanning library
 // like react-qr-reader, but for the purpose of this demo, we'll simulate scanning
@@ -110,7 +111,7 @@ const QrCodeScanner = () => {
         itemId: parsedData.id,
         itemName: parsedData.name,
         itemType: parsedData.type,
-        scannedBy: userData?.name || "Unknown User",
+        scannedBy: userData?.displayName || "Unknown User", // Fixed: use displayName instead of name
         scannedAt: new Date().toISOString(),
         location: "Current Location", // In a real app, this would use geolocation
       });
@@ -121,11 +122,14 @@ const QrCodeScanner = () => {
         itemId: parsedData.id,
         itemName: parsedData.name,
         itemType: parsedData.type,
-        scannedBy: userData?.name || "Unknown User",
+        scannedBy: userData?.displayName || "Unknown User", // Fixed: use displayName instead of name
         scannedAt: new Date().toISOString(),
         location: "Current Location",
       });
       localStorage.setItem("qrScanHistory", JSON.stringify(scanHistory));
+      
+      // Use the imported logQrScan function
+      logQrScan(parsedData, userData);
     } catch (error) {
       console.error("Error logging scan:", error);
     }

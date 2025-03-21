@@ -1,5 +1,6 @@
 
 // Utility functions for QR code tracking system
+import { UserData } from "@/types/AuthTypes";
 
 // Initialize event listener for tab switching
 export const initializeQrCodeTracking = () => {
@@ -47,7 +48,7 @@ export const initializeQrCodeTracking = () => {
 };
 
 // Log QR code scan to tracking system (with location)
-export const logQrScan = async (qrData: any, userData?: any) => {
+export const logQrScan = async (qrData: any, userData?: UserData | null) => {
   try {
     // Get location (if available and permitted)
     let locationStr = "Unknown Location";
@@ -72,7 +73,7 @@ export const logQrScan = async (qrData: any, userData?: any) => {
       itemId: qrData.id,
       itemName: qrData.name,
       itemType: qrData.type,
-      scannedBy: userData?.name || "Unknown User",
+      scannedBy: userData?.displayName || "Unknown User", // Fixed: use displayName instead of name
       scannedAt: new Date().toISOString(),
       location: locationStr,
     });
@@ -83,7 +84,7 @@ export const logQrScan = async (qrData: any, userData?: any) => {
       itemId: qrData.id,
       itemName: qrData.name,
       itemType: qrData.type,
-      scannedBy: userData?.name || "Unknown User",
+      scannedBy: userData?.displayName || "Unknown User", // Fixed: use displayName instead of name
       scannedAt: new Date().toISOString(),
       location: locationStr,
     });
