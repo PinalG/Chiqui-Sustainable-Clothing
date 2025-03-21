@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -60,7 +59,7 @@ interface PaperDonationFormProps {
   onComplete?: () => void;
 }
 
-const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
+const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
   const { toast } = useToast();
   const { userData } = useAuth();
   const [items, setItems] = useState<DonationItem[]>([]);
@@ -195,7 +194,7 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
 
       toast({
         title: "Donation registered",
-        description: `${data.batchName} has been successfully registered for paper donation.`,
+        description: `${data.batchName} has been successfully registered for retail donation.`,
       });
 
       // Reset form and state
@@ -538,7 +537,7 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
               ) : (
                 <>
                   <Upload className="h-4 w-4" />
-                  Register Paper Donation
+                  Register Retail Donation
                 </>
               )}
             </Button>
@@ -549,4 +548,4 @@ const PaperDonationForm = ({ onComplete }: PaperDonationFormProps) => {
   );
 };
 
-export default PaperDonationForm;
+export default RetailDonationForm;

@@ -3,15 +3,15 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PackagePlus, QrCode, DollarSign, ClipboardList, FileText, Info } from "lucide-react";
-import PaperDonationForm from "@/components/paper-donations/PaperDonationForm";
-import InventoryManagement from "@/components/paper-donations/InventoryManagement";
-import QrCodeGenerator from "@/components/paper-donations/QrCodeGenerator";
-import TaxBenefitCalculator from "@/components/paper-donations/TaxBenefitCalculator";
-import DonationReports from "@/components/paper-donations/DonationReports";
+import RetailDonationForm from "@/components/retail-donations/RetailDonationForm";
+import InventoryManagement from "@/components/retail-donations/InventoryManagement";
+import QrCodeGenerator from "@/components/retail-donations/QrCodeGenerator";
+import TaxBenefitCalculator from "@/components/retail-donations/TaxBenefitCalculator";
+import DonationReports from "@/components/retail-donations/DonationReports";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 
-const PaperDonations = () => {
+const RetailDonations = () => {
   const [activeTab, setActiveTab] = useState("register");
   const { userData } = useAuth();
   
@@ -22,7 +22,7 @@ const PaperDonations = () => {
     <div className="space-y-6 animate-enter">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Paper Donations</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Retail Donations</h1>
           <p className="text-muted-foreground">
             Register inventory items for donation without physically moving them until sold.
           </p>
@@ -36,7 +36,7 @@ const PaperDonations = () => {
                 Retailer Feature
               </TooltipTrigger>
               <TooltipContent side="left" className="max-w-xs">
-                <p>Paper donations are primarily for retail partners. As a non-retailer, you can explore the interface but some functionality may be limited.</p>
+                <p>Retail donations are primarily for retail partners. As a non-retailer, you can explore the interface but some functionality may be limited.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -45,9 +45,9 @@ const PaperDonations = () => {
 
       <Card className="glass-morphism">
         <CardHeader>
-          <CardTitle>Paper Donation Management</CardTitle>
+          <CardTitle>Retail Donation Management</CardTitle>
           <CardDescription>
-            Create, track, and manage your paper donations from a central dashboard
+            Create, track, and manage your retail donations from a central dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -76,7 +76,7 @@ const PaperDonations = () => {
             </TabsList>
             
             <TabsContent value="register" className="mt-6">
-              <PaperDonationForm onComplete={() => setActiveTab("inventory")} />
+              <RetailDonationForm onComplete={() => setActiveTab("inventory")} />
             </TabsContent>
             
             <TabsContent value="inventory" className="mt-6">
@@ -101,4 +101,4 @@ const PaperDonations = () => {
   );
 };
 
-export default PaperDonations;
+export default RetailDonations;

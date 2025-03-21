@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -62,7 +61,7 @@ const DonationReports = () => {
         title: "Total Donations",
         value: "537",
         icon: <FileText className="h-5 w-5 text-soft-pink" />,
-        description: "Total number of paper donations registered",
+        description: "Total number of retail donations registered",
         change: "+12.5%",
         isPositive: true
       },
@@ -110,7 +109,7 @@ const DonationReports = () => {
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Donation Reports</h2>
           <p className="text-muted-foreground">
-            View detailed reports and analytics for your paper donations
+            View detailed reports and analytics for your retail donations
           </p>
         </div>
         
@@ -183,7 +182,7 @@ const DonationReports = () => {
               </TooltipProvider>
             </div>
             <CardDescription>
-              Total number of paper donations registered monthly
+              Total number of retail donations registered monthly
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
@@ -226,7 +225,7 @@ const DonationReports = () => {
               </TooltipProvider>
             </div>
             <CardDescription>
-              Estimated value of paper donations in USD
+              Estimated value of retail donations in USD
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
@@ -301,7 +300,7 @@ const DonationReports = () => {
           <CardHeader>
             <CardTitle>Recent Donations</CardTitle>
             <CardDescription>
-              Your most recent paper donations
+              Your most recent retail donations
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -341,8 +340,7 @@ const DonationReports = () => {
                 <TooltipContent>
                   <p>View your complete donation history</p>
                 </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+              </TooltipProvider>
           </CardFooter>
         </Card>
       </div>
