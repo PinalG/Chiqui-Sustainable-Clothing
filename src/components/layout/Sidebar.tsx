@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { 
   Home, ShoppingBag, Heart, Tags, 
   BarChart2, FileText, Package, Truck, HelpCircle, 
-  Menu, X, User
+  Menu, X, User, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from './SidebarContext';
