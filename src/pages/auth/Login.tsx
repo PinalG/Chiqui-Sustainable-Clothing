@@ -83,9 +83,9 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-12 h-12 rounded-xl bg-soft-pink flex items-center justify-center mx-auto mb-4">
-            <span className="font-bold text-white text-xl">AC</span>
+            <span className="font-bold text-white text-xl">CH</span>
           </div>
-          <h1 className="text-2xl font-bold">ACDRP Platform</h1>
+          <h1 className="text-2xl font-bold">Chiqui</h1>
           <p className="text-muted-foreground">Transforming Sustainable Retail</p>
         </div>
         
