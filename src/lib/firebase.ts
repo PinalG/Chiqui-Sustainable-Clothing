@@ -1,10 +1,10 @@
 
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
-// Your web app's Firebase configuration (replace with actual values in production)
+// Firebase configuration for development (will be replaced in production)
 const firebaseConfig = {
   apiKey: "demo-key-for-development",
   authDomain: "acdrp-platform.firebaseapp.com",
@@ -19,5 +19,20 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// In development mode, connect to Firebase emulators
+if (process.env.NODE_ENV === 'development') {
+  // Set up auth emulator
+  try {
+    connectAuthEmulator(auth, "http://localhost:9099");
+    console.log("Connected to Auth emulator");
+  } catch (e) {
+    console.log("Using mock authentication in development mode");
+  }
+  
+  // Uncommment these when you set up the corresponding emulators
+  // connectFirestoreEmulator(db, 'localhost', 8080);
+  // connectStorageEmulator(storage, 'localhost', 9199);
+}
 
 export { auth, db, storage };

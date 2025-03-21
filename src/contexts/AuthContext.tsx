@@ -79,6 +79,38 @@ const MOCK_USERS = [
   }
 ];
 
+// Create a mock user for development
+const createMockUser = (email: string, displayName: string): User => {
+  return {
+    uid: `mock-${Date.now()}`,
+    email,
+    emailVerified: true,
+    displayName,
+    isAnonymous: false,
+    photoURL: null,
+    providerData: [],
+    metadata: {
+      creationTime: Date.now().toString(),
+      lastSignInTime: Date.now().toString()
+    },
+    tenantId: null,
+    delete: async () => {},
+    getIdToken: async () => "mock-token",
+    getIdTokenResult: async () => ({
+      token: "mock-token",
+      signInProvider: "password",
+      expirationTime: new Date(Date.now() + 3600000).toISOString(),
+      issuedAtTime: new Date().toISOString(),
+      claims: { role: "user" },
+      authTime: new Date().toISOString(),
+    }),
+    reload: async () => {},
+    toJSON: () => ({}),
+    phoneNumber: null,
+    providerId: "password",
+  } as unknown as User;
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -92,42 +124,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      
-      if (currentUser) {
-        try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            setUserData(userDoc.data() as UserData);
-          } else {
-            // If user document doesn't exist yet (first login)
-            const newUserData: UserData = {
-              uid: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName,
-              photoURL: currentUser.photoURL,
-              role: "consumer", // Default role
-              createdAt: Date.now(),
-              sustainabilityScore: 0,
-              rewardsPoints: 0
-            };
-            await setDoc(userDocRef, newUserData);
-            setUserData(newUserData);
+    // Use real Firebase Auth if not in development
+    if (process.env.NODE_ENV !== 'development') {
+      const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        setUser(currentUser);
+        
+        if (currentUser) {
+          try {
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            
+            if (userDoc.exists()) {
+              setUserData(userDoc.data() as UserData);
+            } else {
+              // If user document doesn't exist yet (first login)
+              const newUserData: UserData = {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                displayName: currentUser.displayName,
+                photoURL: currentUser.photoURL,
+                role: "consumer", // Default role
+                createdAt: Date.now(),
+                sustainabilityScore: 0,
+                rewardsPoints: 0
+              };
+              await setDoc(userDocRef, newUserData);
+              setUserData(newUserData);
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
           }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
+        } else {
+          setUserData(null);
         }
-      } else {
-        setUserData(null);
-      }
+        
+        setIsLoading(false);
+      });
       
+      return () => unsubscribe();
+    } else {
+      // In development, initialize with no user
+      setUser(null);
+      setUserData(null);
       setIsLoading(false);
-    });
-
-    return () => unsubscribe();
+    }
   }, []);
 
   const signUp = async (
@@ -138,6 +178,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     additionalData?: Partial<UserData>
   ) => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        // In development mode, create a mock user without Firebase
+        const mockUser = createMockUser(email, name);
+        setUser(mockUser);
+        
+        // Create mock user data
+        const mockUserData: UserData = {
+          uid: mockUser.uid,
+          email: email,
+          displayName: name,
+          photoURL: null,
+          role: role,
+          createdAt: Date.now(),
+          sustainabilityScore: 0,
+          rewardsPoints: role === "consumer" ? 100 : 0,
+          ...additionalData
+        };
+        
+        setUserData(mockUserData);
+        toast.success("Account created successfully");
+        return;
+      }
+      
+      // In production, use real Firebase auth
       const result = await createUserWithEmailAndPassword(auth, email, password);
       // Update the user profile with display name
       await updateProfile(result.user, { displayName: name });
@@ -165,6 +229,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        // In development mode, find the mock user
+        const mockUser = MOCK_USERS.find(u => u.email === email && u.password === password);
+        
+        if (!mockUser) {
+          toast.error("Invalid email or password");
+          throw new Error("Invalid email or password");
+        }
+        
+        // Create a mock Firebase user
+        const user = createMockUser(mockUser.email, mockUser.name);
+        setUser(user);
+        
+        // Create user data
+        const userData: UserData = {
+          uid: user.uid,
+          email: mockUser.email,
+          displayName: mockUser.name,
+          photoURL: null,
+          role: mockUser.role,
+          createdAt: Date.now(),
+          sustainabilityScore: mockUser.sustainabilityScore,
+          rewardsPoints: mockUser.rewardsPoints || 0,
+          organizationName: mockUser.organizationName,
+          taxId: mockUser.taxId
+        };
+        
+        setUserData(userData);
+        toast.success("Signed in successfully");
+        return;
+      }
+      
+      // In production, use real Firebase auth
       await signInWithEmailAndPassword(auth, email, password);
       toast.success("Signed in successfully");
     } catch (error: any) {
@@ -175,6 +272,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async (role: UserRole = "consumer") => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        // In development mode, create a mock Google user
+        const mockUser = createMockUser("google@example.com", "Google User");
+        setUser(mockUser);
+        
+        const userData: UserData = {
+          uid: mockUser.uid,
+          email: "google@example.com",
+          displayName: "Google User",
+          photoURL: "https://lh3.googleusercontent.com/a/default-user",
+          role: role,
+          createdAt: Date.now(),
+          sustainabilityScore: 50,
+          rewardsPoints: role === "consumer" ? 100 : 0
+        };
+        
+        setUserData(userData);
+        toast.success("Signed in with Google successfully");
+        return;
+      }
+      
+      // In production, use real Firebase auth
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       
@@ -206,6 +325,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        // In development mode, just clear the user state
+        setUser(null);
+        setUserData(null);
+        toast.success("Signed out successfully");
+        return;
+      }
+      
+      // In production, use real Firebase auth
       await signOut(auth);
       toast.success("Signed out successfully");
     } catch (error: any) {
@@ -216,6 +344,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const resetPassword = async (email: string) => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        // In development mode, just show a success message
+        toast.success("Password reset email sent (mock)");
+        return;
+      }
+      
+      // In production, use real Firebase auth
       await sendPasswordResetEmail(auth, email);
       toast.success("Password reset email sent");
     } catch (error: any) {
