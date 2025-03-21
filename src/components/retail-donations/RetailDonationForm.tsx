@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -9,11 +10,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, Minus, ImagePlus, PackagePlus, Sparkles } from "lucide-react";
+import { Upload, Plus, Minus, ImagePlus, PackagePlus, Sparkles, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import ImageAnalyzer from "@/components/ai/ImageAnalyzer";
 import { ItemAnalysisResult } from "@/lib/geminiService";
 import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -37,12 +40,19 @@ const donationSchema = z.object({
   storageArea: z.coerce.number().min(0, {
     message: "Storage area must be a positive number.",
   }),
+  storageType: z.string().optional(),
+  notes: z.string().optional(),
   description: z.string().optional(),
+  taxEntityName: z.string().min(2, {
+    message: "Tax entity name is required for tax benefits.",
+  }).optional(),
+  taxId: z.string().optional(),
 });
 
 type DonationFormValues = z.infer<typeof donationSchema>;
 
 interface DonationItem {
+  id: string;
   name: string;
   category: string;
   quantity: number;
@@ -53,6 +63,7 @@ interface DonationItem {
   sustainabilityScore?: number;
   tags?: string[];
   description?: string;
+  status: "registered" | "pending" | "approved";
 }
 
 interface PaperDonationFormProps {
@@ -67,6 +78,8 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAiAnalyzer, setShowAiAnalyzer] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<ItemAnalysisResult | null>(null);
+  const [donationComplete, setDonationComplete] = useState(false);
+  const [batchId, setBatchId] = useState<string>(`RTL-${Math.floor(100000 + Math.random() * 900000)}`);
 
   const form = useForm<DonationFormValues>({
     resolver: zodResolver(donationSchema),
@@ -76,8 +89,12 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
       quantity: 1,
       estimatedValue: 0,
       storageLocation: userData?.organizationName ? `${userData.organizationName} Main Warehouse` : "",
-      storageArea: 0,
+      storageArea: 100,
+      storageType: "warehouse",
+      notes: "",
       description: "",
+      taxEntityName: userData?.organizationName || "",
+      taxId: userData?.taxId || "",
     },
   });
 
@@ -132,7 +149,8 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
 
   const addItem = (data: DonationFormValues) => {
     const newItem: DonationItem = {
-      name: `Item #${items.length + 1}`,
+      id: `item-${Math.random().toString(36).substring(2, 9)}`,
+      name: `${data.itemCategory} - ${data.quantity} units`,
       category: data.itemCategory,
       quantity: data.quantity,
       value: data.estimatedValue,
@@ -142,6 +160,7 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
       sustainabilityScore: aiAnalysisResult?.sustainabilityScore,
       tags: aiAnalysisResult?.tags,
       description: data.description || aiAnalysisResult?.description,
+      status: "registered"
     };
 
     setItems([...items, newItem]);
@@ -166,6 +185,16 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
     setItems(newItems);
   };
 
+  const calculateTaxBenefit = (totalValue: number): number => {
+    // Simplified tax benefit calculation - typically 30% of donation value
+    return totalValue * 0.30;
+  };
+
+  const calculateStorageBenefit = (storageArea: number): number => {
+    // Simplified storage benefit calculation - $2.50 per sq ft
+    return storageArea * 2.50;
+  };
+
   const onSubmit = async (data: DonationFormValues) => {
     if (items.length === 0) {
       toast({
@@ -180,33 +209,52 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
 
     try {
       // In a real application, this would make an API call to save the donation
-      console.log("Donation submitted:", {
+      const donationData = {
+        batchId: batchId,
         batchName: data.batchName,
         items,
         storageLocation: data.storageLocation,
         storageArea: data.storageArea,
+        storageType: data.storageType,
+        taxEntityName: data.taxEntityName,
+        taxId: data.taxId,
+        registrationDate: new Date().toISOString(),
+        status: "approved",
         totalItems: items.reduce((sum, item) => sum + item.quantity, 0),
         totalValue: items.reduce((sum, item) => sum + item.value, 0),
-      });
+        taxBenefit: calculateTaxBenefit(items.reduce((sum, item) => sum + item.value, 0)),
+        storageBenefit: calculateStorageBenefit(data.storageArea),
+        notes: data.notes,
+      };
+
+      console.log("Retail donation submitted:", donationData);
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast({
         title: "Donation registered",
-        description: `${data.batchName} has been successfully registered for retail donation.`,
+        description: `${data.batchName} has been successfully registered with batch ID ${batchId}.`,
       });
 
-      // Reset form and state
-      setItems([]);
-      form.reset();
-      if (onComplete) {
-        onComplete();
-      }
+      // Show completion state
+      setDonationComplete(true);
+
+      // Reset form and state after a short delay
+      setTimeout(() => {
+        setItems([]);
+        setDonationComplete(false);
+        form.reset();
+        setBatchId(`RTL-${Math.floor(100000 + Math.random() * 900000)}`);
+        
+        if (onComplete) {
+          onComplete();
+        }
+      }, 3000);
     } catch (error) {
       toast({
         title: "Error",
-        description: "There was an error registering your donation.",
+        description: "There was an error registering your retail donation.",
         variant: "destructive",
       });
     } finally {
@@ -216,6 +264,54 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalValue = items.reduce((sum, item) => sum + item.value, 0);
+  const taxBenefit = calculateTaxBenefit(totalValue);
+  const storageBenefit = calculateStorageBenefit(form.getValues().storageArea);
+  const totalBenefit = taxBenefit + storageBenefit;
+
+  // If donation is complete, show success state
+  if (donationComplete) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center"
+        >
+          <div className="rounded-full bg-green-100 p-3 mb-4">
+            <CheckCircle2 className="h-12 w-12 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Retail Donation Registered!</h2>
+          <p className="text-muted-foreground mb-6 max-w-md">
+            Your items have been registered for donation without physically moving them. 
+            They will remain in your storage location until sold.
+          </p>
+          <div className="bg-soft-pink/10 rounded-lg py-3 px-6 mb-6">
+            <p className="font-medium text-soft-pink">Batch ID: {batchId}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">Estimated Tax Benefit</p>
+              <p className="text-2xl font-bold">${taxBenefit.toFixed(2)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">Storage Benefit</p>
+              <p className="text-2xl font-bold">${storageBenefit.toFixed(2)}</p>
+            </div>
+          </div>
+          <Button onClick={() => {
+            setDonationComplete(false);
+            setItems([]);
+            form.reset();
+            setBatchId(`RTL-${Math.floor(100000 + Math.random() * 900000)}`);
+            if (onComplete) onComplete();
+          }}>
+            Register Another Donation
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -223,12 +319,12 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
         <div>
           <Form {...form}>
             <form className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-start justify-between">
                 <FormField
                   control={form.control}
                   name="batchName"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex-1 mr-4">
                       <FormLabel>Batch Name</FormLabel>
                       <FormControl>
                         <Input {...field} />
@@ -238,6 +334,14 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                   )}
                 />
                 
+                <div className="min-w-[140px] mt-8">
+                  <Badge variant="outline" className="bg-soft-pink/5 text-soft-pink border-soft-pink/20 px-3 py-1.5 text-xs">
+                    Batch ID: {batchId}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="itemCategory"
@@ -263,9 +367,7 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                     </FormItem>
                   )}
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
                 <FormField
                   control={form.control}
                   name="quantity"
@@ -279,7 +381,9 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                     </FormItem>
                   )}
                 />
-                
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="estimatedValue"
@@ -293,39 +397,105 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                     </FormItem>
                   )}
                 />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="storageLocation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Storage Location</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 
                 <FormField
                   control={form.control}
-                  name="storageArea"
+                  name="taxEntityName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Storage Area (sq ft)</FormLabel>
+                      <FormLabel>Tax Entity Name</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormDescription>
-                        For storage space tax benefits
+                        For tax benefit documentation
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
+              
+              <div className="bg-muted/30 p-4 rounded-md border border-muted">
+                <h3 className="text-sm font-medium mb-3">Storage Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="storageLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Storage Location</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="storageType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Storage Type</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || "warehouse"}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="warehouse">Warehouse</SelectItem>
+                            <SelectItem value="retail-backroom">Retail Backroom</SelectItem>
+                            <SelectItem value="distribution-center">Distribution Center</SelectItem>
+                            <SelectItem value="offsite-storage">Offsite Storage</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="storageArea"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Storage Area (sq ft)</FormLabel>
+                        <FormControl>
+                          <Input type="number" min="0" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          For storage space tax benefits
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Storage Notes</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="mt-2 text-xs text-muted-foreground">
+                  <p>
+                    <span className="font-medium">Note:</span> Items will remain in this location until sold or requested to be moved.
+                  </p>
+                </div>
               </div>
               
               <FormField
@@ -438,7 +608,22 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Batch Summary</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Batch Summary</h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="inline-flex items-center text-sm text-soft-pink hover:underline cursor-help">
+                  How it works
+                </TooltipTrigger>
+                <TooltipContent className="max-w-sm">
+                  <p className="text-sm">
+                    Retail donations allow you to register items without physically moving them until sold. 
+                    You gain tax benefits for both the donated items and the storage space.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           
           {items.length > 0 ? (
             <div className="space-y-4">
@@ -458,22 +643,32 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                 <Card className="backdrop-blur-sm bg-white/90 border-none shadow-md">
                   <CardContent className="p-4">
                     <p className="text-sm font-medium text-muted-foreground">Est. Tax Benefit</p>
-                    <p className="text-2xl font-bold">${(totalValue * 0.30).toFixed(2)}</p>
+                    <p className="text-2xl font-bold">${taxBenefit.toFixed(2)}</p>
                   </CardContent>
                 </Card>
                 <Card className="backdrop-blur-sm bg-white/90 border-none shadow-md">
                   <CardContent className="p-4">
                     <p className="text-sm font-medium text-muted-foreground">Storage Benefit</p>
-                    <p className="text-2xl font-bold">
-                      ${(form.getValues().storageArea * 2.50).toFixed(2)}
-                    </p>
+                    <p className="text-2xl font-bold">${storageBenefit.toFixed(2)}</p>
                   </CardContent>
                 </Card>
               </div>
               
+              <Card className="border-soft-pink/20 bg-soft-pink/5">
+                <CardContent className="p-4">
+                  <div className="flex items-baseline justify-between">
+                    <h4 className="font-medium">Total Estimated Benefit</h4>
+                    <p className="text-xl font-bold">${totalBenefit.toFixed(2)}</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Estimated tax deduction based on current rates. Consult your tax professional for final determination.
+                  </p>
+                </CardContent>
+              </Card>
+              
               <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2">
                 {items.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border">
+                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border">
                     <div className="flex items-center space-x-3">
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="w-12 h-12 rounded object-cover" />
@@ -483,7 +678,12 @@ const RetailDonationForm = ({ onComplete }: PaperDonationFormProps) => {
                         </div>
                       )}
                       <div>
-                        <p className="font-medium">{item.category}</p>
+                        <div className="flex items-center">
+                          <p className="font-medium">{item.category}</p>
+                          <Badge className="ml-2 bg-green-100 text-green-800 text-xs">
+                            {item.status}
+                          </Badge>
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           {item.quantity} items • ${item.value.toFixed(2)}
                           {item.condition && ` • ${item.condition}`}
