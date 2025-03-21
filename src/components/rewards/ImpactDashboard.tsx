@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Droplet, Wind, Battery, Clock, ShoppingBag, TrendingUp, Recycle, Globe, Sun, Cloud, Target } from "lucide-react";
+import { Leaf, Droplet, Wind, Battery, Clock, ShoppingBag, TrendingUp, Recycle, Globe, Sun, Cloud, Target, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
   ResponsiveContainer, 
