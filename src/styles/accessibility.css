@@ -49,6 +49,7 @@ html.large-text a {
 html.reduced-motion * {
   animation-duration: 0.001s !important;
   transition-duration: 0.001s !important;
+  scroll-behavior: auto !important;
 }
 
 /* Screen Reader Optimizations */
@@ -85,9 +86,96 @@ html:not(.reduced-motion) *:focus {
   transition: outline-offset 0.2s ease;
 }
 
+/* Optimized animations for different preferences */
 @media (prefers-reduced-motion) {
   * {
     animation-duration: 0.001s !important;
     transition-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-slide-in,
+  .animate-slide-out,
+  .animate-shimmer,
+  .animate-pulse {
+    animation: none !important;
+  }
+}
+
+/* Enhanced animations for those who prefer motion */
+@media (prefers-reduced-motion: no-preference) {
+  /* Smooth page transitions */
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  .page-transition-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .page-transition-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 200ms, transform 200ms;
+  }
+  
+  /* Enhanced hover interactions */
+  .premium-hover {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  
+  .premium-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Optimized loading animations */
+  @keyframes optimized-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  .optimized-loading {
+    animation: optimized-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000 !important;
+    background: #fff !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
   }
 }
