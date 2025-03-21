@@ -1,4 +1,3 @@
-
 import React, { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -25,6 +24,7 @@ const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
 const ReportingDashboard = lazy(() => import("@/pages/admin/ReportingDashboard"));
 const SettingsPage = lazy(() => import("@/pages/settings/SettingsPage"));
 const PrivacyPage = lazy(() => import("@/pages/settings/PrivacyPage"));
+const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage"));
 const Rewards = lazy(() => import("@/pages/Rewards"));
 
 // Define route groups for better organization
@@ -91,6 +91,10 @@ export const protectedRoutes = [
   {
     path: "/settings/privacy",
     element: <PrivacyPage />,
+  },
+  {
+    path: "/settings/security",
+    element: <SecurityPage />,
   },
 ];
 

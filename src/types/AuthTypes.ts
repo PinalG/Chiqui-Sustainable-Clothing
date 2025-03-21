@@ -29,6 +29,7 @@ export interface UserData {
     lastUpdated: number;
   };
   preferences?: UserPreferences; // User preferences for accessibility and language
+  did?: string; // Decentralized Identifier
 }
 
 export interface AuthContextType {

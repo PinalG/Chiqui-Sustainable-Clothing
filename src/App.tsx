@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { DidAuthProvider } from "@/contexts/DidAuthContext";
 import { PerformanceProvider } from "@/contexts/PerformanceContext";
 import RouteChangeTracker from "@/components/performance/RouteChangeTracker";
 import { LoadingAnimation } from "@/components/ui/loading-animation";
@@ -41,66 +42,68 @@ const loadingFallback = (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <PerformanceProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <RouteChangeTracker />
-            <Suspense fallback={loadingFallback}>
-              <Routes>
-                {/* Public routes */}
-                {publicRoutes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={<PublicRouteWrapper>{route.element}</PublicRouteWrapper>}
-                  />
-                ))}
-                
-                {/* Protected routes for all authenticated users */}
-                {protectedRoutes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={<ProtectedRouteWrapper>{route.element}</ProtectedRouteWrapper>}
-                  />
-                ))}
-                
-                {/* Role-specific routes */}
-                {roleSpecificRoutes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={
-                      <RoleProtectedRouteWrapper 
-                        allowedRoles={route.allowedRoles}
-                        requiresConsentVerification={route.requiresConsentVerification}
-                      >
-                        {route.element}
-                      </RoleProtectedRouteWrapper>
-                    }
-                  />
-                ))}
-                
-                {/* Admin routes */}
-                {adminRoutes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={<AdminRouteWrapper>{route.element}</AdminRouteWrapper>}
-                  />
-                ))}
-                
-                {/* Error and fallback routes */}
-                {errorRoutes.map((route) => (
-                  <Route key={route.path} path={route.path} element={route.element} />
-                ))}
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </PerformanceProvider>
+      <DidAuthProvider>
+        <PerformanceProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <RouteChangeTracker />
+              <Suspense fallback={loadingFallback}>
+                <Routes>
+                  {/* Public routes */}
+                  {publicRoutes.map((route) => (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={<PublicRouteWrapper>{route.element}</PublicRouteWrapper>}
+                    />
+                  ))}
+                  
+                  {/* Protected routes for all authenticated users */}
+                  {protectedRoutes.map((route) => (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={<ProtectedRouteWrapper>{route.element}</ProtectedRouteWrapper>}
+                    />
+                  ))}
+                  
+                  {/* Role-specific routes */}
+                  {roleSpecificRoutes.map((route) => (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={
+                        <RoleProtectedRouteWrapper 
+                          allowedRoles={route.allowedRoles}
+                          requiresConsentVerification={route.requiresConsentVerification}
+                        >
+                          {route.element}
+                        </RoleProtectedRouteWrapper>
+                      }
+                    />
+                  ))}
+                  
+                  {/* Admin routes */}
+                  {adminRoutes.map((route) => (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={<AdminRouteWrapper>{route.element}</AdminRouteWrapper>}
+                    />
+                  ))}
+                  
+                  {/* Error and fallback routes */}
+                  {errorRoutes.map((route) => (
+                    <Route key={route.path} path={route.path} element={route.element} />
+                  ))}
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </PerformanceProvider>
+      </DidAuthProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
