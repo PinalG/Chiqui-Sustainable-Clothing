@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -16,13 +15,12 @@ import NotFound from "./pages/NotFound";
 import { UserRole } from "./contexts/AuthContext";
 import "./styles/accessibility.css";
 
-// Lazy load all pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Marketplace = lazy(() => import("./pages/Marketplace"));
 const ProductDetails = lazy(() => import("./pages/ProductDetails"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const Donations = lazy(() => import("./pages/Donations"));
-const PaperDonations = lazy(() => import("./pages/PaperDonations"));
+const RetailDonations = lazy(() => import("./pages/RetailDonations"));
 const Logistics = lazy(() => import("./pages/logistics/Logistics"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
@@ -61,7 +59,6 @@ const App = () => (
           <BrowserRouter>
             <RouteChangeTracker />
             <Routes>
-              {/* Auth Routes */}
               <Route path="/auth/login" element={
                 <LazyComponent fallback={loadingFallback}>
                   <Login />
@@ -78,7 +75,6 @@ const App = () => (
                 </LazyComponent>
               } />
               
-              {/* Routes for all authenticated users */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={
                   <MainLayout>
@@ -145,7 +141,6 @@ const App = () => (
                 } />
               </Route>
               
-              {/* Routes for consumers only */}
               <Route element={<ProtectedRoute allowedRoles={["consumer"] as UserRole[]} />}>
                 <Route path="/donations" element={
                   <MainLayout>
@@ -156,18 +151,16 @@ const App = () => (
                 } />
               </Route>
               
-              {/* Routes for retailers only */}
               <Route element={<ProtectedRoute allowedRoles={["retailer"] as UserRole[]} requiresConsentVerification={true} />}>
-                <Route path="/paper-donations" element={
+                <Route path="/retail-donations" element={
                   <MainLayout>
                     <LazyComponent>
-                      <PaperDonations />
+                      <RetailDonations />
                     </LazyComponent>
                   </MainLayout>
                 } />
               </Route>
               
-              {/* Routes for admin only */}
               <Route element={<ProtectedRoute allowedRoles={["admin"] as UserRole[]} />}>
                 <Route path="/admin/dashboard" element={
                   <MainLayout>
@@ -192,7 +185,6 @@ const App = () => (
                 } />
               </Route>
               
-              {/* Unauthorized Route */}
               <Route path="/unauthorized" element={
                 <div className="min-h-screen flex items-center justify-center">
                   <div className="text-center p-6 max-w-md">
@@ -203,7 +195,6 @@ const App = () => (
                 </div>
               } />
               
-              {/* 404 Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
