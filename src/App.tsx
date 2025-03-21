@@ -3,9 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { PerformanceProvider } from "@/contexts/PerformanceContext";
+import { PerformanceProvider, RouteChangeTracker } from "@/contexts/PerformanceContext";
 import { LazyComponent } from "@/components/ui/lazy-component";
 import { LoadingAnimation } from "@/components/ui/loading-animation";
 import MainLayout from "./components/layout/MainLayout";
@@ -33,17 +33,6 @@ const SettingsPage = lazy(() => import("./pages/settings/SettingsPage"));
 const PrivacyPage = lazy(() => import("./pages/settings/PrivacyPage"));
 const Rewards = lazy(() => import("./pages/Rewards"));
 
-// Create route change listener for animations
-function AnimationHandler() {
-  const location = useLocation();
-  const navigationType = useNavigationType();
-  
-  // You could implement route transition animations here
-  // using framer-motion's AnimatePresence
-  
-  return null;
-}
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -68,7 +57,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <AnimationHandler />
+            <RouteChangeTracker />
             <Routes>
               {/* Auth Routes */}
               <Route path="/auth/login" element={

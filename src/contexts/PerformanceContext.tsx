@@ -3,6 +3,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import analytics from '@/lib/analytics';
 import monitoring from '@/lib/monitoring';
+
+// Import these but don't use them immediately
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 interface PerformanceContextType {
@@ -15,11 +17,9 @@ const PerformanceContext = createContext<PerformanceContextType | null>(null);
 
 export function PerformanceProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const location = useLocation();
-  const navigationType = useNavigationType();
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Initialize services
+  // Initialize services without router dependencies
   useEffect(() => {
     if (isInitialized) return;
     
@@ -42,31 +42,6 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
       monitoring.shutdown();
     };
   }, [user?.uid, isInitialized]);
-  
-  // Track page views
-  useEffect(() => {
-    if (!isInitialized) return;
-    
-    const path = location.pathname + location.search;
-    
-    // Track page view in analytics
-    analytics.trackPageView({
-      path,
-      title: document.title,
-    });
-    
-    // Track route change performance
-    if (window.performance) {
-      const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      
-      if (navigationTiming) {
-        monitoring.captureMetric('route_change_time', navigationTiming.duration, {
-          path,
-          navigationType,
-        });
-      }
-    }
-  }, [location.pathname, location.search, navigationType, isInitialized]);
   
   // Utility functions
   const trackEvent = (category: string, action: string, label?: string, value?: number) => {
@@ -102,4 +77,36 @@ export function usePerformance() {
   }
   
   return context;
+}
+
+// Create a separate component for router-dependent tracking
+export function RouteChangeTracker() {
+  // These hooks will only be used inside the Router context
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  const { trackMetric } = usePerformance();
+  
+  useEffect(() => {
+    const path = location.pathname + location.search;
+    
+    // Track page view in analytics
+    analytics.trackPageView({
+      path,
+      title: document.title,
+    });
+    
+    // Track route change performance
+    if (window.performance) {
+      const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      
+      if (navigationTiming) {
+        monitoring.captureMetric('route_change_time', navigationTiming.duration, {
+          path,
+          navigationType,
+        });
+      }
+    }
+  }, [location.pathname, location.search, navigationType, trackMetric]);
+  
+  return null;
 }

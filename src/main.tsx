@@ -55,7 +55,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-// Render the app with PerformanceProvider to provide monitoring context
+// Render the app with ErrorBoundary
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
