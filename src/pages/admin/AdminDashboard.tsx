@@ -40,6 +40,36 @@ const sustainabilityData = [
 
 const COLORS = ["#FFC0CB", "#B0B0B0", "#F8C3CD", "#F0EAD6"];
 
+// Chart configurations
+const donationChartConfig = {
+  donations: { 
+    label: "Donations",
+    color: "#FFC0CB" 
+  }
+};
+
+const taxBenefitChartConfig = {
+  value: { 
+    label: "Tax Benefits",
+    color: "#FFC0CB" 
+  }
+};
+
+const userDistributionChartConfig = {
+  Consumers: { 
+    label: "Consumers",
+    color: "#FFC0CB" 
+  },
+  Retailers: { 
+    label: "Retailers",
+    color: "#B0B0B0" 
+  },
+  Logistics: { 
+    label: "Logistics",
+    color: "#F8C3CD" 
+  }
+};
+
 const AdminDashboard = () => {
   const [period, setPeriod] = useState("monthly");
   
@@ -99,7 +129,7 @@ const AdminDashboard = () => {
                 <CardDescription>Number of items donated over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-72">
+                <ChartContainer className="h-72" config={donationChartConfig}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={donationData} margin={{ top: 0, right: 10, left: -10, bottom: 0 }}>
                       <ChartTooltip content={<ChartTooltipContent />} />
@@ -118,7 +148,7 @@ const AdminDashboard = () => {
                 <CardDescription>Cumulative tax benefits generated</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-72">
+                <ChartContainer className="h-72" config={taxBenefitChartConfig}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={taxBenefitData} margin={{ top: 0, right: 10, left: -10, bottom: 0 }}>
                       <ChartTooltip content={<ChartTooltipContent />} />
@@ -145,7 +175,7 @@ const AdminDashboard = () => {
                 <CardDescription>Breakdown by user type</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-72">
+                <ChartContainer className="h-72" config={userDistributionChartConfig}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <ChartTooltip content={<ChartTooltipContent />} />

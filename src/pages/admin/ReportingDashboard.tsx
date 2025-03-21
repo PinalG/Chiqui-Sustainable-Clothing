@@ -74,6 +74,36 @@ const storageUsage = [
   { month: "Jun", value: 70 },
 ];
 
+// Chart configurations
+const taxBenefitsChartConfig = {
+  value: { 
+    label: "Tax Benefits",
+    color: "#FFC0CB" 
+  }
+};
+
+const sustainabilityChartConfig = {
+  carbonSaved: { 
+    label: "Carbon Saved",
+    color: "#FFC0CB" 
+  },
+  textileWaste: { 
+    label: "Textile Waste Reduction",
+    color: "#B0B0B0" 
+  },
+  waterSaved: { 
+    label: "Water Saved",
+    color: "#90CAF9" 
+  }
+};
+
+const storageChartConfig = {
+  value: { 
+    label: "Storage Space (m²)",
+    color: "#FFC0CB" 
+  }
+};
+
 const ReportingDashboard = () => {
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(2023, 0, 1),
@@ -154,7 +184,7 @@ const ReportingDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer className="h-80">
+              <ChartContainer className="h-80" config={taxBenefitsChartConfig}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={taxBenefitsByRetailer}
@@ -200,7 +230,7 @@ const ReportingDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer className="h-80">
+              <ChartContainer className="h-80" config={sustainabilityChartConfig}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
                     data={sustainabilityMetricsByMonth}
@@ -285,7 +315,7 @@ const ReportingDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer className="h-80">
+              <ChartContainer className="h-80" config={storageChartConfig}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={storageUsage}
