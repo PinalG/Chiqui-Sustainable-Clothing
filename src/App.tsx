@@ -8,6 +8,13 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
 import './App.css';
 
+// Define the type for route objects
+interface RouteObject {
+  path: string;
+  element: React.ReactNode;
+  children?: RouteObject[];
+}
+
 function App() {
   const location = useLocation();
   
@@ -18,7 +25,7 @@ function App() {
   }, []);
 
   // Define all routes by combining route groups
-  const allRoutes = [...publicRoutes, ...protectedRoutes, ...roleSpecificRoutes, ...adminRoutes, ...errorRoutes];
+  const allRoutes = [...publicRoutes, ...protectedRoutes, ...roleSpecificRoutes, ...adminRoutes, ...errorRoutes] as RouteObject[];
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="chiqui-theme">

@@ -14,11 +14,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen flex-col md:flex-row">
+      <div className="flex min-h-screen flex-col md:flex-row bg-light-bg">
         <Sidebar />
         <div className="flex flex-col flex-1 w-full">
           <Navbar />
-          <main className="flex-1 p-4 md:p-6 lg:p-8 bg-light-bg animate-fade-in overflow-x-hidden">
+          <main className="flex-1 p-4 md:p-6 lg:p-8 animate-fade-in overflow-x-hidden">
             {children}
           </main>
         </div>

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { 
   Home, ShoppingBag, Heart, Tags, 
   BarChart2, FileText, Package, Truck, HelpCircle, 
-  Menu, X, User, Users, Settings, Shield
+  Menu, X, User, Users, Settings, Shield, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from './SidebarContext';
@@ -11,15 +11,17 @@ import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface SidebarItemProps {
   icon: React.ElementType;
   label: string;
   href: string;
   active?: boolean;
+  hasSubmenu?: boolean;
 }
 
-const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
+const SidebarItem = ({ icon: Icon, label, href, active, hasSubmenu }: SidebarItemProps) => {
   return (
     <Link to={href} className="w-full">
       <Button
@@ -30,7 +32,8 @@ const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
         )}
       >
         <Icon className={cn("h-5 w-5", active && "text-soft-pink")} />
-        <span>{label}</span>
+        <span className="flex-1 text-left">{label}</span>
+        {hasSubmenu && <ChevronRight className="h-4 w-4" />}
       </Button>
     </Link>
   );
@@ -98,12 +101,18 @@ const Sidebar = () => {
   return (
     <>
       {/* Overlay for mobile */}
-      {isMobile && isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 z-30 transition-opacity animate-fade-in"
-          onClick={closeSidebar}
-        />
-      )}
+      <AnimatePresence>
+        {isMobile && isSidebarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/40 z-30 backdrop-blur-[2px]"
+            onClick={closeSidebar}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
       <aside
@@ -121,16 +130,19 @@ const Sidebar = () => {
             <div className="w-8 h-8 rounded-md bg-soft-pink flex items-center justify-center">
               <span className="font-bold text-white">CH</span>
             </div>
-            <span className={cn("font-semibold", !isSidebarOpen && "hidden md:hidden")}>
+            <span className={cn(
+              "font-semibold transition-opacity duration-300", 
+              !isSidebarOpen && "hidden md:opacity-0 md:hidden"
+            )}>
               Chiqui
             </span>
           </div>
           
-          {isSidebarOpen && (
+          {isMobile && isSidebarOpen && (
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden hover:bg-soft-pink/10"
               onClick={toggleSidebar}
             >
               <X className="h-5 w-5" />
@@ -149,7 +161,7 @@ const Sidebar = () => {
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="hidden md:flex"
+            className="hidden md:flex hover:bg-soft-pink/10"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -177,7 +189,10 @@ const Sidebar = () => {
             <div className="w-10 h-10 rounded-full bg-heather-grey flex items-center justify-center">
               <User className="h-5 w-5 text-white" />
             </div>
-            <div className={cn("flex-1 truncate", !isSidebarOpen && "hidden")}>
+            <div className={cn(
+              "flex-1 truncate transition-opacity duration-300", 
+              !isSidebarOpen && "hidden md:opacity-0 md:hidden"
+            )}>
               <div className="text-sm font-medium">
                 {userData?.displayName || "Guest User"}
               </div>
