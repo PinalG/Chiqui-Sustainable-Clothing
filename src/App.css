@@ -1,8 +1,22 @@
+
 #root {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
+}
+
+@media (min-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  #root {
+    max-width: 1280px;
+    padding: 2rem;
+  }
 }
 
 .logo {
@@ -34,9 +48,52 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 1em;
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: 2em;
+  }
 }
 
 .read-the-docs {
   color: #888;
+}
+
+/* Mobile optimizations */
+input, select, textarea, button {
+  font-size: 16px !important; /* Prevents iOS zoom on focus */
+}
+
+/* Improved touch targets for mobile */
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Responsive containers */
+.responsive-container {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .responsive-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Mobile-friendly scrolling */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent horizontal overflow on mobile */
+.prevent-overflow {
+  max-width: 100%;
+  overflow-x: hidden;
 }

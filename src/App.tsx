@@ -1,5 +1,5 @@
 
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,8 +41,8 @@ const loadingFallback = (
 );
 
 const App = () => {
-  // Add keyboard shortcut to focus on accessibility settings - moved inside the component
-  useEffect(() => {
+  // Add keyboard shortcut to focus on accessibility settings
+  React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Alt + Shift + A
       if (event.altKey && event.shiftKey && event.key === 'A') {
@@ -56,6 +56,24 @@ const App = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Add viewport meta tag for proper mobile scaling
+  React.useEffect(() => {
+    // Check if the viewport meta tag exists
+    let viewport = document.querySelector('meta[name="viewport"]');
+    
+    // If it doesn't exist, create it
+    if (!viewport) {
+      viewport = document.createElement('meta');
+      viewport.setAttribute('name', 'viewport');
+      document.head.appendChild(viewport);
+    }
+    
+    // Set the content with proper mobile viewport settings
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    
+    // Cleanup function not needed since we want this to persist
   }, []);
 
   return (
@@ -75,7 +93,7 @@ const App = () => {
                   
                   <RouteChangeTracker />
                   <Suspense fallback={loadingFallback}>
-                    <main id="main-content">
+                    <main id="main-content" className="prevent-overflow">
                       <Routes>
                         {/* Public routes */}
                         {publicRoutes.map((route) => (
