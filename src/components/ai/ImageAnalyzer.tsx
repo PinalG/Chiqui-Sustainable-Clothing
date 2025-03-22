@@ -15,11 +15,11 @@ import {
   DollarSign,
   Leaf,
   RefreshCw,
-  CheckCircle,
-  AlertCircle
+  CheckCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { analyzeClothingItem, ItemAnalysisResult } from "@/lib/geminiService";
+import { ItemAnalysisResult } from "@/lib/geminiService";
+import { useGemini } from "@/hooks/use-gemini";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -31,10 +31,21 @@ interface ImageAnalyzerProps {
 const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
   const { toast } = useToast();
   const [image, setImage] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [analysisResult, setAnalysisResult] = useState<ItemAnalysisResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { 
+    analyzeImage,
+    resetAnalysis,
+    isAnalyzing,
+    progress,
+    result: analysisResult,
+  } = useGemini({
+    onSuccess: (result) => {
+      if (onAnalysisComplete) {
+        onAnalysisComplete(result);
+      }
+    }
+  });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -63,7 +74,7 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
     reader.onload = (e) => {
       if (e.target?.result) {
         setImage(e.target.result as string);
-        setAnalysisResult(null);
+        resetAnalysis();
       }
     };
     reader.readAsDataURL(file);
@@ -73,60 +84,17 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
     fileInputRef.current?.click();
   };
 
-  const resetAnalysis = () => {
+  const handleReset = () => {
     setImage(null);
-    setAnalysisResult(null);
-    setProgress(0);
+    resetAnalysis();
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  const analyzeImage = async () => {
+  const handleAnalyzeImage = async () => {
     if (!image) return;
-
-    setIsAnalyzing(true);
-    setProgress(0);
-
-    // Simulate progress for better UX
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = prev + Math.random() * 15;
-        return newProgress >= 90 ? 90 : newProgress;
-      });
-    }, 300);
-
-    try {
-      // Call the Gemini service
-      const result = await analyzeClothingItem(image);
-      
-      // Complete the progress bar
-      clearInterval(progressInterval);
-      setProgress(100);
-      
-      // Set the result
-      setAnalysisResult(result);
-      
-      // Notify parent component
-      if (onAnalysisComplete) {
-        onAnalysisComplete(result);
-      }
-
-      toast({
-        title: "Analysis complete",
-        description: "Your item has been successfully analyzed",
-      });
-    } catch (error) {
-      toast({
-        title: "Analysis failed",
-        description: "There was an error analyzing your image",
-        variant: "destructive",
-      });
-      clearInterval(progressInterval);
-      setProgress(0);
-    } finally {
-      setIsAnalyzing(false);
-    }
+    await analyzeImage(image);
   };
 
   return (
@@ -187,7 +155,7 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
                       size="icon"
                       variant="outline"
                       className="bg-white/80 backdrop-blur-sm h-8 w-8"
-                      onClick={resetAnalysis}
+                      onClick={handleReset}
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -197,7 +165,7 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
                 {isAnalyzing && (
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Analyzing image...</span>
+                      <span className="text-sm font-medium">Analyzing with Google Gemini 2.0...</span>
                       <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
                     </div>
                     <Progress value={progress} className="h-2" />
@@ -207,11 +175,11 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
                 {!isAnalyzing && !analysisResult && (
                   <div className="p-4 flex justify-center">
                     <Button 
-                      onClick={analyzeImage} 
+                      onClick={handleAnalyzeImage} 
                       className="w-full max-w-xs hover:shadow-lg transition-all"
                     >
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Analyze with AI
+                      Analyze with Gemini 2.0
                     </Button>
                   </div>
                 )}

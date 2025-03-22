@@ -1,5 +1,5 @@
 
-import { GEMINI_API_KEY } from "./firebase";
+import { GEMINI_API_KEY, GEMINI_API_ENDPOINT } from "./firebase";
 
 // Use a TypeScript interface for the item analysis result
 export interface ItemAnalysisResult {
@@ -120,43 +120,113 @@ const mockGeminiAnalysis = (imageData: string): Promise<ItemAnalysisResult> => {
   });
 };
 
-// In production, this would make an actual API call to Google Gemini
+// This function formats the image data for the Gemini API
+const formatImageForGemini = (imageData: string): any => {
+  // Extract the base64 data without the prefix
+  const base64Data = imageData.split(',')[1];
+  
+  return {
+    inlineData: {
+      data: base64Data,
+      mimeType: "image/jpeg" // Assuming JPEG, but could be dynamic based on image format
+    }
+  };
+};
+
+// Create the prompt for the Gemini API
+const createGeminiPrompt = (): string => {
+  return `
+  Analyze this clothing item image and provide the following information in JSON format:
+  - category: Determine if it's "clothing", "accessories", "footwear", "outerwear", "sportswear", or "formalwear"
+  - condition: Assess as "new with tags", "like new", "excellent", "good", "fair", or "poor"
+  - description: Write a brief description of the item (max 100 characters)
+  - tags: List 2-4 relevant descriptive tags as an array
+  - sustainabilityScore: Estimate sustainability on a scale of 0-100
+  
+  IMPORTANT: Respond ONLY with valid JSON. No introduction, explanation, or additional text.
+  `;
+};
+
+// In production, this makes an actual API call to Google Gemini
 const realGeminiAnalysis = async (imageData: string): Promise<ItemAnalysisResult> => {
   try {
-    // This is a placeholder for the actual Gemini API call
-    // In a real implementation, you would:
-    // 1. Send the image to Gemini API
-    // 2. Process the response
-    // 3. Return structured data
+    console.log("Calling Gemini 2.0 API for image analysis");
     
-    const response = await fetch('https://api.gemini.ai/v1/analyze', {
+    if (!GEMINI_API_KEY) {
+      throw new Error('Gemini API key is not configured');
+    }
+
+    // Prepare the request payload
+    const payload = {
+      contents: [
+        {
+          parts: [
+            { text: createGeminiPrompt() },
+            formatImageForGemini(imageData)
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 1024
+      }
+    };
+
+    // Make the API call
+    const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GEMINI_API_KEY}`
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        image: imageData,
-        analysisType: 'clothing'
-      })
+      body: JSON.stringify(payload)
     });
     
     if (!response.ok) {
-      throw new Error('Failed to analyze image with Gemini API');
+      const errorText = await response.text();
+      console.error('Gemini API error:', errorText);
+      throw new Error(`Failed to analyze image with Gemini API: ${response.status}`);
     }
     
     const data = await response.json();
     
-    // Process the response and return structured data
-    // This is a simplified example, actual response processing would be more complex
+    // Extract the generated text from the response
+    let generatedText = '';
+    if (data.candidates && data.candidates.length > 0 && 
+        data.candidates[0].content && 
+        data.candidates[0].content.parts && 
+        data.candidates[0].content.parts.length > 0) {
+      generatedText = data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error('Invalid response format from Gemini API');
+    }
+    
+    // Parse the JSON response from the generated text
+    let parsedResponse;
+    try {
+      // The response should be a JSON string
+      parsedResponse = JSON.parse(generatedText);
+    } catch (e) {
+      console.error('Failed to parse Gemini response as JSON:', generatedText);
+      throw new Error('Failed to parse Gemini response as JSON');
+    }
+    
+    // Map the response to our ItemAnalysisResult interface
+    const condition = parsedResponse.condition?.toLowerCase() || 'good';
+    const category = parsedResponse.category?.toLowerCase() || 'clothing';
+    
     return {
-      category: data.category,
-      condition: data.condition,
-      conditionScore: conditionScores[data.condition.toLowerCase()] || 0.5,
-      estimatedValue: data.estimatedValue || 30,
-      description: data.description || '',
-      tags: data.tags || [],
-      sustainabilityScore: data.sustainabilityScore || 75
+      category: category,
+      condition: condition,
+      conditionScore: conditionScores[condition] || 0.65,
+      estimatedValue: calculateDynamicPrice(
+        categoryBaseValues[category] || 30,
+        conditionScores[condition] || 0.65
+      ),
+      description: parsedResponse.description || '',
+      tags: parsedResponse.tags || [],
+      sustainabilityScore: parsedResponse.sustainabilityScore || 75
     };
   } catch (error) {
     console.error('Error calling Gemini API:', error);
@@ -167,8 +237,8 @@ const realGeminiAnalysis = async (imageData: string): Promise<ItemAnalysisResult
 
 // Main function to analyze clothing item from image
 export const analyzeClothingItem = async (imageData: string): Promise<ItemAnalysisResult> => {
-  // In development mode, use mock data
-  // In production, use the real API call
+  // In development mode or if no API key, use mock data
+  // In production with API key, use the real API call
   if (process.env.NODE_ENV === 'development' || !GEMINI_API_KEY) {
     return mockGeminiAnalysis(imageData);
   } else {

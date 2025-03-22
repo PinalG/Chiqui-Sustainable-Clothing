@@ -37,8 +37,11 @@ if (process.env.NODE_ENV === 'development') {
 
 // Gemini API key - this would normally be secured in a backend environment
 // For development purposes, we use a mock key
-const GEMINI_API_KEY = process.env.NODE_ENV === 'development' 
+export const GEMINI_API_KEY = process.env.NODE_ENV === 'development' 
   ? "GEMINI_MOCK_KEY_FOR_DEVELOPMENT" 
-  : ""; // In production, this would be fetched securely
+  : process.env.GEMINI_API_KEY || ""; 
 
-export { auth, db, storage, GEMINI_API_KEY };
+// Gemini API endpoint - using the latest Gemini 2.0 pro vision version
+export const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent";
+
+export { auth, db, storage };
