@@ -4,15 +4,18 @@ import { render, RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { PerformanceProvider } from '@/contexts/PerformanceContext';
 
 // Custom renderer that includes providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <BrowserRouter>
       <ThemeProvider defaultTheme="light" storageKey="test-theme">
-        <WebSocketProvider autoConnect={false}>
-          {children}
-        </WebSocketProvider>
+        <PerformanceProvider>
+          <WebSocketProvider>
+            {children}
+          </WebSocketProvider>
+        </PerformanceProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

@@ -6,13 +6,14 @@ import { publicRoutes, protectedRoutes, roleSpecificRoutes, adminRoutes, errorRo
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { PerformanceProvider } from '@/contexts/PerformanceContext';
 import './App.css';
 
 function App() {
   const location = useLocation();
   
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.info('Mock users for development: consumer@example.com / password123, retailer@example.com / password123, logistics@example.com / password123, admin@example.com / password123');
     }
   }, []);
@@ -22,19 +23,21 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="chiqui-theme">
-      <WebSocketProvider>
-        <RouteChangeTracker />
-        <Routes location={location}>
-          {allRoutes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element}>
-              {route.children?.map((child) => (
-                <Route key={child.path} path={child.path} element={child.element} />
-              ))}
-            </Route>
-          ))}
-        </Routes>
-        <Toaster />
-      </WebSocketProvider>
+      <PerformanceProvider>
+        <WebSocketProvider>
+          <RouteChangeTracker />
+          <Routes location={location}>
+            {allRoutes.map((route) => (
+              <Route key={route.path} path={route.path} element={route.element}>
+                {route.children?.map((child) => (
+                  <Route key={child.path} path={child.path} element={child.element} />
+                ))}
+              </Route>
+            ))}
+          </Routes>
+          <Toaster />
+        </WebSocketProvider>
+      </PerformanceProvider>
     </ThemeProvider>
   );
 }
