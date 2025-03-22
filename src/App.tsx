@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { RouteChangeTracker } from '@/components/performance/RouteChangeTracker';
+import RouteChangeTracker from '@/components/performance/RouteChangeTracker';
 import routes from '@/routes/routes';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/ui/theme-provider";
