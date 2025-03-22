@@ -63,9 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   highContrast: false,
                   largeText: false,
                   reducedMotion: false,
-                  screenReader: false,
-                  colorBlindFriendly: false,
-                  dyslexiaFriendly: false
+                  screenReader: false
                 }
               };
               // Will be created in the firestore by the signUp method
@@ -153,13 +151,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     userData,
     isLoading,
-    signUp: authMethods.signUp,
-    signIn: authMethods.signIn,
-    signInWithGoogle: authMethods.signInWithGoogle,
-    logout: authMethods.logout,
-    resetPassword: authMethods.resetPassword,
-    updateUserPreferences: authMethods.updateUserPreferences,
-    updateConsentSettings: authMethods.updateConsentSettings
+    signUp,
+    signIn,
+    signInWithGoogle,
+    logout,
+    resetPassword,
+    updateUserPreferences,
+    updateConsentSettings
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

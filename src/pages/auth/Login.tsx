@@ -14,34 +14,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Define mock users for development
-const MOCK_USERS = [
-  {
-    email: "consumer@example.com",
-    password: "password123",
-    name: "Sarah Consumer",
-    role: "consumer"
-  },
-  {
-    email: "retailer@example.com",
-    password: "password123",
-    name: "John Retailer",
-    role: "retailer"
-  },
-  {
-    email: "logistics@example.com",
-    password: "password123",
-    name: "Mike Logistics",
-    role: "logistics"
-  },
-  {
-    email: "admin@example.com",
-    password: "password123",
-    name: "Admin User",
-    role: "admin"
-  }
-];
-
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
@@ -157,8 +129,6 @@ const Login = () => {
         toast.error("Too many failed login attempts. Account locked for 15 minutes.");
       } else if (attempts >= 3) {
         toast.error(`Login failed. ${5 - attempts} attempts remaining before lockout.`);
-      } else {
-        toast.error("Invalid email or password. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -173,17 +143,29 @@ const Login = () => {
       navigate("/");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to sign in with Google. Please try again.");
     } finally {
       setGoogleLoading(false);
     }
   };
 
   const fillMockUser = (type: string) => {
-    const mockUser = MOCK_USERS.find(u => u.role === type);
-    if (mockUser) {
-      form.setValue('email', mockUser.email);
-      form.setValue('password', mockUser.password);
+    switch (type) {
+      case 'consumer':
+        form.setValue('email', 'consumer@example.com');
+        form.setValue('password', 'password123');
+        break;
+      case 'retailer':
+        form.setValue('email', 'retailer@example.com');
+        form.setValue('password', 'password123');
+        break;
+      case 'logistics':
+        form.setValue('email', 'logistics@example.com');
+        form.setValue('password', 'password123');
+        break;
+      case 'admin':
+        form.setValue('email', 'admin@example.com');
+        form.setValue('password', 'password123');
+        break;
     }
   };
 
@@ -266,8 +248,7 @@ const Login = () => {
               </form>
             </Form>
             
-            {/* Demo accounts section - always visible during development */}
-            {import.meta.env.DEV && (
+            {process.env.NODE_ENV === 'development' && (
               <div className="mt-4">
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="demo-accounts">
@@ -279,19 +260,50 @@ const Login = () => {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-2 p-2 bg-muted/50 rounded-md text-sm">
-                        {MOCK_USERS.map((user) => (
-                          <div key={user.email} className="flex justify-between">
-                            <span>{user.name} ({user.role}):</span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-6 text-xs" 
-                              onClick={() => fillMockUser(user.role)}
-                            >
-                              Use
-                            </Button>
-                          </div>
-                        ))}
+                        <div className="flex justify-between">
+                          <span>Consumer:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('consumer')}
+                          >
+                            Use
+                          </Button>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Retailer:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('retailer')}
+                          >
+                            Use
+                          </Button>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Logistics:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('logistics')}
+                          >
+                            Use
+                          </Button>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Admin:</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 text-xs" 
+                            onClick={() => fillMockUser('admin')}
+                          >
+                            Use
+                          </Button>
+                        </div>
                         <p className="text-xs text-muted-foreground mt-2">
                           Password for all accounts: password123
                         </p>

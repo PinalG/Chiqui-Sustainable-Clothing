@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   User,
@@ -50,9 +49,7 @@ export function useAuthMethods() {
             highContrast: false,
             largeText: false,
             reducedMotion: false,
-            screenReader: false,
-            colorBlindFriendly: false,
-            dyslexiaFriendly: false
+            screenReader: false
           },
           ...additionalData
         };
@@ -92,9 +89,7 @@ export function useAuthMethods() {
           highContrast: false,
           largeText: false,
           reducedMotion: false,
-          screenReader: false,
-          colorBlindFriendly: false,
-          dyslexiaFriendly: false
+          screenReader: false
         },
         ...additionalData
       };
@@ -130,25 +125,10 @@ export function useAuthMethods() {
           photoURL: null,
           role: mockUser.role,
           createdAt: Date.now(),
-          sustainabilityScore: mockUser.sustainabilityScore || 0,
+          sustainabilityScore: mockUser.sustainabilityScore,
           rewardsPoints: mockUser.rewardsPoints || 0,
           organizationName: mockUser.organizationName,
-          taxId: mockUser.taxId,
-          consentSettings: {
-            marketing: false,
-            cookies: true,
-            dataSharing: false,
-            lastUpdated: Date.now()
-          },
-          preferences: {
-            language: 'en',
-            highContrast: false,
-            largeText: false,
-            reducedMotion: false,
-            screenReader: false,
-            colorBlindFriendly: false,
-            dyslexiaFriendly: false
-          }
+          taxId: mockUser.taxId
         };
         
         toast.success("Signed in successfully");
@@ -179,22 +159,7 @@ export function useAuthMethods() {
           role: role,
           createdAt: Date.now(),
           sustainabilityScore: 50,
-          rewardsPoints: role === "consumer" ? 100 : 0,
-          consentSettings: {
-            marketing: false,
-            cookies: true,
-            dataSharing: false,
-            lastUpdated: Date.now()
-          },
-          preferences: {
-            language: 'en',
-            highContrast: false,
-            largeText: false,
-            reducedMotion: false,
-            screenReader: false,
-            colorBlindFriendly: false,
-            dyslexiaFriendly: false
-          }
+          rewardsPoints: role === "consumer" ? 100 : 0
         };
         
         toast.success("Signed in with Google successfully");
@@ -219,22 +184,7 @@ export function useAuthMethods() {
           role: role,
           createdAt: Date.now(),
           sustainabilityScore: 0,
-          rewardsPoints: role === "consumer" ? 100 : 0,
-          consentSettings: {
-            marketing: false,
-            cookies: true,
-            dataSharing: false,
-            lastUpdated: Date.now()
-          },
-          preferences: {
-            language: 'en',
-            highContrast: false,
-            largeText: false,
-            reducedMotion: false,
-            screenReader: false,
-            colorBlindFriendly: false,
-            dyslexiaFriendly: false
-          }
+          rewardsPoints: role === "consumer" ? 100 : 0
         };
         await setDoc(userDocRef, userData);
         toast.success("Signed in with Google successfully");

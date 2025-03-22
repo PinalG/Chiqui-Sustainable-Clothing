@@ -1,122 +1,88 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import analytics from '@/lib/analytics';
 import monitoring from '@/lib/monitoring';
 
 interface PerformanceContextType {
-  trackEvent: (category: string, action: string, label?: string, value?: any) => void;
-  trackError: (message: string, severity?: string) => void;
-  lastRenderTime: number;
-  componentRenderTimes: Record<string, number>;
-  recordComponentRender: (componentName: string, renderTime: number) => void;
+  trackEvent: (category: string, action: string, label?: string, value?: number) => void;
+  trackError: (error: Error | string, severity?: 'low' | 'medium' | 'high' | 'critical') => void;
+  trackMetric: (name: string, value: number, metadata?: Record<string, any>) => void;
+  isMonitoringInitialized: boolean;
 }
 
-const PerformanceContext = createContext<PerformanceContextType | undefined>(undefined);
+const PerformanceContext = createContext<PerformanceContextType | null>(null);
 
-export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
-  const location = useLocation();
-  const [lastRenderTime, setLastRenderTime] = useState(0);
-  const [componentRenderTimes, setComponentRenderTimes] = useState<Record<string, number>>({});
-
-  // Initialize analytics and monitoring
+export function PerformanceProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Initialize services without router dependencies
   useEffect(() => {
-    analytics.init();
-    monitoring.init();
+    if (isInitialized) return;
+    
+    try {
+      // Initialize analytics and monitoring with user ID if available
+      analytics.init(user?.uid);
+      monitoring.init(user?.uid);
+      
+      setIsInitialized(true);
+      
+      // Track page load performance
+      if (window.performance) {
+        const timing = window.performance.timing;
+        const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
+        
+        if (pageLoadTime > 0) {
+          monitoring.captureMetric('page_load_time', pageLoadTime);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to initialize performance monitoring:", error);
+    }
     
     return () => {
-      monitoring.shutdown();
+      try {
+        monitoring.shutdown();
+      } catch (error) {
+        console.error("Failed to shutdown monitoring:", error);
+      }
     };
-  }, []);
-
-  // Track route changes
-  useEffect(() => {
-    // Record route change time
-    const routeChangeTime = performance.now();
-    setLastRenderTime(routeChangeTime);
-    
-    // Track page view in analytics
-    analytics.trackPageView({
-      path: location.pathname,
-      title: 'Chiqui - Sustainable Fashion Platform',
-      referrer: document.referrer
-    });
-    
-    // Track route change as custom event
-    analytics.trackEvent({
-      category: 'navigation',
-      action: 'pageView',
-      label: location.pathname
-    });
-    
-    // Capture route change performance metric
-    monitoring.captureMetric('route_change_time', routeChangeTime);
-  }, [location.pathname]);
-
-  // Global error handler
-  useEffect(() => {
-    const handleGlobalError = (event: ErrorEvent) => {
-      monitoring.captureError(event.error || event.message, 'high', {
-        location: location.pathname,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Track error as event
-      analytics.trackEvent({
-        category: 'error',
-        action: 'runtime',
-        label: event.message
-      });
-    };
-
-    window.addEventListener('error', handleGlobalError);
-    return () => window.removeEventListener('error', handleGlobalError);
-  }, [location.pathname]);
-
-  // Track event wrapper
-  const trackEvent = (category: string, action: string, label?: string, value?: any) => {
-    analytics.trackEvent({ 
-      category, 
-      action, 
-      label, 
-      value 
-    });
+  }, [user?.uid, isInitialized]);
+  
+  // Utility functions
+  const trackEvent = (category: string, action: string, label?: string, value?: number) => {
+    analytics.trackEvent({ category, action, label, value });
   };
-
-  // Track error wrapper
-  const trackError = (message: string, severity: string = 'medium') => {
-    monitoring.captureError(message, severity as any);
+  
+  const trackError = (error: Error | string, severity: 'low' | 'medium' | 'high' | 'critical' = 'medium') => {
+    monitoring.captureError(error, severity);
   };
-
-  // Record component render time
-  const recordComponentRender = (componentName: string, renderTime: number) => {
-    setComponentRenderTimes(prev => ({
-      ...prev,
-      [componentName]: renderTime
-    }));
-    
-    monitoring.captureMetric(`component_render_${componentName}`, renderTime);
+  
+  const trackMetric = (name: string, value: number, metadata?: Record<string, any>) => {
+    monitoring.captureMetric(name, value, metadata);
   };
-
+  
   return (
     <PerformanceContext.Provider
       value={{
         trackEvent,
         trackError,
-        lastRenderTime,
-        componentRenderTimes,
-        recordComponentRender
+        trackMetric,
+        isMonitoringInitialized: isInitialized
       }}
     >
       {children}
     </PerformanceContext.Provider>
   );
-};
+}
 
-export const usePerformance = () => {
+export function usePerformance() {
   const context = useContext(PerformanceContext);
-  if (context === undefined) {
+  
+  if (!context) {
     throw new Error('usePerformance must be used within a PerformanceProvider');
   }
+  
   return context;
-};
+}

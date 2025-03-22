@@ -1,51 +1,54 @@
 
-import { useCallback, useEffect, useRef } from 'react';
-import { usePerformance } from '@/contexts/PerformanceContext';
-import monitoring from '@/lib/monitoring';
+import { useEffect, useRef } from "react";
+import { useLocation, useNavigationType } from "react-router-dom";
+import analytics from "@/lib/analytics";
+import monitoring from "@/lib/monitoring";
+import { usePerformance } from "@/contexts/PerformanceContext";
 
 export function useRouteTracking() {
-  const { trackEvent } = usePerformance();
-  const lastRouteRef = useRef<string>('');
-  const routeStartTimeRef = useRef<number>(0);
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  const { trackMetric, isMonitoringInitialized } = usePerformance();
+  const previousPathRef = useRef<string | null>(null);
   
-  const trackRouteChange = useCallback((path: string) => {
-    const currentTime = performance.now();
-    
-    // Track the time spent on the previous route if we have that data
-    if (lastRouteRef.current && routeStartTimeRef.current) {
-      const timeSpent = currentTime - routeStartTimeRef.current;
-      
-      // Track time spent on route
-      monitoring.captureMetric('time_on_route', timeSpent, {
-        route: lastRouteRef.current
-      });
-      
-      trackEvent(
-        'navigation',
-        'routeDuration',
-        lastRouteRef.current,
-        Math.round(timeSpent)
-      );
-    }
-    
-    // Update refs for the new route
-    lastRouteRef.current = path;
-    routeStartTimeRef.current = currentTime;
-  }, [trackEvent]);
-  
-  // Clean up when component unmounts
   useEffect(() => {
-    return () => {
-      const currentTime = performance.now();
-      if (lastRouteRef.current && routeStartTimeRef.current) {
-        const timeSpent = currentTime - routeStartTimeRef.current;
-        
-        monitoring.captureMetric('time_on_route', timeSpent, {
-          route: lastRouteRef.current
-        });
+    try {
+      const path = location.pathname + location.search;
+      
+      // Avoid duplicate tracking for the same path
+      if (previousPathRef.current === path) {
+        return;
       }
-    };
-  }, []);
-  
-  return { trackRouteChange };
+      
+      previousPathRef.current = path;
+      
+      // Only track if analytics and monitoring are properly initialized
+      if (isMonitoringInitialized) {
+        // Track page view in analytics
+        analytics.trackPageView({
+          path,
+          title: document.title,
+          referrer: document.referrer,
+        });
+        
+        // Track route change performance
+        if (window.performance) {
+          const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+          
+          if (navigationTiming) {
+            trackMetric('route_change_time', navigationTiming.duration, {
+              path,
+              navigationType,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to track route change:", error);
+      monitoring.captureError(error, 'medium', { 
+        context: 'route_tracking',
+        path: location.pathname
+      });
+    }
+  }, [location.pathname, location.search, navigationType, trackMetric, isMonitoringInitialized]);
 }
