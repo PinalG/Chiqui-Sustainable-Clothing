@@ -11,25 +11,48 @@ const SettingsPage = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
+      <h1 className="text-3xl font-bold mb-6" id="settings-heading">Account Settings</h1>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
-          <TabsTrigger value="accessibility" className="flex items-center justify-center">
-            <Eye className="mr-2 h-4 w-4" />
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab} 
+        className="w-full"
+        aria-labelledby="settings-heading"
+      >
+        <TabsList className="grid w-full max-w-md grid-cols-2 mb-8" aria-label="Settings categories">
+          <TabsTrigger 
+            value="accessibility" 
+            className="flex items-center justify-center"
+            aria-controls="accessibility-tab"
+          >
+            <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
             Accessibility
           </TabsTrigger>
-          <TabsTrigger value="privacy" className="flex items-center justify-center">
-            <Shield className="mr-2 h-4 w-4" />
+          <TabsTrigger 
+            value="privacy" 
+            className="flex items-center justify-center"
+            aria-controls="privacy-tab"
+          >
+            <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
             Privacy
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="accessibility">
+        <TabsContent 
+          value="accessibility" 
+          id="accessibility-tab"
+          role="tabpanel"
+          aria-labelledby="accessibility-tab"
+        >
           <AccessibilitySettings />
         </TabsContent>
         
-        <TabsContent value="privacy">
+        <TabsContent 
+          value="privacy" 
+          id="privacy-tab"
+          role="tabpanel"
+          aria-labelledby="privacy-tab"
+        >
           <PrivacySettings />
         </TabsContent>
       </Tabs>
@@ -47,6 +70,9 @@ const SettingsPage = () => {
           <li>Use <kbd className="px-1 py-0.5 bg-muted rounded">Esc</kbd> to close modals and dialogs</li>
           <li>Use arrow keys to navigate dropdown menus</li>
         </ul>
+        <p className="mt-4 text-sm">
+          <strong>Accessibility Shortcut:</strong> Press <kbd className="px-1 py-0.5 bg-muted rounded">Alt + Shift + A</kbd> from anywhere to quickly access accessibility settings.
+        </p>
       </Card>
     </div>
   );

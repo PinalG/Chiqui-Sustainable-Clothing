@@ -1,4 +1,3 @@
-
 import { User } from "firebase/auth";
 
 export type UserRole = "consumer" | "retailer" | "admin" | "logistics";
@@ -9,6 +8,8 @@ export interface UserPreferences {
   largeText: boolean;
   reducedMotion: boolean;
   screenReader: boolean;
+  colorBlindFriendly?: boolean;
+  dyslexiaFriendly?: boolean;
 }
 
 export interface UserData {

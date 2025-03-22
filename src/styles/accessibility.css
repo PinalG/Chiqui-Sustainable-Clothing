@@ -86,6 +86,42 @@ html:not(.reduced-motion) *:focus {
   transition: outline-offset 0.2s ease;
 }
 
+/* Skip navigation for keyboard users */
+.skip-nav {
+  background: rgb(255, 192, 203);
+  color: black;
+  padding: 0.5rem 1rem;
+  position: absolute;
+  transform: translateY(-100%);
+  transition: transform 0.2s;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  font-weight: bold;
+}
+
+.skip-nav:focus {
+  transform: translateY(0);
+}
+
+/* Improved interactive element focus states */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 3px solid rgb(255, 192, 203) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.3) !important;
+}
+
+/* Enhanced form label visibility */
+label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
 /* Optimized animations for different preferences */
 @media (prefers-reduced-motion) {
   * {
@@ -178,4 +214,26 @@ html:not(.reduced-motion) *:focus {
     content: " (" attr(href) ")";
     font-size: 90%;
   }
+}
+
+/* Color blindness accommodations */
+html.color-blind-friendly .text-soft-pink {
+  color: #0066CC !important; /* Use blue instead of pink for better color blindness support */
+}
+
+html.color-blind-friendly button[data-state="checked"] {
+  background-color: #0066CC !important;
+}
+
+/* Dyslexia-friendly text */
+html.dyslexia-friendly {
+  font-family: 'Open Sans', 'Arial', sans-serif !important;
+  line-height: 1.8 !important;
+  letter-spacing: 0.5px !important;
+  word-spacing: 3px !important;
+}
+
+html.dyslexia-friendly p,
+html.dyslexia-friendly li {
+  max-width: 75ch !important;
 }
