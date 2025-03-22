@@ -95,7 +95,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     setIsConnected(webSocketService.isConnected());
 
     // For development mode, we'll mock some WebSocket messages
-    if (import.meta.env.DEV && mockWebSocketMessages) {
+    if (process.env.NODE_ENV === 'development' && mockWebSocketMessages) {
       mockWebSocketMessages();
     }
 

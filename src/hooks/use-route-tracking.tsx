@@ -36,24 +36,19 @@ export function useRouteTracking() {
           const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
           
           if (navigationTiming) {
-            // Fix: Create a PerformanceMetric object to match the expected argument type
-            trackMetric({
-              name: 'route_change_time',
-              type: 'navigation',
-              value: navigationTiming.duration,
-              timestamp: Date.now(),
-              metadata: {
-                path,
-                navigationType,
-              }
+            trackMetric('route_change_time', navigationTiming.duration, {
+              path,
+              navigationType,
             });
           }
         }
       }
     } catch (error) {
       console.error("Failed to track route change:", error);
-      // Fix: Make sure captureError is called with the correct number of arguments
-      monitoring.captureError(error);
+      monitoring.captureError(error, 'medium', { 
+        context: 'route_tracking',
+        path: location.pathname
+      });
     }
   }, [location.pathname, location.search, navigationType, trackMetric, isMonitoringInitialized]);
 }
