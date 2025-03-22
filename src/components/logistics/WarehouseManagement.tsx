@@ -15,10 +15,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Package, Warehouse, Search, Filter, Clock, RefreshCw, Loader2, 
-  SortAsc, SortDesc, CheckCircle, AlertTriangle, XCircle 
+  SortAsc, SortDesc, CheckCircle, AlertTriangle, XCircle, 
+  WifiOff
 } from "lucide-react";
 import { WarehouseItem, getWarehouseInventory } from "@/services/logisticsService";
 import { motion } from "framer-motion";
+import { useWebSocketContext } from "@/contexts/WebSocketContext";
+import LiveInventoryUpdates from "./LiveInventoryUpdates";
 
 const warehouseLocations = [
   { id: "warehouse-1", name: "Los Angeles Warehouse", location: "Los Angeles, CA" },
@@ -34,6 +37,7 @@ const WarehouseManagement = () => {
   const [statusFilter, setStatusFilter] = useState<WarehouseItem['status'] | "all">("all");
   const [sortField, setSortField] = useState<"productId" | "quantity" | "lastUpdated">("lastUpdated");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const { isConnected, subscribe } = useWebSocketContext();
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -51,6 +55,45 @@ const WarehouseManagement = () => {
 
     fetchInventory();
   }, [selectedWarehouse]);
+
+  // Subscribe to real-time inventory updates
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const unsubscribe = subscribe<WarehouseItem>('inventory_update', (update) => {
+      setInventory(prev => {
+        // Find if the item already exists in our inventory
+        const itemIndex = prev.findIndex(item => 
+          item.productId === update.productId && 
+          item.warehouseId === update.warehouseId
+        );
+
+        // Create a copy of the previous inventory
+        const newInventory = [...prev];
+
+        if (itemIndex >= 0) {
+          // Update existing item with new quantity, status, etc.
+          newInventory[itemIndex] = {
+            ...newInventory[itemIndex],
+            quantity: update.quantity,
+            status: update.status,
+            lastUpdated: update.lastUpdated
+          };
+        } else {
+          // Add the new item if it's not filtered out by warehouse
+          if (selectedWarehouse === "all" || selectedWarehouse === update.warehouseId) {
+            newInventory.push(update);
+          }
+        }
+
+        return newInventory;
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isConnected, subscribe, selectedWarehouse]);
 
   const refreshInventory = async () => {
     setLoading(true);
@@ -171,6 +214,20 @@ const WarehouseManagement = () => {
 
   return (
     <div className="space-y-6">
+      {/* Real-time connection indicator */}
+      {!isConnected && (
+        <div className="flex items-center justify-between p-3 mb-4 bg-amber-50 border border-amber-200 rounded-md">
+          <div className="flex items-center">
+            <WifiOff className="h-5 w-5 text-amber-500 mr-2" />
+            <p className="text-amber-700">Real-time updates unavailable</p>
+          </div>
+          <Button variant="outline" size="sm">Reconnect</Button>
+        </div>
+      )}
+
+      {/* Live updates component */}
+      <LiveInventoryUpdates />
+
       <Tabs defaultValue="inventory">
         <TabsList className="grid grid-cols-2 w-full max-w-md mb-4">
           <TabsTrigger value="inventory" className="flex items-center gap-2">
