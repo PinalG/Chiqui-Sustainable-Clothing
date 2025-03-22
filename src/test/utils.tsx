@@ -10,7 +10,7 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <BrowserRouter>
       <ThemeProvider defaultTheme="light" storageKey="test-theme">
-        <WebSocketProvider autoConnect={false}>
+        <WebSocketProvider>
           {children}
         </WebSocketProvider>
       </ThemeProvider>
