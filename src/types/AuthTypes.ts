@@ -9,6 +9,8 @@ export interface UserPreferences {
   largeText: boolean;
   reducedMotion: boolean;
   screenReader: boolean;
+  colorBlindFriendly: boolean;
+  dyslexiaFriendly: boolean;
 }
 
 export interface UserData {
@@ -56,24 +58,40 @@ export const MOCK_USERS = [
     email: "consumer@example.com",
     password: "password123",
     name: "Sarah Consumer",
-    role: "consumer" as UserRole
+    role: "consumer" as UserRole,
+    sustainabilityScore: 85,
+    rewardsPoints: 250,
+    organizationName: undefined,
+    taxId: undefined
   },
   {
     email: "retailer@example.com",
     password: "password123",
     name: "John Retailer",
-    role: "retailer" as UserRole
+    role: "retailer" as UserRole,
+    sustainabilityScore: 90,
+    rewardsPoints: 0,
+    organizationName: "Eco Retail Co.",
+    taxId: "RT-123456"
   },
   {
     email: "logistics@example.com",
     password: "password123",
     name: "Mike Logistics",
-    role: "logistics" as UserRole
+    role: "logistics" as UserRole,
+    sustainabilityScore: 75,
+    rewardsPoints: 0,
+    organizationName: "Green Logistics Inc.",
+    taxId: "LG-654321"
   },
   {
     email: "admin@example.com",
     password: "password123",
     name: "Admin User",
-    role: "admin" as UserRole
+    role: "admin" as UserRole,
+    sustainabilityScore: 100,
+    rewardsPoints: 0,
+    organizationName: "ACDRP Admin",
+    taxId: "AD-111111"
   }
 ];

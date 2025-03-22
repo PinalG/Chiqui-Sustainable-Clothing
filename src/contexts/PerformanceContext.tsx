@@ -1,12 +1,12 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAnalytics } from '@/hooks/use-analytics';
-import { useRouteTracking } from '@/hooks/use-route-tracking';
-import { useMonitoring } from '@/hooks/use-monitoring';
+import analytics from '@/lib/analytics';
+import monitoring from '@/lib/monitoring';
 
 interface PerformanceContextType {
   trackEvent: (category: string, action: string, label?: string, value?: any) => void;
+  trackError: (message: string, severity?: string) => void;
   lastRenderTime: number;
   componentRenderTimes: Record<string, number>;
   recordComponentRender: (componentName: string, renderTime: number) => void;
@@ -15,12 +15,19 @@ interface PerformanceContextType {
 const PerformanceContext = createContext<PerformanceContextType | undefined>(undefined);
 
 export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
-  const { trackEvent, trackPageview } = useAnalytics();
-  const { trackRouteChange } = useRouteTracking();
-  const { logError } = useMonitoring();
   const location = useLocation();
   const [lastRenderTime, setLastRenderTime] = useState(0);
   const [componentRenderTimes, setComponentRenderTimes] = useState<Record<string, number>>({});
+
+  // Initialize analytics and monitoring
+  useEffect(() => {
+    analytics.init();
+    monitoring.init();
+    
+    return () => {
+      monitoring.shutdown();
+    };
+  }, []);
 
   // Track route changes
   useEffect(() => {
@@ -29,41 +36,57 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
     setLastRenderTime(routeChangeTime);
     
     // Track page view in analytics
-    trackPageview({
+    analytics.trackPageView({
       path: location.pathname,
       title: 'Chiqui - Sustainable Fashion Platform',
       referrer: document.referrer
     });
     
     // Track route change as custom event
-    trackEvent(
-      'navigation',
-      'pageView',
-      location.pathname
-    );
+    analytics.trackEvent({
+      category: 'navigation',
+      action: 'pageView',
+      label: location.pathname
+    });
     
-    // Call custom route change tracking
-    trackRouteChange(location.pathname);
-  }, [location.pathname, trackPageview, trackEvent, trackRouteChange]);
+    // Capture route change performance metric
+    monitoring.captureMetric('route_change_time', routeChangeTime);
+  }, [location.pathname]);
 
   // Global error handler
   useEffect(() => {
     const handleGlobalError = (event: ErrorEvent) => {
-      logError({
-        message: event.message,
-        stack: event.error?.stack,
-        type: 'runtime',
+      monitoring.captureError(event.error || event.message, 'high', {
         location: location.pathname,
         timestamp: new Date().toISOString()
       });
       
       // Track error as event
-      trackEvent('error', 'runtime', event.message);
+      analytics.trackEvent({
+        category: 'error',
+        action: 'runtime',
+        label: event.message
+      });
     };
 
     window.addEventListener('error', handleGlobalError);
     return () => window.removeEventListener('error', handleGlobalError);
-  }, [logError, trackEvent, location.pathname]);
+  }, [location.pathname]);
+
+  // Track event wrapper
+  const trackEvent = (category: string, action: string, label?: string, value?: any) => {
+    analytics.trackEvent({ 
+      category, 
+      action, 
+      label, 
+      value 
+    });
+  };
+
+  // Track error wrapper
+  const trackError = (message: string, severity: string = 'medium') => {
+    monitoring.captureError(message, severity as any);
+  };
 
   // Record component render time
   const recordComponentRender = (componentName: string, renderTime: number) => {
@@ -71,12 +94,15 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       ...prev,
       [componentName]: renderTime
     }));
+    
+    monitoring.captureMetric(`component_render_${componentName}`, renderTime);
   };
 
   return (
     <PerformanceContext.Provider
       value={{
         trackEvent,
+        trackError,
         lastRenderTime,
         componentRenderTimes,
         recordComponentRender

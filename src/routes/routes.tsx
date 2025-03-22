@@ -1,5 +1,5 @@
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
@@ -37,8 +37,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<Index />} />
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Index />} />
         
         {/* Auth Routes */}
         <Route path="auth">
