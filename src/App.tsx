@@ -77,15 +77,15 @@ const App = () => {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <I18nProvider>
-          <DidAuthProvider>
-            <PerformanceProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <PerformanceProvider>
+          <AuthProvider>
+            <I18nProvider>
+              <DidAuthProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
                   {/* Skip to content link for keyboard users */}
                   <a href="#main-content" className="skip-nav">
                     Skip to main content
@@ -145,13 +145,13 @@ const App = () => {
                       </Routes>
                     </main>
                   </Suspense>
-                </BrowserRouter>
-              </TooltipProvider>
-            </PerformanceProvider>
-          </DidAuthProvider>
-        </I18nProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+                </TooltipProvider>
+              </DidAuthProvider>
+            </I18nProvider>
+          </AuthProvider>
+        </PerformanceProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 };
 

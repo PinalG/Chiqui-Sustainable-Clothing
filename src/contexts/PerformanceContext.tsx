@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import analytics from '@/lib/analytics';
 import monitoring from '@/lib/monitoring';
 
@@ -14,17 +13,17 @@ interface PerformanceContextType {
 const PerformanceContext = createContext<PerformanceContextType | null>(null);
 
 export function PerformanceProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Initialize services without router dependencies
+  // Initialize services without immediate auth dependency
   useEffect(() => {
     if (isInitialized) return;
     
     try {
-      // Initialize analytics and monitoring with user ID if available
-      analytics.init(user?.uid);
-      monitoring.init(user?.uid);
+      // Initialize analytics and monitoring without user ID initially
+      // User ID can be added later when available
+      analytics.init();
+      monitoring.init();
       
       setIsInitialized(true);
       
@@ -48,7 +47,20 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
         console.error("Failed to shutdown monitoring:", error);
       }
     };
-  }, [user?.uid, isInitialized]);
+  }, [isInitialized]);
+  
+  // Later, we can update the user context when auth is available
+  useEffect(() => {
+    // This can be implemented later to associate analytics with user
+    // We'll add this after providers are properly organized
+    const updateUserContext = async () => {
+      // Implementation can be added later when needed
+    };
+    
+    if (isInitialized) {
+      updateUserContext().catch(console.error);
+    }
+  }, [isInitialized]);
   
   // Utility functions
   const trackEvent = (category: string, action: string, label?: string, value?: number) => {
