@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import RouteChangeTracker from '@/components/performance/RouteChangeTracker';
-import routes from '@/routes/routes';
+import { publicRoutes, protectedRoutes, roleSpecificRoutes, adminRoutes, errorRoutes } from '@/routes/routes';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
@@ -17,12 +17,15 @@ function App() {
     }
   }, []);
 
+  // Define all routes by combining route groups
+  const allRoutes = [...publicRoutes, ...protectedRoutes, ...roleSpecificRoutes, ...adminRoutes, ...errorRoutes];
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="chiqui-theme">
       <WebSocketProvider>
         <RouteChangeTracker />
         <Routes location={location}>
-          {routes.map((route) => (
+          {allRoutes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element}>
               {route.children &&
                 route.children.map((child) => (

@@ -1,49 +1,77 @@
 
-import { useState, useEffect, useRef, RefObject } from "react";
+import { useEffect, useRef, useState, useCallback } from 'react';
 
-interface UseIntersectionObserverProps {
-  threshold?: number;
-  root?: HTMLElement | null;
+interface UseIntersectionObserverOptions {
+  root?: Element | null;
   rootMargin?: string;
-  freezeOnceVisible?: boolean;
+  threshold?: number | number[];
+  triggerOnce?: boolean;
+  skip?: boolean;
 }
 
-export function useIntersectionObserver({
-  threshold = 0.1,
+export function useIntersectionObserver<T extends Element>({
   root = null,
-  rootMargin = "0px",
-  freezeOnceVisible = true,
-}: UseIntersectionObserverProps = {}): [boolean, RefObject<HTMLElement>] {
-  const [isVisible, setIsVisible] = useState(false);
-  const elementRef = useRef<HTMLElement>(null);
-  
+  rootMargin = '0px',
+  threshold = 0,
+  triggerOnce = false,
+  skip = false,
+}: UseIntersectionObserverOptions = {}) {
+  const [entry, setEntry] = useState<IntersectionObserverEntry | null>(null);
+  const [isIntersecting, setIsIntersecting] = useState(false);
+  const previouslyIntersected = useRef(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const targetRef = useRef<T | null>(null);
+
+  const setRef = useCallback((node: T | null) => {
+    if (targetRef.current) {
+      observerRef.current?.unobserve(targetRef.current);
+    }
+
+    targetRef.current = node;
+
+    if (node && observerRef.current && !skip) {
+      observerRef.current.observe(node);
+    }
+  }, [skip]);
+
   useEffect(() => {
-    const element = elementRef.current;
-    if (!element) return;
+    if (skip) return;
     
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const isElementVisible = entry.isIntersecting;
-        if (isElementVisible) {
-          setIsVisible(true);
-          if (freezeOnceVisible) {
-            observer.unobserve(element);
+        setEntry(entry);
+        
+        // Check if element is intersecting
+        const isElementIntersecting = entry.isIntersecting;
+        
+        // If triggerOnce is true, only set to true if hasn't been intersected before
+        if (triggerOnce) {
+          if (isElementIntersecting && !previouslyIntersected.current) {
+            setIsIntersecting(true);
+            previouslyIntersected.current = true;
           }
-        } else if (!freezeOnceVisible) {
-          setIsVisible(false);
+        } else {
+          setIsIntersecting(isElementIntersecting);
         }
       },
-      { threshold, root, rootMargin }
+      { root, rootMargin, threshold }
     );
 
-    observer.observe(element);
-    
+    observerRef.current = observer;
+
+    if (targetRef.current) {
+      observer.observe(targetRef.current);
+    }
+
     return () => {
-      if (element) {
-        observer.unobserve(element);
-      }
+      observer.disconnect();
+      observerRef.current = null;
     };
-  }, [threshold, root, rootMargin, freezeOnceVisible]);
-  
-  return [isVisible, elementRef as RefObject<HTMLElement>];
+  }, [root, rootMargin, threshold, triggerOnce, skip]);
+
+  return {
+    ref: setRef,
+    entry,
+    isIntersecting,
+  };
 }
