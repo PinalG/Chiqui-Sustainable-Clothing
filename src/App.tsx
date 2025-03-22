@@ -6,6 +6,7 @@ import { publicRoutes, protectedRoutes, roleSpecificRoutes, adminRoutes, errorRo
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import './App.css';
 
 // Define the type for route objects
@@ -29,19 +30,21 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="chiqui-theme">
-      <WebSocketProvider>
-        <RouteChangeTracker />
-        <Routes location={location}>
-          {allRoutes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element}>
-              {route.children?.map((child) => (
-                <Route key={child.path} path={child.path} element={child.element} />
-              ))}
-            </Route>
-          ))}
-        </Routes>
-        <Toaster />
-      </WebSocketProvider>
+      <AuthProvider>
+        <WebSocketProvider>
+          <RouteChangeTracker />
+          <Routes location={location}>
+            {allRoutes.map((route) => (
+              <Route key={route.path} path={route.path} element={route.element}>
+                {route.children?.map((child) => (
+                  <Route key={child.path} path={child.path} element={child.element} />
+                ))}
+              </Route>
+            ))}
+          </Routes>
+          <Toaster />
+        </WebSocketProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
