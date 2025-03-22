@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { usePerformanceContext } from '@/contexts/PerformanceContext';
+import { usePerformanceContext, PerformanceMetric } from '@/contexts/PerformanceContext';
 
 export type PerformanceMetricType = 
   | 'pageLoad' 
@@ -10,14 +10,6 @@ export type PerformanceMetricType =
   | 'imageLoad' 
   | 'interaction'
   | 'custom';
-
-export interface PerformanceMetric {
-  name: string;
-  type: PerformanceMetricType;
-  value: number;
-  timestamp: number;
-  metadata?: Record<string, any>;
-}
 
 interface UsePerformanceOptions {
   enableAutoPageTracking?: boolean;
@@ -156,33 +148,33 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
     if (shouldTrackSession()) {
       // Modern browsers only - use dynamic import
       if (trackLCP || trackFID || trackCLS || trackFCP || trackTTFB) {
-        import('web-vitals').then(({ getLCP, getFID, getCLS, getFCP, getTTFB }) => {
-          if (trackLCP) {
-            getLCP((metric) => {
+        import('web-vitals').then((webVitals) => {
+          if (trackLCP && webVitals.onLCP) {
+            webVitals.onLCP((metric) => {
               trackCustomMetric('lcp', metric.value, { page: location.pathname });
             });
           }
           
-          if (trackFID) {
-            getFID((metric) => {
+          if (trackFID && webVitals.onFID) {
+            webVitals.onFID((metric) => {
               trackCustomMetric('fid', metric.value, { page: location.pathname });
             });
           }
           
-          if (trackCLS) {
-            getCLS((metric) => {
+          if (trackCLS && webVitals.onCLS) {
+            webVitals.onCLS((metric) => {
               trackCustomMetric('cls', metric.value, { page: location.pathname });
             });
           }
           
-          if (trackFCP) {
-            getFCP((metric) => {
+          if (trackFCP && webVitals.onFCP) {
+            webVitals.onFCP((metric) => {
               trackCustomMetric('fcp', metric.value, { page: location.pathname });
             });
           }
           
-          if (trackTTFB) {
-            getTTFB((metric) => {
+          if (trackTTFB && webVitals.onTTFB) {
+            webVitals.onTTFB((metric) => {
               trackCustomMetric('ttfb', metric.value, { page: location.pathname });
             });
           }

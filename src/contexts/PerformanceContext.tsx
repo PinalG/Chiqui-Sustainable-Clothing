@@ -4,10 +4,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import analytics from '@/lib/analytics';
 import monitoring from '@/lib/monitoring';
 
+export interface PerformanceMetric {
+  name: string;
+  type: string;
+  value: number;
+  timestamp: number;
+  metadata?: Record<string, any>;
+}
+
 interface PerformanceContextType {
   trackEvent: (category: string, action: string, label?: string, value?: number) => void;
   trackError: (error: Error | string, severity?: 'low' | 'medium' | 'high' | 'critical') => void;
-  trackMetric: (name: string, value: number, metadata?: Record<string, any>) => void;
+  trackMetric: (metric: PerformanceMetric) => void;
+  trackCustomMetric: (name: string, value: number, metadata?: Record<string, any>) => void;
   isMonitoringInitialized: boolean;
 }
 
@@ -59,7 +68,11 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
     monitoring.captureError(error, severity);
   };
   
-  const trackMetric = (name: string, value: number, metadata?: Record<string, any>) => {
+  const trackMetric = (metric: PerformanceMetric) => {
+    monitoring.captureMetric(metric.name, metric.value, metric.metadata);
+  };
+  
+  const trackCustomMetric = (name: string, value: number, metadata?: Record<string, any>) => {
     monitoring.captureMetric(name, value, metadata);
   };
   
@@ -69,6 +82,7 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
         trackEvent,
         trackError,
         trackMetric,
+        trackCustomMetric,
         isMonitoringInitialized: isInitialized
       }}
     >
@@ -77,12 +91,16 @@ export function PerformanceProvider({ children }: { children: React.ReactNode })
   );
 }
 
-export function usePerformance() {
+export function usePerformanceContext() {
   const context = useContext(PerformanceContext);
   
   if (!context) {
-    throw new Error('usePerformance must be used within a PerformanceProvider');
+    throw new Error('usePerformanceContext must be used within a PerformanceProvider');
   }
   
   return context;
+}
+
+export function usePerformance() {
+  return usePerformanceContext();
 }

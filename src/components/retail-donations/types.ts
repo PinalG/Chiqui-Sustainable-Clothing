@@ -8,6 +8,7 @@ export interface DonationItem {
   quantity: number;
   value: number;
   image?: string;
+  imageUrl?: string; // Added to support tests
   condition?: string;
   conditionScore?: number;
   sustainabilityScore?: number;
