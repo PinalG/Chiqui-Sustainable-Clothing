@@ -1,3 +1,4 @@
+
 // WebSocket connection management for real-time updates
 // Handles auto-reconnection, message parsing, and event subscription
 
@@ -27,7 +28,7 @@ export class WebSocketService {
   constructor(url: string) {
     // In development, connect to a local WebSocket server
     // In production, use the deployed WebSocket endpoint
-    this.url = process.env.NODE_ENV === 'development' 
+    this.url = import.meta.env.DEV 
       ? 'ws://localhost:8080' 
       : url;
   }
@@ -255,11 +256,11 @@ export class WebSocketService {
 }
 
 // Create a singleton instance for the application
-const wsUrl = process.env.REACT_APP_WEBSOCKET_URL || 'wss://api.chiqui-platform.com/ws';
+const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'wss://api.chiqui-platform.com/ws';
 export const webSocketService = new WebSocketService(wsUrl);
 
 // For mocking in development
-export const mockWebSocketMessages = process.env.NODE_ENV === 'development' ? () => {
+export const mockWebSocketMessages = import.meta.env.DEV ? () => {
   setInterval(() => {
     const handlers = webSocketService.subscribe('inventory_update', () => {});
     const mockData = {

@@ -21,7 +21,7 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // For development mode, we'll use mock authentication and emulators
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   // Set up auth emulator
   try {
     connectAuthEmulator(auth, "http://localhost:9099");
@@ -37,9 +37,9 @@ if (process.env.NODE_ENV === 'development') {
 
 // Gemini API key - this would normally be secured in a backend environment
 // For development purposes, we use a mock key
-export const GEMINI_API_KEY = process.env.NODE_ENV === 'development' 
+export const GEMINI_API_KEY = import.meta.env.DEV
   ? "GEMINI_MOCK_KEY_FOR_DEVELOPMENT" 
-  : process.env.GEMINI_API_KEY || ""; 
+  : import.meta.env.VITE_GEMINI_API_KEY || ""; 
 
 // Gemini API endpoint - using the latest Gemini 2.0 pro vision version
 export const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent";
