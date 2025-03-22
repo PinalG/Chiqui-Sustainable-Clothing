@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import QrCodeScanner from './QrCodeScanner';
 
 interface QrItem {
   id: string;
@@ -14,11 +13,44 @@ interface QrCodeWorkflowProps {
   initialItem?: QrItem;
 }
 
-// Define the prop types for QrCodeScanner
-interface QrCodeScannerProps {
+// Define the QrCodeScanner component that's used within this workflow
+const QrCodeScanner: React.FC<{
   onScan: (data: string) => void;
   onError: (error: Error) => void;
-}
+}> = ({ onScan, onError }) => {
+  // Simple placeholder implementation for the scanner
+  // In a real app, this would use camera access and QR code detection
+  return (
+    <div className="bg-gray-100 p-6 rounded-md text-center">
+      <div className="w-48 h-48 mx-auto border-2 border-dashed border-gray-400 flex items-center justify-center mb-4">
+        <span className="text-gray-500">Scanner View</span>
+      </div>
+      <p className="text-sm text-gray-500 mb-4">
+        Scanning for QR codes...
+      </p>
+      {/* For demo/test purposes, add a button to simulate a scan */}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={() => onScan(JSON.stringify({
+          id: "DEMO123",
+          name: "Demo Item",
+          type: "Clothing"
+        }))}
+        className="mr-2"
+      >
+        Simulate Scan
+      </Button>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={() => onError(new Error("Demo error"))}
+      >
+        Simulate Error
+      </Button>
+    </div>
+  );
+};
 
 const QrCodeWorkflow: React.FC<QrCodeWorkflowProps> = ({ initialItem }) => {
   const [isScannerActive, setIsScannerActive] = useState(false);
