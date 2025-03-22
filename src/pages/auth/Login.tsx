@@ -13,7 +13,34 @@ import { Loader2, Info, AlertCircle, Cookie } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MOCK_USERS } from "@/types/AuthTypes";
+
+// Define mock users for development
+const MOCK_USERS = [
+  {
+    email: "consumer@example.com",
+    password: "password123",
+    name: "Sarah Consumer",
+    role: "consumer"
+  },
+  {
+    email: "retailer@example.com",
+    password: "password123",
+    name: "John Retailer",
+    role: "retailer"
+  },
+  {
+    email: "logistics@example.com",
+    password: "password123",
+    name: "Mike Logistics",
+    role: "logistics"
+  },
+  {
+    email: "admin@example.com",
+    password: "password123",
+    name: "Admin User",
+    role: "admin"
+  }
+];
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
