@@ -29,7 +29,7 @@ function App() {
           <Routes location={location}>
             {allRoutes.map((route) => (
               <Route key={route.path} path={route.path} element={route.element}>
-                {route.children?.map((child) => (
+                {route.children && route.children.map((child) => (
                   <Route key={child.path} path={child.path} element={child.element} />
                 ))}
               </Route>

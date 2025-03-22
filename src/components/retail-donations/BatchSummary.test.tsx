@@ -32,6 +32,7 @@ describe('BatchSummary', () => {
       quantity: 5,
       value: 100,
       imageUrl: '',
+      status: "registered"
     },
     {
       id: '2',
@@ -41,6 +42,7 @@ describe('BatchSummary', () => {
       quantity: 3,
       value: 150,
       imageUrl: '',
+      status: "registered"
     },
   ];
 

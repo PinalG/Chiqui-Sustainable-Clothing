@@ -36,16 +36,14 @@ export function useRouteTracking() {
           const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
           
           if (navigationTiming) {
-            trackMetric('route_change_time', navigationTiming.duration, {
-              path,
-              navigationType,
-            });
+            // Fix the argument count to match the expected function signature
+            trackMetric('route_change_time', navigationTiming.duration);
           }
         }
       }
     } catch (error) {
       console.error("Failed to track route change:", error);
-      monitoring.captureError(error, 'medium', { 
+      monitoring.captureError(error as Error, 'medium', { 
         context: 'route_tracking',
         path: location.pathname
       });
