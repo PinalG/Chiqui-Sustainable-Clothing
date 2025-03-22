@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,8 +20,7 @@ import {
   Music,
   PlusCircle,
   MessageSquareShare,
-  ExternalLink,
-  WhatsApp
+  ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -80,7 +78,6 @@ export const SocialSharing = () => {
         shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
         break;
       case "Instagram":
-        // Instagram doesn't have a direct web share API, so we show instructions
         toast({
           title: "Instagram Sharing",
           description: "To share on Instagram, save the image and upload it via the Instagram app",
@@ -125,16 +122,14 @@ export const SocialSharing = () => {
       window.open(shareLink, "_blank");
     }
     
-    // Track the share event
     analytics.trackEvent({
       category: "Social",
       action: "Share",
       label: platform,
     });
     
-    // Track sustainability impact of sharing
     analytics.trackSustainabilityImpact({
-      co2Saved: 0.5, // Symbolic CO2 impact of digital sharing vs physical marketing
+      co2Saved: 0.5,
     });
     
     toast({
@@ -177,8 +172,6 @@ export const SocialSharing = () => {
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real app, this would upload the image to storage
-      // For now, we'll just show a success message
       toast({
         title: "Image uploaded!",
         description: "Your image has been uploaded and is ready to share.",
@@ -303,7 +296,6 @@ export const SocialSharing = () => {
                   </div>
                 </div>
                 
-                {/* Primary sharing platforms */}
                 <div className="flex flex-wrap gap-2">
                   <Button
                     onClick={() => handleShare("Facebook")}
@@ -328,7 +320,6 @@ export const SocialSharing = () => {
                   </Button>
                 </div>
                 
-                {/* Secondary sharing platforms */}
                 <div className="flex flex-wrap gap-2">
                   <Button
                     onClick={() => handleShare("LinkedIn")}
@@ -353,7 +344,6 @@ export const SocialSharing = () => {
                   </Button>
                 </div>
                 
-                {/* Native share button */}
                 <div className="mt-3">
                   <Button
                     onClick={handleNativeShare}
