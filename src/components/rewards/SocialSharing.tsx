@@ -19,7 +19,10 @@ import {
   Camera,
   Globe,
   Music,
-  PlusCircle
+  PlusCircle,
+  MessageSquareShare,
+  ExternalLink,
+  WhatsApp
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -88,6 +91,33 @@ export const SocialSharing = () => {
         break;
       case "Email":
         shareLink = `mailto:?subject=Check out Chiqui&body=${encodeURIComponent(shareText + " " + shareUrl)}`;
+        break;
+      case "WhatsApp":
+        shareLink = `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
+        break;
+      case "Messenger":
+        shareLink = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=123456789&redirect_uri=${encodeURIComponent(window.location.href)}`;
+        break;
+      case "Pinterest":
+        shareLink = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(shareUrl)}&description=${encodeURIComponent(shareText)}`;
+        break;
+      case "NativeShare":
+        if (navigator.share) {
+          navigator.share({
+            title: 'Chiqui Sustainable Fashion',
+            text: shareText,
+            url: shareUrl,
+          })
+          .then(() => console.log('Successful share'))
+          .catch((error) => console.log('Error sharing:', error));
+          return;
+        } else {
+          toast({
+            title: "Native Sharing Not Available",
+            description: "Your browser doesn't support native sharing. Please use one of the other options.",
+          });
+          return;
+        }
         break;
     }
     
@@ -158,6 +188,37 @@ export const SocialSharing = () => {
         category: "Social",
         action: "Upload Image",
       });
+    }
+  };
+
+  const handleNativeShare = () => {
+    try {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Chiqui Sustainable Fashion',
+          text: shareText,
+          url: "https://chiqui-app.com/share/" + Math.random().toString(36).substring(2, 8),
+        })
+        .then(() => {
+          analytics.trackEvent({
+            category: "Social",
+            action: "Native Share",
+          });
+          
+          toast({
+            title: "Shared successfully!",
+            description: "Your content has been shared. You earned 10 points!",
+          });
+        })
+        .catch((error) => console.log('Error sharing:', error));
+      } else {
+        toast({
+          title: "Native Sharing Not Available",
+          description: "Your browser doesn't support native sharing. Please use one of the other options.",
+        });
+      }
+    } catch (err) {
+      console.error("Native sharing error:", err);
     }
   };
 
@@ -242,6 +303,7 @@ export const SocialSharing = () => {
                   </div>
                 </div>
                 
+                {/* Primary sharing platforms */}
                 <div className="flex flex-wrap gap-2">
                   <Button
                     onClick={() => handleShare("Facebook")}
@@ -266,6 +328,7 @@ export const SocialSharing = () => {
                   </Button>
                 </div>
                 
+                {/* Secondary sharing platforms */}
                 <div className="flex flex-wrap gap-2">
                   <Button
                     onClick={() => handleShare("LinkedIn")}
@@ -275,11 +338,29 @@ export const SocialSharing = () => {
                     LinkedIn
                   </Button>
                   <Button
+                    onClick={() => handleShare("WhatsApp")}
+                    className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90"
+                  >
+                    <MessageSquareShare className="mr-2 h-4 w-4" />
+                    WhatsApp
+                  </Button>
+                  <Button
                     onClick={() => handleShare("Email")}
                     className="flex-1 bg-[#B23121] hover:bg-[#B23121]/90"
                   >
                     <Mail className="mr-2 h-4 w-4" />
                     Email
+                  </Button>
+                </div>
+                
+                {/* Native share button */}
+                <div className="mt-3">
+                  <Button
+                    onClick={handleNativeShare}
+                    className="w-full bg-gradient-to-r from-soft-pink to-soft-pink/70 hover:opacity-90"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Share on Device
                   </Button>
                 </div>
                 

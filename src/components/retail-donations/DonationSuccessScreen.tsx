@@ -1,8 +1,19 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, Share2, Twitter, Facebook, Linkedin, Copy, Check } from "lucide-react";
+import { 
+  CheckCircle2, 
+  Share2, 
+  Twitter, 
+  Facebook, 
+  Linkedin, 
+  Copy, 
+  Check, 
+  MessageSquareShare, 
+  ExternalLink,
+  Mail
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { 
   generateShareableDonationSummary, 
@@ -12,6 +23,7 @@ import {
 } from "./donationUtils";
 import { useToast } from "@/hooks/use-toast";
 import analytics from "@/lib/analytics";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface DonationSuccessScreenProps {
   batchId: string;
@@ -34,6 +46,7 @@ const DonationSuccessScreen = ({
 }: DonationSuccessScreenProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   
   // Generate sharing content
   const shareText = generateShareableDonationSummary(
@@ -65,6 +78,12 @@ const DonationSuccessScreen = ({
       case "linkedin":
         shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&summary=${encodeURIComponent(shareText)}`;
         break;
+      case "whatsapp":
+        shareLink = `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
+        break;
+      case "email":
+        shareLink = `mailto:?subject=Paper Donation with Chiqui&body=${encodeURIComponent(shareText + " " + shareUrl)}`;
+        break;
     }
     
     if (shareLink) {
@@ -81,6 +100,38 @@ const DonationSuccessScreen = ({
         title: "Shared successfully!",
         description: `Your donation has been shared on ${platform}.`,
       });
+    }
+  };
+  
+  // Handle native sharing
+  const handleNativeShare = () => {
+    try {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Chiqui Paper Donation',
+          text: shareText,
+          url: generateSharingLink(batchId, 'native'),
+        })
+        .then(() => {
+          analytics.trackEvent({
+            category: "Donation",
+            action: "Native Share",
+          });
+          
+          toast({
+            title: "Shared successfully!",
+            description: "Your donation has been shared.",
+          });
+        })
+        .catch((error) => console.log('Error sharing:', error));
+      } else {
+        toast({
+          title: "Native Sharing Not Available",
+          description: "Your browser doesn't support native sharing. Please use one of the other options.",
+        });
+      }
+    } catch (err) {
+      console.error("Native sharing error:", err);
     }
   };
   
@@ -116,7 +167,7 @@ const DonationSuccessScreen = ({
   };
   
   // Track donation success on component mount
-  useState(() => {
+  useEffect(() => {
     analytics.trackEvent({
       category: "Donation",
       action: "Donation Success",
@@ -125,7 +176,7 @@ const DonationSuccessScreen = ({
     });
     
     trackImpact();
-  });
+  }, [batchId, taxBenefit, storageBenefit]);
 
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -196,6 +247,23 @@ const DonationSuccessScreen = ({
               <Linkedin className="mr-2 h-4 w-4" />
               LinkedIn
             </Button>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
+            <Button
+              onClick={() => handleShare("whatsapp")}
+              className="bg-[#25D366] hover:bg-[#25D366]/90"
+            >
+              <MessageSquareShare className="mr-2 h-4 w-4" />
+              WhatsApp
+            </Button>
+            <Button
+              onClick={() => handleShare("email")}
+              className="bg-[#B23121] hover:bg-[#B23121]/90"
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              Email
+            </Button>
             <Button variant="outline" onClick={copyToClipboard}>
               {copied ? (
                 <>
@@ -210,6 +278,23 @@ const DonationSuccessScreen = ({
               )}
             </Button>
           </div>
+          
+          <Button
+            onClick={handleNativeShare}
+            className="w-full bg-gradient-to-r from-soft-pink to-soft-pink/70 hover:opacity-90 mb-4"
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Share on Device
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setPreviewOpen(true)}
+            className="text-soft-pink text-xs mx-auto block mb-3"
+          >
+            Preview Post
+          </Button>
           
           <div className="bg-soft-pink/5 rounded-lg p-3 text-left">
             <p className="text-xs font-medium mb-2">Recommended hashtags:</p>
@@ -239,6 +324,63 @@ const DonationSuccessScreen = ({
           </Button>
         </div>
       </motion.div>
+      
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Preview</DialogTitle>
+            <DialogDescription>
+              Here's how your post will look on social media
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="border rounded-md p-4">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 rounded-full bg-soft-pink/20 flex items-center justify-center text-soft-pink">
+                  C
+                </div>
+                <div className="ml-2">
+                  <p className="font-medium text-sm">Chiqui Retail</p>
+                  <p className="text-xs text-muted-foreground">Just now</p>
+                </div>
+              </div>
+              
+              <p className="text-sm mb-3">{shareText}</p>
+              
+              <div className="bg-muted rounded-md p-2 mb-3">
+                <p className="text-xs font-medium">Environmental Impact Stats:</p>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">CO₂ Saved</p>
+                    <p className="text-sm font-medium">{impact.co2Saved.toFixed(1)} kg</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Water Saved</p>
+                    <p className="text-sm font-medium">{(impact.waterSaved / 1000).toFixed(1)}k L</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-1">
+                {hashtags.map((tag, i) => (
+                  <span key={i} className="text-xs text-blue-500">#{tag}</span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setPreviewOpen(false)}>Close</Button>
+              <Button onClick={() => {
+                setPreviewOpen(false);
+                handleShare("facebook");
+              }}>
+                Share Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
