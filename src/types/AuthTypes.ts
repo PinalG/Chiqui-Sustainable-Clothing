@@ -1,9 +1,11 @@
+
 import { User } from "firebase/auth";
+import { AvailableLanguage } from "@/lib/translations";
 
 export type UserRole = "consumer" | "retailer" | "admin" | "logistics";
 
 export interface UserPreferences {
-  language: string;
+  language: AvailableLanguage | string;
   highContrast: boolean;
   largeText: boolean;
   reducedMotion: boolean;

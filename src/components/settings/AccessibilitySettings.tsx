@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth, UserPreferences } from "@/contexts/AuthContext";
+import { useI18n } from "@/contexts/I18nContext";
 import {
   Card,
   CardContent,
@@ -16,20 +17,13 @@ import { toast } from "sonner";
 import { Save, Eye, Type, MousePointer, Palette, BookOpen } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-const LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'es', name: 'Español' },
-  { code: 'fr', name: 'Français' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'zh', name: 'Chinese (中文)' },
-];
 
 const AccessibilitySettings = () => {
   const { userData, updateUserPreferences } = useAuth();
+  const { t, language, setLanguage, availableLanguages } = useI18n();
+  
   const [preferences, setPreferences] = useState<UserPreferences>({
-    language: 'en',
+    language: language,
     highContrast: false,
     largeText: false,
     reducedMotion: false,
@@ -70,19 +64,23 @@ const AccessibilitySettings = () => {
     
     // Apply dyslexia friendly text
     document.documentElement.classList.toggle('dyslexia-friendly', preferences.dyslexiaFriendly);
-
-    // Set language attribute on html element
-    document.documentElement.setAttribute('lang', preferences.language);
   }, [preferences]);
+
+  // Update language state when preferences.language changes
+  useEffect(() => {
+    if (preferences.language && preferences.language !== language) {
+      setLanguage(preferences.language as any);
+    }
+  }, [preferences.language, setLanguage, language]);
 
   const handleSavePreferences = async () => {
     setIsLoading(true);
     try {
       await updateUserPreferences(preferences);
-      toast.success("Accessibility settings saved successfully");
+      toast.success(t('settings.saved'));
     } catch (error) {
       console.error("Error saving preferences:", error);
-      toast.error("Failed to save settings");
+      toast.error(t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -96,25 +94,25 @@ const AccessibilitySettings = () => {
   return (
     <Card className="w-full max-w-3xl mx-auto animate-fade-up">
       <CardHeader>
-        <CardTitle>Accessibility & Language Settings</CardTitle>
+        <CardTitle>{t('accessibility.title')}</CardTitle>
         <CardDescription>
-          Customize your experience to meet your accessibility needs
+          {t('accessibility.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-medium mb-2">Language</h3>
+            <h3 className="text-lg font-medium mb-2">{t('accessibility.language')}</h3>
             <Select 
               value={preferences.language}
               onValueChange={(value) => setPreferences({...preferences, language: value})}
-              aria-label="Select language"
+              aria-label={t('accessibility.language')}
             >
               <SelectTrigger className="w-full md:w-80">
-                <SelectValue placeholder="Select a language" />
+                <SelectValue placeholder={t('accessibility.language')} />
               </SelectTrigger>
               <SelectContent>
-                {LANGUAGES.map((lang) => (
+                {availableLanguages.map((lang) => (
                   <SelectItem key={lang.code} value={lang.code}>
                     {lang.name}
                   </SelectItem>
@@ -124,11 +122,11 @@ const AccessibilitySettings = () => {
           </div>
           
           <div className="grid gap-6 pt-4">
-            <h3 className="text-lg font-medium">Visual Preferences</h3>
+            <h3 className="text-lg font-medium">{t('accessibility.title')}</h3>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Eye className="h-4 w-4 text-soft-pink" aria-hidden="true" />
-                <Label htmlFor="high-contrast">High Contrast Mode</Label>
+                <Label htmlFor="high-contrast">{t('accessibility.highContrast')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -141,20 +139,20 @@ const AccessibilitySettings = () => {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => handlePreview('highContrast')}
-                  aria-label="Preview high contrast mode"
+                  aria-label={`${t('accessibility.preview')} ${t('accessibility.highContrast')}`}
                 >
-                  Preview
+                  {t('accessibility.preview')}
                 </Button>
               </div>
             </div>
             <p id="high-contrast-description" className="text-sm text-muted-foreground -mt-4 ml-6">
-              Enhances visual boundaries with greater contrast between elements
+              {t('accessibility.highContrastDescription')}
             </p>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Type className="h-4 w-4 text-soft-pink" aria-hidden="true" />
-                <Label htmlFor="large-text">Large Text Mode</Label>
+                <Label htmlFor="large-text">{t('accessibility.largeText')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -167,20 +165,20 @@ const AccessibilitySettings = () => {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => handlePreview('largeText')}
-                  aria-label="Preview large text mode"
+                  aria-label={`${t('accessibility.preview')} ${t('accessibility.largeText')}`}
                 >
-                  Preview
+                  {t('accessibility.preview')}
                 </Button>
               </div>
             </div>
             <p id="large-text-description" className="text-sm text-muted-foreground -mt-4 ml-6">
-              Increases the font size across the application for improved readability
+              {t('accessibility.largeTextDescription')}
             </p>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <MousePointer className="h-4 w-4 text-soft-pink" aria-hidden="true" />
-                <Label htmlFor="reduced-motion">Reduced Motion</Label>
+                <Label htmlFor="reduced-motion">{t('accessibility.reducedMotion')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -193,14 +191,14 @@ const AccessibilitySettings = () => {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => handlePreview('reducedMotion')}
-                  aria-label="Preview reduced motion"
+                  aria-label={`${t('accessibility.preview')} ${t('accessibility.reducedMotion')}`}
                 >
-                  Preview
+                  {t('accessibility.preview')}
                 </Button>
               </div>
             </div>
             <p id="reduced-motion-description" className="text-sm text-muted-foreground -mt-4 ml-6">
-              Minimizes animations and transitions throughout the interface
+              {t('accessibility.reducedMotionDescription')}
             </p>
             
             <div className="flex items-center justify-between">
@@ -222,7 +220,7 @@ const AccessibilitySettings = () => {
                   <path d="m13.33 18.33-2.66 2.67-2.67-2.67"></path>
                   <path d="M12 4v16"></path>
                 </svg>
-                <Label htmlFor="screen-reader">Screen Reader Optimized</Label>
+                <Label htmlFor="screen-reader">{t('accessibility.screenReaderOptimized')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -235,20 +233,20 @@ const AccessibilitySettings = () => {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => handlePreview('screenReader')}
-                  aria-label="Preview screen reader optimization"
+                  aria-label={`${t('accessibility.preview')} ${t('accessibility.screenReaderOptimized')}`}
                 >
-                  Preview
+                  {t('accessibility.preview')}
                 </Button>
               </div>
             </div>
             <p id="screen-reader-description" className="text-sm text-muted-foreground -mt-4 ml-6">
-              Improves compatibility with screen readers and assistive technologies
+              {t('accessibility.screenReaderOptimizedDescription')}
             </p>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Palette className="h-4 w-4 text-soft-pink" aria-hidden="true" />
-                <Label htmlFor="color-blind">Color Blind Friendly</Label>
+                <Label htmlFor="color-blind">{t('accessibility.colorBlindFriendly')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -261,20 +259,20 @@ const AccessibilitySettings = () => {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => handlePreview('colorBlindFriendly')}
-                  aria-label="Preview color blind friendly mode"
+                  aria-label={`${t('accessibility.preview')} ${t('accessibility.colorBlindFriendly')}`}
                 >
-                  Preview
+                  {t('accessibility.preview')}
                 </Button>
               </div>
             </div>
             <p id="color-blind-description" className="text-sm text-muted-foreground -mt-4 ml-6">
-              Adjusts colors to be more distinguishable for those with color vision deficiencies
+              {t('accessibility.colorBlindFriendlyDescription')}
             </p>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <BookOpen className="h-4 w-4 text-soft-pink" aria-hidden="true" />
-                <Label htmlFor="dyslexia-friendly">Dyslexia Friendly Text</Label>
+                <Label htmlFor="dyslexia-friendly">{t('accessibility.dyslexiaFriendly')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -287,23 +285,23 @@ const AccessibilitySettings = () => {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => handlePreview('dyslexiaFriendly')}
-                  aria-label="Preview dyslexia friendly text"
+                  aria-label={`${t('accessibility.preview')} ${t('accessibility.dyslexiaFriendly')}`}
                 >
-                  Preview
+                  {t('accessibility.preview')}
                 </Button>
               </div>
             </div>
             <p id="dyslexia-friendly-description" className="text-sm text-muted-foreground -mt-4 ml-6">
-              Adjusts text spacing and font for easier reading for those with dyslexia
+              {t('accessibility.dyslexiaFriendlyDescription')}
             </p>
           </div>
         </div>
         
         <Collapsible className="mt-6 border rounded-lg p-4">
           <CollapsibleTrigger className="flex items-center justify-between w-full">
-            <span className="font-medium">Keyboard Navigation Tips</span>
+            <span className="font-medium">{t('accessibility.keyboardNavigation')}</span>
             <Button variant="ghost" size="sm">
-              <span className="sr-only">Toggle keyboard navigation tips</span>
+              <span className="sr-only">{t('accessibility.keyboardNavigation')}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -340,12 +338,12 @@ const AccessibilitySettings = () => {
           {isLoading ? (
             <>
               <span className="animate-spin mr-2">⏳</span>
-              Saving...
+              {t('common.loading')}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" aria-hidden="true" />
-              Save Settings
+              {t('accessibility.saveSettings')}
             </>
           )}
         </Button>
@@ -354,7 +352,9 @@ const AccessibilitySettings = () => {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Preview {previewSetting?.replace(/([A-Z])/g, ' $1').toLowerCase()}</DialogTitle>
+            <DialogTitle>
+              {t('accessibility.preview')} {previewSetting?.replace(/([A-Z])/g, ' $1').toLowerCase()}
+            </DialogTitle>
             <DialogDescription>
               This is a preview of how the application would look with this setting enabled.
             </DialogDescription>
@@ -364,8 +364,8 @@ const AccessibilitySettings = () => {
               <h3 className="text-lg font-medium mb-2">Sample Content</h3>
               <p className="mb-4">This is an example of how content would appear with the selected accessibility option enabled.</p>
               <div className="flex space-x-2">
-                <Button size="sm">Primary Button</Button>
-                <Button size="sm" variant="outline">Secondary Button</Button>
+                <Button size="sm">{t('common.save')}</Button>
+                <Button size="sm" variant="outline">{t('common.cancel')}</Button>
               </div>
             </div>
           </div>
@@ -374,7 +374,7 @@ const AccessibilitySettings = () => {
               variant="outline" 
               onClick={() => setIsPreviewOpen(false)}
             >
-              Close Preview
+              {t('common.close')}
             </Button>
             <Button 
               onClick={() => {

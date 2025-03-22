@@ -5,13 +5,15 @@ import AccessibilitySettings from "@/components/settings/AccessibilitySettings";
 import PrivacySettings from "@/components/settings/PrivacySettings";
 import { Card } from "@/components/ui/card";
 import { Shield, Eye } from "lucide-react";
+import { useI18n } from "@/contexts/I18nContext";
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("accessibility");
+  const { t } = useI18n();
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6" id="settings-heading">Account Settings</h1>
+      <h1 className="text-3xl font-bold mb-6" id="settings-heading">{t('settings.title')}</h1>
       
       <Tabs 
         value={activeTab} 
@@ -26,7 +28,7 @@ const SettingsPage = () => {
             aria-controls="accessibility-tab"
           >
             <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
-            Accessibility
+            {t('settings.accessibility')}
           </TabsTrigger>
           <TabsTrigger 
             value="privacy" 
@@ -34,7 +36,7 @@ const SettingsPage = () => {
             aria-controls="privacy-tab"
           >
             <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
-            Privacy
+            {t('settings.privacy')}
           </TabsTrigger>
         </TabsList>
         

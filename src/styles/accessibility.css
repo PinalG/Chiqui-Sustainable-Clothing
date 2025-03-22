@@ -1,239 +1,228 @@
 
-/* High Contrast Mode */
-html.high-contrast {
-  filter: contrast(1.4);
+/* High contrast mode */
+.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --primary: 0 0% 0%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 0%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 90%;
+  --muted-foreground: 0 0% 0%;
+  --accent: 0 0% 0%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 0%;
+  --input: 0 0% 0%;
+  --ring: 0 0% 0%;
+  
+  /* Increase contrast for all text */
+  color: #000 !important;
+  background-color: #fff !important;
+  
+  /* Add border to improve visibility of UI elements */
+  --border-width: 2px;
+  --outline-width: 3px;
+  
+  /* High contrast focus styles */
+  --focus-ring-color: #000;
+  --focus-ring-width: 3px;
 }
 
-html.high-contrast body {
-  background-color: white;
-  color: black;
+.high-contrast button,
+.high-contrast a,
+.high-contrast input,
+.high-contrast select,
+.high-contrast [role="button"],
+.high-contrast [role="tab"],
+.high-contrast [role="link"] {
+  border: 2px solid #000 !important;
+  outline: none !important;
 }
 
-html.high-contrast button,
-html.high-contrast a {
-  outline: 2px solid currentColor;
+.high-contrast button:focus,
+.high-contrast a:focus,
+.high-contrast input:focus,
+.high-contrast select:focus,
+.high-contrast [role="button"]:focus,
+.high-contrast [role="tab"]:focus,
+.high-contrast [role="link"]:focus {
+  outline: 3px solid #000 !important;
+  outline-offset: 2px !important;
 }
 
-html.high-contrast input,
-html.high-contrast select,
-html.high-contrast textarea {
-  background-color: white !important;
-  color: black !important;
-  border: 2px solid black !important;
+/* Large text mode */
+.large-text {
+  font-size: 120% !important;
+  line-height: 1.5 !important;
 }
 
-/* Large Text Mode */
-html.large-text {
-  font-size: 120%;
+.large-text h1 {
+  font-size: 2.5em !important;
 }
 
-html.large-text h1 {
-  font-size: 2.2em;
+.large-text h2 {
+  font-size: 2em !important;
 }
 
-html.large-text h2 {
-  font-size: 1.8em;
+.large-text h3 {
+  font-size: 1.75em !important;
 }
 
-html.large-text h3 {
-  font-size: 1.5em;
+.large-text button,
+.large-text input,
+.large-text select {
+  font-size: 1.2em !important;
+  padding: 0.5em !important;
 }
 
-html.large-text button,
-html.large-text input,
-html.large-text a {
-  font-size: 1.1em;
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-/* Reduced Motion */
-html.reduced-motion * {
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
   animation-duration: 0.001s !important;
+  animation-iteration-count: 1 !important;
   transition-duration: 0.001s !important;
   scroll-behavior: auto !important;
 }
 
-/* Screen Reader Optimizations */
-html.screen-reader .visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+/* Screen reader optimizations */
+.screen-reader .sr-only {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0.5rem !important;
+  margin: 0.5rem 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  border: 1px solid !important;
+  clip-path: none !important;
 }
 
-html.screen-reader a,
-html.screen-reader button {
-  text-decoration: underline;
-}
-
-html.screen-reader [aria-hidden="true"] {
+.screen-reader *[aria-hidden="true"] {
   display: none !important;
 }
 
-html.screen-reader table {
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
+/* Color blind friendly mode */
+.color-blind-friendly {
+  --primary: 240 100% 50%; /* Blue, more distinguishable for most types of color blindness */
+  --destructive: 0 0% 0%; /* Black for error states instead of red */
+  --success: 60 100% 40%; /* Yellow instead of green for success states */
+  --warning: 260 100% 50%; /* Purple instead of orange/yellow for warnings */
 }
 
-/* Focus indicators for better keyboard navigation */
-html:not(.reduced-motion) *:focus {
-  outline: 2px solid rgb(255, 192, 203) !important; /* soft-pink */
-  outline-offset: 2px !important;
-  transition: outline-offset 0.2s ease;
+.color-blind-friendly button[data-state="checked"],
+.color-blind-friendly [aria-checked="true"] {
+  background-color: #0000FF !important; /* Blue */
+  color: white !important;
+  border: 2px solid black !important;
 }
 
-/* Skip navigation for keyboard users */
+.color-blind-friendly button[data-variant="destructive"] {
+  background-color: black !important;
+  color: white !important;
+}
+
+/* Dyslexia friendly text */
+.dyslexia-friendly {
+  font-family: OpenDyslexic, Arial, sans-serif !important;
+  font-size: 110% !important;
+  line-height: 1.8 !important;
+  letter-spacing: 0.1em !important;
+  word-spacing: 0.2em !important;
+  text-align: left !important;
+}
+
+.dyslexia-friendly p {
+  max-width: 60ch !important;
+  margin-bottom: 1.5em !important;
+}
+
+/* Skip to main content link */
 .skip-nav {
-  background: rgb(255, 192, 203);
-  color: black;
-  padding: 0.5rem 1rem;
   position: absolute;
-  transform: translateY(-100%);
-  transition: transform 0.2s;
-  left: 1rem;
-  top: 1rem;
+  top: -40px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: fit-content;
+  background: #FFC0CB;
+  color: #000;
+  padding: 8px 16px;
   z-index: 100;
-  font-weight: bold;
+  transition: top 0.2s;
+  border-radius: 0 0 8px 8px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 500;
 }
 
 .skip-nav:focus {
-  transform: translateY(0);
+  top: 0;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.5);
 }
 
-/* Improved interactive element focus states */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-[tabindex="0"]:focus-visible {
-  outline: 3px solid rgb(255, 192, 203) !important;
+/* Keyboard focus styles */
+:focus-visible {
+  outline: 2px solid #FFC0CB !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px rgba(255, 192, 203, 0.3) !important;
+  border-radius: 4px !important;
 }
 
-/* Enhanced form label visibility */
-label {
-  display: inline-block;
-  margin-bottom: 0.5rem;
+/* Improved form control accessibility */
+[role="button"],
+button {
+  cursor: pointer;
 }
 
-/* Optimized animations for different preferences */
-@media (prefers-reduced-motion) {
-  * {
-    animation-duration: 0.001s !important;
-    transition-duration: 0.001s !important;
-    scroll-behavior: auto !important;
-  }
-  
-  .animate-fade-in,
-  .animate-fade-out,
-  .animate-scale-in,
-  .animate-scale-out,
-  .animate-slide-in,
-  .animate-slide-out,
-  .animate-shimmer,
-  .animate-pulse {
-    animation: none !important;
-  }
+/* Improve form field accessibility */
+input:invalid,
+select:invalid,
+textarea:invalid {
+  border-color: var(--destructive) !important;
 }
 
-/* Enhanced animations for those who prefer motion */
+/* Add accessible animations for people who prefer motion */
 @media (prefers-reduced-motion: no-preference) {
-  /* Smooth page transitions */
-  .page-transition-enter {
-    opacity: 0;
-    transform: translateY(10px);
+  .animate-fade-up:not(.reduced-motion *) {
+    animation: fadeUp 0.5s ease forwards;
   }
   
-  .page-transition-enter-active {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 300ms, transform 300ms;
-  }
-  
-  .page-transition-exit {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .page-transition-exit-active {
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 200ms, transform 200ms;
-  }
-  
-  /* Enhanced hover interactions */
-  .premium-hover {
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  
-  .premium-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Optimized loading animations */
-  @keyframes optimized-pulse {
-    0%, 100% {
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
       opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
+      transform: translateY(0);
     }
   }
-  
-  .optimized-loading {
-    animation: optimized-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
 }
 
-/* Print optimizations */
-@media print {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-  
-  body {
-    font-size: 12pt;
-    line-height: 1.5;
-    color: #000 !important;
-    background: #fff !important;
-  }
-  
-  .no-print {
-    display: none !important;
-  }
-  
-  a[href]:after {
-    content: " (" attr(href) ")";
-    font-size: 90%;
-  }
-}
-
-/* Color blindness accommodations */
-html.color-blind-friendly .text-soft-pink {
-  color: #0066CC !important; /* Use blue instead of pink for better color blindness support */
-}
-
-html.color-blind-friendly button[data-state="checked"] {
-  background-color: #0066CC !important;
-}
-
-/* Dyslexia-friendly text */
-html.dyslexia-friendly {
-  font-family: 'Open Sans', 'Arial', sans-serif !important;
-  line-height: 1.8 !important;
-  letter-spacing: 0.5px !important;
-  word-spacing: 3px !important;
-}
-
-html.dyslexia-friendly p,
-html.dyslexia-friendly li {
-  max-width: 75ch !important;
+/* Language specific text direction */
+[lang="ar"],
+[lang="he"],
+[lang="fa"],
+[lang="ur"] {
+  direction: rtl;
+  text-align: right;
 }
