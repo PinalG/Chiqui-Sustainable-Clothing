@@ -17,7 +17,8 @@ import {
   Briefcase,
   ClipboardCheck,
   BookOpen,
-  AlertCircle
+  AlertCircle,
+  Check
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
