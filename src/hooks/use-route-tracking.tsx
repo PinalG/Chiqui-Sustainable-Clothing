@@ -36,10 +36,16 @@ export function useRouteTracking() {
           const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
           
           if (navigationTiming) {
-            // Fix: Pass only the metric value and an object with additional properties
-            trackMetric('route_change_time', navigationTiming.duration, {
-              path,
-              navigationType,
+            // Fix: Create a PerformanceMetric object to match the expected argument type
+            trackMetric({
+              name: 'route_change_time',
+              type: 'navigation',
+              value: navigationTiming.duration,
+              timestamp: Date.now(),
+              metadata: {
+                path,
+                navigationType,
+              }
             });
           }
         }
