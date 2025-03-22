@@ -19,7 +19,7 @@ function App() {
   const location = useLocation();
   
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.info('Mock users for development: consumer@example.com / password123, retailer@example.com / password123, logistics@example.com / password123, admin@example.com / password123');
     }
   }, []);
