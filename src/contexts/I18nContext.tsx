@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useAuth, UserPreferences } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { translations, TranslationKey, AvailableLanguage } from '@/lib/translations';
 
 interface I18nContextType {
@@ -12,7 +12,7 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
-export const availableLanguages = [
+export const availableLanguages: { code: AvailableLanguage; name: string }[] = [
   { code: 'en', name: 'English' },
   { code: 'es', name: 'Español' },
   { code: 'fr', name: 'Français' },
@@ -27,7 +27,13 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
   // Initialize language from user preferences or browser
   useEffect(() => {
     if (userData?.preferences?.language) {
-      setLanguageState(userData.preferences.language as AvailableLanguage);
+      // We need to validate that the user's language preference is a valid AvailableLanguage
+      const userLang = userData.preferences.language as string;
+      const isValidLang = availableLanguages.some(lang => lang.code === userLang);
+      
+      if (isValidLang) {
+        setLanguageState(userLang as AvailableLanguage);
+      }
     } else {
       // Try to detect browser language
       const browserLang = navigator.language.split('-')[0];
@@ -71,7 +77,7 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     return translatedText;
   };
 
-  const value = {
+  const value: I18nContextType = {
     language,
     setLanguage,
     t,
