@@ -140,3 +140,122 @@ export const calculateEffectiveTaxRate = (
   // Calculate effective tax rate reduction
   return taxSavings / totalRevenue * 100;
 };
+
+// NEW SOCIAL SHARING UTILITIES
+
+// Generate a shareable donation summary for social media
+export const generateShareableDonationSummary = (
+  itemCount: number,
+  categories: string[],
+  estimatedValue: number,
+  taxBenefit: number,
+  isRetailer: boolean = false
+): string => {
+  // Different templates for different user types
+  if (isRetailer) {
+    return `I just registered ${itemCount} items as a paper donation on Chiqui, saving an estimated ${formatCurrency(taxBenefit)} in tax benefits while promoting sustainable fashion! #ChiquiPaperDonation #SustainableRetail`;
+  } else {
+    const categoryText = categories.length > 0 
+      ? `including ${categories.slice(0, 2).join(' and ')}` 
+      : '';
+    
+    return `I just donated ${itemCount} items ${categoryText} on Chiqui, contributing to sustainable fashion and reducing textile waste! #ChiquiDonation #SustainableFashion`;
+  }
+};
+
+// Calculate environmental impact for sharing
+export const calculateDonationEnvironmentalImpact = (
+  itemCount: number,
+  categories: string[] = []
+): { co2Saved: number, waterSaved: number, energySaved: number } => {
+  // Average environmental impact values per clothing item
+  // These are estimated values that would be refined in a real application
+  const baseImpact = {
+    co2Saved: 5.5, // kg of CO2
+    waterSaved: 1800, // liters of water
+    energySaved: 22, // kWh of energy
+  };
+  
+  // Adjust impact based on category if needed
+  const categoryMultipliers: Record<string, number> = {
+    'Apparel': 1.0,
+    'Footwear': 1.2,
+    'Accessories': 0.7,
+    'Home Textiles': 1.3,
+    'Children\'s Items': 0.9,
+  };
+  
+  // Calculate average multiplier based on categories
+  let multiplier = 1.0;
+  if (categories.length > 0) {
+    const validCategories = categories.filter(cat => categoryMultipliers[cat]);
+    if (validCategories.length > 0) {
+      const sum = validCategories.reduce((acc, cat) => acc + categoryMultipliers[cat], 0);
+      multiplier = sum / validCategories.length;
+    }
+  }
+  
+  return {
+    co2Saved: baseImpact.co2Saved * itemCount * multiplier,
+    waterSaved: baseImpact.waterSaved * itemCount * multiplier,
+    energySaved: baseImpact.energySaved * itemCount * multiplier,
+  };
+};
+
+// Generate hashtags for donation sharing
+export const generateDonationHashtags = (
+  categories: string[] = [],
+  isRetailer: boolean = false
+): string[] => {
+  // Base hashtags everyone gets
+  const baseHashtags = ['SustainableFashion', 'ChiquiDonation', 'FashionWithPurpose'];
+  
+  // Retailer-specific hashtags
+  const retailerHashtags = ['RetailInnovation', 'PaperDonation', 'SustainableInventory', 'TaxBenefits'];
+  
+  // Category-specific hashtags
+  const categoryHashtags: Record<string, string[]> = {
+    'Apparel': ['SecondHandStyle', 'ReFashion'],
+    'Footwear': ['SustainableFootwear', 'EcoShoes'],
+    'Accessories': ['EcoAccessories', 'SustainableStyle'],
+    'Home Textiles': ['SustainableHome', 'EcoLiving'],
+    'Children\'s Items': ['KidsFashion', 'SustainableKids'],
+  };
+  
+  // Collect all relevant hashtags
+  let result = [...baseHashtags];
+  
+  // Add retailer hashtags if applicable
+  if (isRetailer) {
+    result = [...result, ...retailerHashtags];
+  }
+  
+  // Add up to 3 category-specific hashtags
+  categories.slice(0, 3).forEach(category => {
+    if (categoryHashtags[category]) {
+      result.push(...categoryHashtags[category].slice(0, 1));
+    }
+  });
+  
+  // Return unique hashtags (no duplicates)
+  return Array.from(new Set(result)).slice(0, 8); // Limit to 8 hashtags
+};
+
+// Generate sharing link with tracking parameters
+export const generateSharingLink = (
+  batchId: string,
+  source: string,
+  userId?: string
+): string => {
+  const baseUrl = 'https://chiqui-app.com/share';
+  const params = new URLSearchParams();
+  
+  if (batchId) params.append('batch', batchId);
+  if (source) params.append('source', source);
+  if (userId) params.append('ref', userId);
+  
+  // Add a timestamp to make each link unique
+  params.append('t', new Date().getTime().toString());
+  
+  return `${baseUrl}?${params.toString()}`;
+};
