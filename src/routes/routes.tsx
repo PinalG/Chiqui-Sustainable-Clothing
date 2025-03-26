@@ -1,5 +1,6 @@
 
 import { lazy } from 'react';
+import { PublicRouteProps, ProtectedRouteProps, RoleProtectedRouteProps, AdminRouteProps } from '@/components/auth/ProtectedRoute';
 
 // Create a custom Error404 component until the actual page is implemented
 const Error404 = () => <div>404 - Page Not Found</div>;
@@ -30,10 +31,10 @@ const VerifyEmail = lazy(() => import('../pages/Dashboard')); // Use Dashboard a
 
 // Create simple route wrapper components
 // These would normally be imported, but for now we'll create placeholder components
-const PublicRoute = ({ children }) => children;
-const ProtectedRoute = ({ children }) => children;
-const RoleProtectedRoute = ({ children, allowedRoles, requiresConsentVerification }) => children;
-const AdminRoute = ({ children }) => children;
+const PublicRoute = ({ children }: { children: React.ReactNode }) => children;
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => children;
+const RoleProtectedRoute = ({ children, allowedRoles, requiresConsentVerification }: { children: React.ReactNode, allowedRoles: string[], requiresConsentVerification?: boolean }) => children;
+const AdminRoute = ({ children }: { children: React.ReactNode }) => children;
 
 // Public routes - accessible without authentication
 export const publicRoutes = [
