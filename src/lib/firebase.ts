@@ -8,7 +8,7 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 // In development, we use a placeholder API key
 // In production, we use the real API key from environment variables
 const firebaseConfig = {
-  apiKey: process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost' || window.location.hostname.includes('lovableproject.com')
+  apiKey: process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost' || window.location.hostname.includes('lovable')
     ? "mock-api-key-for-development" 
     : (import.meta.env.VITE_FIREBASE_API_KEY || ""),
   authDomain: "chiqui-platform.firebaseapp.com",
@@ -21,11 +21,41 @@ const firebaseConfig = {
 // Determine if we're in a development-like environment (includes Lovable preview links)
 const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
                            window.location.hostname === 'localhost' || 
-                           window.location.hostname.includes('lovableproject.com');
+                           window.location.hostname.includes('lovable');
 
 // For debugging purposes
 console.log(`Firebase initialization - Environment: ${process.env.NODE_ENV}, Hostname: ${window.location.hostname}`);
 console.log(`Firebase initialization - Using development mode: ${isDevelopmentLike}`);
+
+// Mock user for preview mode - automatically logged in
+const MOCK_AUTHENTICATED_USER = {
+  uid: "preview-user-123",
+  email: "consumer@example.com",
+  displayName: "Preview User",
+  emailVerified: true,
+  isAnonymous: false,
+  photoURL: null,
+  providerData: [],
+  metadata: {
+    creationTime: Date.now().toString(),
+    lastSignInTime: Date.now().toString()
+  },
+  tenantId: null,
+  delete: async () => {},
+  getIdToken: async () => "mock-token",
+  getIdTokenResult: async () => ({
+    token: "mock-token",
+    signInProvider: "password",
+    expirationTime: new Date(Date.now() + 3600000).toISOString(),
+    issuedAtTime: new Date().toISOString(),
+    claims: { role: "consumer" },
+    authTime: new Date().toISOString(),
+  }),
+  reload: async () => {},
+  toJSON: () => ({}),
+  phoneNumber: null,
+  providerId: "password",
+};
 
 // Initialize Firebase
 let app;
@@ -33,24 +63,30 @@ let auth;
 let db;
 let storage;
 
-// Create a mock auth object for development
+// Create a mock auth object for development/preview
 const createMockAuth = () => {
-  console.log("Using mock Firebase auth in development mode");
+  console.log("Using mock Firebase auth in development/preview mode");
   // Return a mock auth object with the methods needed by the application
   return {
     onAuthStateChanged: (callback) => {
-      // Immediately invoke callback with null (not authenticated)
-      callback(null);
+      // For preview mode, immediately return a mock authenticated user
+      if (window.location.hostname.includes('lovable')) {
+        console.log("Preview mode detected - using auto-authenticated mock user");
+        callback(MOCK_AUTHENTICATED_USER);
+      } else {
+        // For local development, start not authenticated
+        callback(null);
+      }
       // Return unsubscribe function
       return () => {};
     },
-    signInWithEmailAndPassword: async () => {
-      console.log("Mock sign in");
-      return { user: null };
+    signInWithEmailAndPassword: async (email, password) => {
+      console.log(`Mock sign in with ${email}`);
+      return { user: MOCK_AUTHENTICATED_USER };
     },
     createUserWithEmailAndPassword: async () => {
       console.log("Mock create user");
-      return { user: null };
+      return { user: MOCK_AUTHENTICATED_USER };
     },
     signOut: async () => {
       console.log("Mock sign out");
@@ -58,7 +94,7 @@ const createMockAuth = () => {
     sendPasswordResetEmail: async () => {
       console.log("Mock password reset");
     },
-    currentUser: null,
+    currentUser: window.location.hostname.includes('lovable') ? MOCK_AUTHENTICATED_USER : null,
     settings: {} // Add mock settings object to prevent "Cannot read properties of undefined (reading 'settings')" error
   };
 };
@@ -67,39 +103,12 @@ const createMockAuth = () => {
 try {
   console.log("Attempting to initialize Firebase");
   app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  // Ensure the auth.settings exists to prevent the error
-  if (!auth.settings) {
-    auth.settings = {};
-  }
-  db = getFirestore(app);
-  storage = getStorage(app);
-
-  // For development or preview environments, we'll use mock authentication if emulators aren't available
-  if (isDevelopmentLike) {
-    console.log("Development-like environment detected, setting up mock auth if needed");
-    try {
-      // Try to connect to emulators if they are running
-      connectAuthEmulator(auth, "http://localhost:9099");
-      console.log("Connected to Auth emulator");
-      // Uncomment when you set up the corresponding emulators
-      // connectFirestoreEmulator(db, 'localhost', 8080);
-      // connectStorageEmulator(storage, 'localhost', 9199);
-    } catch (e) {
-      console.log("Error connecting to emulators:", e);
-      console.log("Using mock authentication in development mode");
-      // Create and use mock auth if emulator connection fails
-      auth = createMockAuth();
-    }
-  }
-} catch (error) {
-  console.error("Error initializing Firebase:", error);
   
-  // Create mock instances for development if initialization fails
   if (isDevelopmentLike) {
-    console.log("Using mock Firebase services in development mode");
-    // Create mock auth object that implements needed methods
+    console.log("Development/preview environment detected, using mock auth");
     auth = createMockAuth();
+    
+    // Mock Firestore
     db = {
       collection: () => ({
         doc: () => ({
@@ -112,6 +121,8 @@ try {
         add: async () => ({})
       })
     };
+    
+    // Mock Storage
     storage = {
       ref: () => ({
         put: async () => {},
@@ -119,13 +130,39 @@ try {
       })
     };
   } else {
-    // In production, we should log this error and provide fallbacks
-    console.error("Firebase initialization failed in production. Some features may not work.");
-    // Create minimal mock to prevent crashes
-    auth = createMockAuth();
-    db = {} as any;
-    storage = {} as any;
+    // Use real Firebase services in production
+    auth = getAuth(app);
+    // Ensure the auth.settings exists to prevent the error
+    if (!auth.settings) {
+      auth.settings = {};
+    }
+    db = getFirestore(app);
+    storage = getStorage(app);
   }
+} catch (error) {
+  console.error("Error initializing Firebase:", error);
+  
+  // Create mock instances for all environments if initialization fails
+  console.log("Using mock Firebase services due to initialization failure");
+  auth = createMockAuth();
+  db = {
+    collection: () => ({
+      doc: () => ({
+        get: async () => ({ exists: false, data: () => null }),
+        set: async () => {}
+      }),
+      where: () => ({
+        get: async () => ({ docs: [] })
+      }),
+      add: async () => ({})
+    })
+  };
+  storage = {
+    ref: () => ({
+      put: async () => {},
+      getDownloadURL: async () => "https://placeholder.com/image.jpg"
+    })
+  };
 }
 
 // Gemini API key - this would normally be secured in a backend environment

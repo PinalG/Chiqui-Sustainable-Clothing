@@ -17,6 +17,12 @@ const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { user, userData, isLoading } = useAuth();
   const location = useLocation();
+  
+  // Auto-allow in preview environment (simplified for demo purposes)
+  if (window.location.hostname.includes('lovable')) {
+    console.log("Preview environment detected - skipping auth checks");
+    return <>{children}</>;
+  }
 
   // Show loading state while auth state is being determined
   if (isLoading) {

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, db, isDevelopmentLike } from "@/lib/firebase";
@@ -7,6 +6,7 @@ import { toast } from "sonner";
 import { UserData, UserRole, UserPreferences, AuthContextType } from "@/types/AuthTypes";
 import { useAuthMethods } from "@/hooks/AuthHooks";
 import { MOCK_USERS } from "@/types/AuthTypes";
+import { getMockUserData } from "@/utils/AuthUtils";
 
 // Create the auth context with undefined as initial value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +30,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log("AuthProvider initialized, isDevelopmentLike:", isDevelopmentLike);
     let unsubscribe: () => void = () => {};
     
-    if (!isDevelopmentLike) {
+    // For preview environments, auto-set a demo user
+    if (window.location.hostname.includes('lovable')) {
+      console.log("Preview environment detected - auto-setting demo user");
+      const demoUser = auth.currentUser;
+      setUser(demoUser);
+      
+      // Use the consumer demo user data
+      const mockUserData = getMockUserData('consumer@example.com');
+      if (mockUserData) {
+        console.log("Setting mock user data for preview:", mockUserData);
+        setUserData(mockUserData);
+      } else {
+        console.warn("Failed to get mock user data for preview");
+      }
+      
+      setIsLoading(false);
+      return;
+    } else if (isDevelopmentLike) {
+      console.log("Using development mock auth in AuthContext");
+      unsubscribe = auth.onAuthStateChanged((currentUser) => {
+        console.log("Mock auth state changed:", currentUser ? `Logged in as ${currentUser.email}` : "Not logged in");
+        setUser(currentUser);
+        
+        if (currentUser) {
+          const userData = getMockUserData(currentUser.email || 'consumer@example.com');
+          setUserData(userData);
+        } else {
+          setUserData(null);
+        }
+        
+        setIsLoading(false);
+      });
+    } else {
       // In production, use real Firebase Auth
       unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
         console.log("Auth state changed:", currentUser ? `Logged in as ${currentUser.email}` : "Not logged in");
@@ -81,12 +113,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         setIsLoading(false);
       });
-    } else {
-      // In development or preview, initialize with no user
-      console.log("Using development mock auth in AuthContext");
-      setUser(null);
-      setUserData(null);
-      setIsLoading(false);
     }
     
     // Clean up the listener
