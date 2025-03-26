@@ -1,3 +1,4 @@
+
 import React, { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -103,6 +104,7 @@ export const roleSpecificRoutes = [
     path: "/donations",
     element: <Donations />,
     allowedRoles: ["consumer"] as UserRole[],
+    requiresConsentVerification: true, // Added to ensure consumer consent is verified
   },
   {
     path: "/retail-donations",

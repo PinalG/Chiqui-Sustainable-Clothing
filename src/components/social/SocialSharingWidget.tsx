@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Share, Twitter, Facebook, Instagram, Linkedin, Copy, Check, Award } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserInteractions } from "@/hooks/use-user-interactions";
 
 interface SocialSharingProps {
   achievementType?: 'donation' | 'purchase' | 'impact' | 'custom';
@@ -25,6 +27,7 @@ const SocialSharingWidget = ({
   const [customMessage, setCustomMessage] = useState('');
   const [copied, setCopied] = useState(false);
   const { userData } = useAuth();
+  const { addSocialInteraction } = useUserInteractions();
   
   const shareUrl = window.location.href;
   const shareTags = ['SustainableFashion', 'CircularEconomy', 'ReduceWaste'];
@@ -54,16 +57,25 @@ const SocialSharingWidget = ({
       case 'instagram':
         // Instagram doesn't support direct sharing via URL, show instructions instead
         toast.info("To share on Instagram, screenshot this achievement and post it to your story!");
+        addSocialInteraction('share', 'instagram');
         return;
     }
     
     window.open(shareLink, '_blank', 'width=600,height=400');
+    
+    // Record the social interaction
+    addSocialInteraction('share', platform as any, shareUrl, getShareMessage());
+    
     toast.success(`Sharing on ${platform}!`);
   };
   
   const handleCopyLink = () => {
     navigator.clipboard.writeText(`${getShareMessage()} ${shareUrl}`);
     setCopied(true);
+    
+    // Record the copy action as a share
+    addSocialInteraction('share', undefined, shareUrl, getShareMessage());
+    
     toast.success('Share text copied to clipboard!');
     setTimeout(() => setCopied(false), 2000);
   };
