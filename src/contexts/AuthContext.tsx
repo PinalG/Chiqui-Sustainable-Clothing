@@ -1,17 +1,12 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
+import { auth, db, isDevelopmentLike } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { UserData, UserRole, UserPreferences, AuthContextType } from "@/types/AuthTypes";
 import { useAuthMethods } from "@/hooks/AuthHooks";
 import { MOCK_USERS } from "@/types/AuthTypes";
-
-// Determine if we're in a development-like environment (includes Lovable preview links)
-const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
-                          window.location.hostname === 'localhost' || 
-                          window.location.hostname.includes('lovableproject.com');
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -25,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Log mock users to console for development and preview
   useEffect(() => {
     if (isDevelopmentLike) {
+      console.log("AuthContext - isDevelopmentLike:", isDevelopmentLike);
       console.log("Mock users available for development: ", MOCK_USERS.map(u => `${u.email} (${u.role})`).join(", "));
     }
   }, []);
@@ -84,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return () => unsubscribe();
     } else {
       // In development or preview, initialize with no user
+      console.log("Using development mock auth in AuthContext");
       setUser(null);
       setUserData(null);
       setIsLoading(false);

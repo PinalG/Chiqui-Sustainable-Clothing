@@ -11,15 +11,10 @@ import {
   sendPasswordResetEmail
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { auth, db, isDevelopmentLike } from "@/lib/firebase";
 import { toast } from "sonner";
 import { UserData, UserRole, MOCK_USERS, UserPreferences } from "@/types/AuthTypes";
 import { createMockUser, createMockUserData, getMockUserData } from "@/utils/AuthUtils";
-
-// Determine if we're in a development-like environment (includes Lovable preview links)
-const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
-                          window.location.hostname === 'localhost' || 
-                          window.location.hostname.includes('lovableproject.com');
 
 export function useAuthMethods() {
   const signUp = async (
@@ -31,6 +26,7 @@ export function useAuthMethods() {
   ) => {
     try {
       if (isDevelopmentLike) {
+        console.log("Using mock signup in development mode");
         // In development or preview mode, create a mock user without Firebase
         const mockUser = createMockUser(email, name);
         
@@ -89,6 +85,7 @@ export function useAuthMethods() {
   const signIn = async (email: string, password: string) => {
     try {
       if (isDevelopmentLike) {
+        console.log("Using mock signin in development mode for:", email);
         // In development or preview mode, find the mock user
         const mockUser = MOCK_USERS.find(u => u.email === email && u.password === password);
         
@@ -142,7 +139,7 @@ export function useAuthMethods() {
 
   const signInWithGoogle = async (role: UserRole = "consumer") => {
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopmentLike) {
         // In development mode, create a mock Google user
         const mockUser = createMockUser("google@example.com", "Google User");
         
@@ -196,7 +193,7 @@ export function useAuthMethods() {
 
   const logout = async () => {
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopmentLike) {
         // In development mode, just clear the user state
         toast.success("Signed out successfully");
         return true;
@@ -214,7 +211,7 @@ export function useAuthMethods() {
   
   const resetPassword = async (email: string): Promise<void> => {
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopmentLike) {
         // In development mode, just show a success message
         toast.success("Password reset email sent (mock)");
         return; // Return void, not boolean
@@ -246,7 +243,7 @@ export function useAuthMethods() {
         ...preferences
       };
 
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopmentLike) {
         // In development, just return the updated preferences
         toast.success("Preferences updated successfully");
         return updatedPreferences as UserPreferences;
@@ -281,7 +278,7 @@ export function useAuthMethods() {
         lastUpdated: Date.now()
       };
 
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopmentLike) {
         // In development, just return the updated settings
         toast.success("Consent settings updated successfully");
         return updatedSettings;

@@ -20,8 +20,12 @@ const firebaseConfig = {
 
 // Determine if we're in a development-like environment (includes Lovable preview links)
 const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
-                          window.location.hostname === 'localhost' || 
-                          window.location.hostname.includes('lovableproject.com');
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname.includes('lovableproject.com');
+
+// For debugging purposes
+console.log(`Environment: ${process.env.NODE_ENV}, Hostname: ${window.location.hostname}`);
+console.log(`Using development mode: ${isDevelopmentLike}`);
 
 // Initialize Firebase
 let app;
@@ -61,6 +65,7 @@ const createMockAuth = () => {
 
 // Only initialize Firebase if API key is available or if we're in development mode
 try {
+  console.log("Attempting to initialize Firebase");
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   // Ensure the auth.settings exists to prevent the error
@@ -72,6 +77,7 @@ try {
 
   // For development or preview environments, we'll use mock authentication if emulators aren't available
   if (isDevelopmentLike) {
+    console.log("Development-like environment detected, setting up mock auth if needed");
     try {
       // Try to connect to emulators if they are running
       connectAuthEmulator(auth, "http://localhost:9099");
@@ -131,4 +137,4 @@ export const GEMINI_API_KEY = isDevelopmentLike
 // Gemini API endpoint - using the latest Gemini 2.0 pro vision version
 export const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent";
 
-export { auth, db, storage };
+export { auth, db, storage, isDevelopmentLike };

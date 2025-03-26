@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,6 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MOCK_USERS } from "@/types/AuthTypes";
+import { isDevelopmentLike } from "@/lib/firebase";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -27,7 +29,7 @@ const getLoginAttempts = (): number => {
 };
 
 const incrementLoginAttempts = (): number => {
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopmentLike) {
     return 0;
   }
   
@@ -39,10 +41,6 @@ const incrementLoginAttempts = (): number => {
 const resetLoginAttempts = (): void => {
   localStorage.removeItem('loginAttempts');
 };
-
-const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
-                          window.location.hostname === 'localhost' || 
-                          window.location.hostname.includes('lovableproject.com');
 
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
@@ -63,12 +61,16 @@ const Login = () => {
   });
 
   useEffect(() => {
+    // Log the development environment status for debugging
+    console.log(`Login component - isDevelopmentLike: ${isDevelopmentLike}`);
+    console.log(`Login component - hostname: ${window.location.hostname}`);
+    
     const hasAcceptedCookies = localStorage.getItem('cookieConsent');
     if (!hasAcceptedCookies) {
       setShowCookieBanner(true);
     }
 
-    if (process.env.NODE_ENV === 'development') {
+    if (isDevelopmentLike) {
       localStorage.removeItem('lockoutUntil');
       localStorage.removeItem('loginAttempts');
       return;
@@ -162,7 +164,7 @@ const Login = () => {
       navigate("/");
     } catch (error) {
       console.error(error);
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopmentLike) {
         toast.error("Firebase API key is invalid. In development mode, use the mock accounts instead.");
       }
     } finally {
@@ -200,8 +202,6 @@ const Login = () => {
     }
   }, []);
 
-  const isDevMode = process.env.NODE_ENV === 'development';
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg p-4">
       <div className="w-full max-w-md">
@@ -213,7 +213,7 @@ const Login = () => {
           <p className="text-muted-foreground">Transforming Sustainable Retail</p>
         </div>
         
-        {!isDevMode && lockoutTime && (
+        {!isDevelopmentLike && lockoutTime && (
           <Alert className="mb-4 bg-red-50 border-red-200 text-red-800">
             <AlertCircle className="h-4 w-4 text-red-600" />
             <AlertDescription>
@@ -223,7 +223,7 @@ const Login = () => {
           </Alert>
         )}
         
-        {isDevMode && (
+        {isDevelopmentLike && (
           <Alert className="mb-4 bg-blue-50 border-blue-200 text-blue-800">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertDescription>
@@ -282,7 +282,7 @@ const Login = () => {
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={isLoading || (!isDevMode && lockoutTime !== null && lockoutTime > Date.now())}
+                  disabled={isLoading || (!isDevelopmentLike && lockoutTime !== null && lockoutTime > Date.now())}
                 >
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Sign In
@@ -371,10 +371,10 @@ const Login = () => {
             <Button
               variant="outline"
               onClick={handleGoogleSignIn}
-              disabled={googleLoading || isDevMode}
+              disabled={googleLoading || isDevelopmentLike}
               className="w-full"
               aria-label="Sign in with Google"
-              title={isDevMode ? "Google sign-in is disabled in development mode" : ""}
+              title={isDevelopmentLike ? "Google sign-in is disabled in development mode" : ""}
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
