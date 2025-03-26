@@ -13,6 +13,7 @@ import { Loader2, Info, AlertCircle, Cookie } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MOCK_USERS } from "@/types/AuthTypes";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -149,23 +150,10 @@ const Login = () => {
   };
 
   const fillMockUser = (type: string) => {
-    switch (type) {
-      case 'consumer':
-        form.setValue('email', 'consumer@example.com');
-        form.setValue('password', 'password123');
-        break;
-      case 'retailer':
-        form.setValue('email', 'retailer@example.com');
-        form.setValue('password', 'password123');
-        break;
-      case 'logistics':
-        form.setValue('email', 'logistics@example.com');
-        form.setValue('password', 'password123');
-        break;
-      case 'admin':
-        form.setValue('email', 'admin@example.com');
-        form.setValue('password', 'password123');
-        break;
+    const user = MOCK_USERS.find(u => u.role === type);
+    if (user) {
+      form.setValue('email', user.email);
+      form.setValue('password', user.password);
     }
   };
 
@@ -305,7 +293,7 @@ const Login = () => {
                           </Button>
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
-                          Password for all accounts: password123
+                          All mock accounts use password: password123
                         </p>
                       </div>
                     </AccordionContent>

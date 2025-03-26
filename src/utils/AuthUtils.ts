@@ -1,5 +1,6 @@
 
 import { User } from "firebase/auth";
+import { UserData, UserRole, MOCK_USERS } from "@/types/AuthTypes";
 
 // Create a mock user for development
 export const createMockUser = (email: string, displayName: string): User => {
@@ -31,4 +32,52 @@ export const createMockUser = (email: string, displayName: string): User => {
     phoneNumber: null,
     providerId: "password",
   } as unknown as User;
+};
+
+// Create mock user data
+export const createMockUserData = (
+  user: User, 
+  role: UserRole,
+  additionalData: Partial<UserData> = {}
+): UserData => {
+  return {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+    role: role,
+    createdAt: Date.now(),
+    sustainabilityScore: additionalData.sustainabilityScore || 0,
+    rewardsPoints: role === "consumer" ? (additionalData.rewardsPoints || 100) : 0,
+    organizationName: additionalData.organizationName,
+    taxId: additionalData.taxId,
+    consentSettings: {
+      marketing: false,
+      cookies: true,
+      dataSharing: false,
+      lastUpdated: Date.now()
+    },
+    preferences: {
+      language: 'en',
+      highContrast: false,
+      largeText: false,
+      reducedMotion: false,
+      screenReader: false
+    },
+    ...additionalData
+  };
+};
+
+// Generate mock user data for a specific mock user
+export const getMockUserData = (email: string): UserData | null => {
+  const mockUser = MOCK_USERS.find(u => u.email === email);
+  if (!mockUser) return null;
+  
+  const user = createMockUser(mockUser.email, mockUser.name);
+  return createMockUserData(user, mockUser.role, {
+    sustainabilityScore: mockUser.sustainabilityScore,
+    rewardsPoints: mockUser.rewardsPoints,
+    organizationName: mockUser.organizationName,
+    taxId: mockUser.taxId
+  });
 };

@@ -13,7 +13,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { toast } from "sonner";
 import { UserData, UserRole, MOCK_USERS, UserPreferences } from "@/types/AuthTypes";
-import { createMockUser } from "@/utils/AuthUtils";
+import { createMockUser, createMockUserData, getMockUserData } from "@/utils/AuthUtils";
 
 export function useAuthMethods() {
   const signUp = async (
@@ -28,31 +28,8 @@ export function useAuthMethods() {
         // In development mode, create a mock user without Firebase
         const mockUser = createMockUser(email, name);
         
-        // Create mock user data with default consent and preference settings
-        const mockUserData: UserData = {
-          uid: mockUser.uid,
-          email: email,
-          displayName: name,
-          photoURL: null,
-          role: role,
-          createdAt: Date.now(),
-          sustainabilityScore: 0,
-          rewardsPoints: role === "consumer" ? 100 : 0,
-          consentSettings: {
-            marketing: false,
-            cookies: true,
-            dataSharing: false,
-            lastUpdated: Date.now()
-          },
-          preferences: {
-            language: 'en',
-            highContrast: false,
-            largeText: false,
-            reducedMotion: false,
-            screenReader: false
-          },
-          ...additionalData
-        };
+        // Create mock user data
+        const mockUserData = createMockUserData(mockUser, role, additionalData);
         
         toast.success("Account created successfully");
         return { user: mockUser, userData: mockUserData };
@@ -117,19 +94,13 @@ export function useAuthMethods() {
         // Create a mock Firebase user
         const user = createMockUser(mockUser.email, mockUser.name);
         
-        // Create user data
-        const userData: UserData = {
-          uid: user.uid,
-          email: mockUser.email,
-          displayName: mockUser.name,
-          photoURL: null,
-          role: mockUser.role,
-          createdAt: Date.now(),
-          sustainabilityScore: mockUser.sustainabilityScore,
-          rewardsPoints: mockUser.rewardsPoints || 0,
-          organizationName: mockUser.organizationName,
-          taxId: mockUser.taxId
-        };
+        // Get user data from the mock user
+        const userData = getMockUserData(mockUser.email);
+        
+        if (!userData) {
+          toast.error("User data not found");
+          throw new Error("User data not found");
+        }
         
         toast.success("Signed in successfully");
         return { user, userData };

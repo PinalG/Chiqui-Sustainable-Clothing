@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
@@ -6,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { UserData, UserRole, UserPreferences, AuthContextType } from "@/types/AuthTypes";
 import { useAuthMethods } from "@/hooks/AuthHooks";
+import { MOCK_USERS } from "@/types/AuthTypes";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -19,12 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Log mock users to console for development
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log("Mock users for development:", 
-        "consumer@example.com / password123, " +
-        "retailer@example.com / password123, " +
-        "logistics@example.com / password123, " +
-        "admin@example.com / password123"
-      );
+      console.log("Mock users available for development: ", MOCK_USERS.map(u => `${u.email} (${u.role})`).join(", "));
     }
   }, []);
 
@@ -122,9 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string): Promise<void> => {
-    // Modified to return void instead of boolean
     await authMethods.resetPassword(email);
-    // No return value
   };
 
   const updateUserPreferences = async (preferences: Partial<UserPreferences>) => {

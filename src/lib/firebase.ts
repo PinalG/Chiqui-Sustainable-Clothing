@@ -6,7 +6,7 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // Firebase configuration for development (will be replaced in production)
 const firebaseConfig = {
-  apiKey: "demo-key-for-development",
+  apiKey: process.env.NODE_ENV === 'development' ? "demo-key-for-development" : (import.meta.env.VITE_FIREBASE_API_KEY || "demo-key-for-development"),
   authDomain: "chiqui-platform.firebaseapp.com",
   projectId: "chiqui-platform",
   storageBucket: "chiqui-platform.appspot.com",
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === 'development') {
 // For development purposes, we use a mock key
 export const GEMINI_API_KEY = process.env.NODE_ENV === 'development' 
   ? "GEMINI_MOCK_KEY_FOR_DEVELOPMENT" 
-  : process.env.GEMINI_API_KEY || ""; 
+  : (import.meta.env.VITE_GEMINI_API_KEY || ""); 
 
 // Gemini API endpoint - using the latest Gemini 2.0 pro vision version
 export const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent";
