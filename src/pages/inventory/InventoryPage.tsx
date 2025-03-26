@@ -2,8 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Truck, BarChart2, ClipboardList, QrCode, AlertCircle, History, Users } from "lucide-react";
-import InventoryManagement from "@/components/retail-donations/InventoryManagement";
+import { Package, Truck, BarChart2, ClipboardList, AlertCircle, Users } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -88,14 +87,10 @@ const InventoryPage = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-4">
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 <span className="hidden md:inline">Overview</span>
-              </TabsTrigger>
-              <TabsTrigger value="inventory" className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4" />
-                <span className="hidden md:inline">Inventory</span>
               </TabsTrigger>
               <TabsTrigger value="warehouse" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
@@ -117,10 +112,6 @@ const InventoryPage = () => {
             
             <TabsContent value="overview" className="mt-6">
               <SupplyChainOverview />
-            </TabsContent>
-            
-            <TabsContent value="inventory" className="mt-6">
-              <InventoryManagement />
             </TabsContent>
             
             <TabsContent value="warehouse" className="mt-6">

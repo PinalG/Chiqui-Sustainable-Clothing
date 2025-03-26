@@ -2,9 +2,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PackagePlus, QrCode, DollarSign, ClipboardList, FileText, Info, Scan, History } from "lucide-react";
+import { PackagePlus, QrCode, DollarSign, FileText, Info, Scan, History } from "lucide-react";
 import RetailDonationForm from "@/components/retail-donations/RetailDonationForm";
-import InventoryManagement from "@/components/retail-donations/InventoryManagement";
 import QrCodeGenerator from "@/components/retail-donations/QrCodeGenerator";
 import QrCodeScanner from "@/components/retail-donations/QrCodeScanner";
 import QrCodeTrackingHistory from "@/components/retail-donations/QrCodeTrackingHistory";
@@ -54,14 +53,10 @@ const RetailDonations = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-7 gap-2 md:gap-4">
+            <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-4">
               <TabsTrigger value="register" className="flex items-center gap-2">
                 <PackagePlus className="h-4 w-4" />
                 <span className="hidden md:inline">Register</span>
-              </TabsTrigger>
-              <TabsTrigger value="inventory" className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4" />
-                <span className="hidden md:inline">Inventory</span>
               </TabsTrigger>
               <TabsTrigger value="qrcode" className="flex items-center gap-2">
                 <QrCode className="h-4 w-4" />
@@ -86,11 +81,7 @@ const RetailDonations = () => {
             </TabsList>
             
             <TabsContent value="register" className="mt-6">
-              <RetailDonationForm onComplete={() => setActiveTab("inventory")} />
-            </TabsContent>
-            
-            <TabsContent value="inventory" className="mt-6">
-              <InventoryManagement />
+              <RetailDonationForm onComplete={() => setActiveTab("qrcode")} />
             </TabsContent>
             
             <TabsContent value="qrcode" className="mt-6">
