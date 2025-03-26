@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -808,3 +809,81 @@ const Marketplace = () => {
                     <div>
                       <h4 className="font-medium mb-2">Sustainability</h4>
                       <div className="space-y-1">
+                        {[
+                          { value: "all", label: "All Scores" },
+                          { value: "high", label: "High (80+)" },
+                          { value: "medium", label: "Medium (50-80)" },
+                          { value: "low", label: "Low (0-50)" }
+                        ].map((option) => (
+                          <div 
+                            key={option.value}
+                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${sustainabilityFilter === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                            onClick={() => setSustainabilityFilter(option.value)}
+                          >
+                            <span>{option.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Mobile Filters */}
+              <FilterSidebar 
+                isOpen={showFilters} 
+                onClose={handleToggleShowFilters} 
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                conditionFilter={conditionFilter}
+                setConditionFilter={setConditionFilter}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                sustainabilityFilter={sustainabilityFilter}
+                setSustainabilityFilter={setSustainabilityFilter}
+              />
+              
+              {/* Product Grid */}
+              <div className="lg:col-span-3">
+                {filteredProducts.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center text-center p-12 bg-muted rounded-lg">
+                    <Tag className="h-12 w-12 mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium mb-2">No products found</h3>
+                    <p className="text-muted-foreground max-w-md mb-6">
+                      We couldn't find any products matching your current filters. Try adjusting your search criteria or browse our other categories.
+                    </p>
+                    <Button onClick={() => {
+                      setCategoryFilter("all");
+                      setConditionFilter("all");
+                      setPriceRange("all");
+                      setSustainabilityFilter("all");
+                      setSearchQuery("");
+                    }}>
+                      Reset Filters
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredProducts.map((product) => (
+                      <ProductCard 
+                        key={product.id}
+                        product={product}
+                        onAddToCart={handleAddToCart}
+                        onViewDetails={handleViewDetails}
+                        wishlisted={wishlistedItems.includes(product.id)}
+                        onToggleWishlist={handleToggleWishlist}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Marketplace;
+
