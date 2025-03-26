@@ -4,28 +4,29 @@ import { lazy } from 'react';
 // Create a custom Error404 component until the actual page is implemented
 const Error404 = () => <div>404 - Page Not Found</div>;
 
-// Lazy-loaded components
-const Home = lazy(() => import('../pages/Home'));
+// Create placeholder components for routes
+// In a real application, these would be actual components
+const Home = lazy(() => import('../pages/Dashboard')); // Use Dashboard as Home for now
 const Marketplace = lazy(() => import('../pages/Marketplace'));
 const RetailDonations = lazy(() => import('../pages/RetailDonations'));
 const Donations = lazy(() => import('../pages/Donations'));
-const Analytics = lazy(() => import('../pages/Analytics'));
-const TaxBenefits = lazy(() => import('../pages/TaxBenefits'));
-const Logistics = lazy(() => import('../pages/Logistics'));
-const Support = lazy(() => import('../pages/Support'));
-const Inventory = lazy(() => import('../pages/inventory/InventoryPage'));
+const Analytics = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const TaxBenefits = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const Logistics = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const Support = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const Inventory = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 const UserManagement = lazy(() => import('../pages/admin/UserManagement'));
-const Reports = lazy(() => import('../pages/admin/Reports'));
-const Permissions = lazy(() => import('../pages/admin/Permissions'));
-const SettingsAccessibility = lazy(() => import('../pages/settings/SettingsAccessibility'));
-const SettingsProfile = lazy(() => import('../pages/settings/SettingsProfile'));
+const Reports = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const Permissions = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const SettingsAccessibility = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const SettingsProfile = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
 const RetailerMarketplace = lazy(() => import("../pages/retailer/RetailerMarketplace"));
-const Login = lazy(() => import('../pages/Login'));
-const Register = lazy(() => import('../pages/Register'));
-const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
-const ResetPassword = lazy(() => import('../pages/ResetPassword'));
-const VerifyEmail = lazy(() => import('../pages/VerifyEmail'));
+const Login = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const Register = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const ForgotPassword = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const ResetPassword = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
+const VerifyEmail = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
 
 // Create simple route wrapper components
 // These would normally be imported, but for now we'll create placeholder components

@@ -586,10 +586,11 @@ const Marketplace = () => {
     toast({
       title: "Item added to cart",
       description: "The item has been added to your shopping cart",
-      action: {
-        label: "View Cart",
-        onClick: () => navigate("/checkout"),
-      },
+      action: (
+        <Button variant="outline" onClick={() => navigate("/checkout")}>
+          View Cart
+        </Button>
+      ),
     });
   };
   
@@ -902,4 +903,3 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
-
