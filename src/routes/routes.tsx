@@ -133,6 +133,12 @@ export const roleSpecificRoutes = [
     allowedRoles: ["retailer"] as UserRole[],
     requiresConsentVerification: true,
   },
+  {
+    path: "/retailer/marketplace",
+    element: <RetailerMarketplace />,
+    allowedRoles: ["retailer", "admin"] as UserRole[],
+    requiresConsentVerification: false,
+  },
 ];
 
 export const adminRoutes = [
