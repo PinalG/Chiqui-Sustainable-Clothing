@@ -1,9 +1,9 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import RewardsTier from "@/components/rewards/RewardsTier";
-import ImpactDashboard from "@/components/rewards/ImpactDashboard";
-import EducationalContent from "@/components/rewards/EducationalContent";
+import { RewardsTier } from "@/components/rewards/RewardsTier";
+import { ImpactDashboard } from "@/components/rewards/ImpactDashboard";
+import { EducationalContent } from "@/components/rewards/EducationalContent";
 import SocialSharingWidget from "@/components/social/SocialSharingWidget";
 import { Card } from "@/components/ui/card";
 import { Award, Share, BookOpen, BarChart2 } from "lucide-react";

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,17 +39,17 @@ const SocialSharingWidget = ({
   const handleSocialShare = (platform: string) => {
     const message = encodeURIComponent(getShareMessage());
     const url = encodeURIComponent(shareUrl);
-    let shareUrl = '';
+    let shareLink = '';
     
     switch (platform) {
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?text=${message}&url=${url}`;
+        shareLink = `https://twitter.com/intent/tweet?text=${message}&url=${url}`;
         break;
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
+        shareLink = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
         break;
       case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${message}`;
+        shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${message}`;
         break;
       case 'instagram':
         // Instagram doesn't support direct sharing via URL, show instructions instead
@@ -58,7 +57,7 @@ const SocialSharingWidget = ({
         return;
     }
     
-    window.open(shareUrl, '_blank', 'width=600,height=400');
+    window.open(shareLink, '_blank', 'width=600,height=400');
     toast.success(`Sharing on ${platform}!`);
   };
   
