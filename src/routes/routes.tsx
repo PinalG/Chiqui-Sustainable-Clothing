@@ -1,3 +1,4 @@
+
 import React, { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -210,7 +211,7 @@ export const RoleProtectedRouteWrapper = ({
 
 export const AdminRouteWrapper = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allowedRoles={["admin"] as UserRole[]}>
-    <AdminLayout>
+    <AdminLayout title="Admin Panel">
       <LazyComponent>{children}</LazyComponent>
     </AdminLayout>
   </ProtectedRoute>
