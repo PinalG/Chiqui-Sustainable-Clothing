@@ -1,4 +1,3 @@
-
 import React, { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -27,6 +26,7 @@ const SettingsPage = lazy(() => import("@/pages/settings/SettingsPage"));
 const PrivacyPage = lazy(() => import("@/pages/settings/PrivacyPage"));
 const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage"));
 const Rewards = lazy(() => import("@/pages/Rewards"));
+const AnalyticsDashboard = lazy(() => import("@/pages/analytics/AnalyticsDashboard"));
 
 // Define route groups for better organization
 export const publicRoutes = [
@@ -86,6 +86,10 @@ export const protectedRoutes = [
     element: <Rewards />,
   },
   {
+    path: "/analytics",
+    element: <AnalyticsDashboard />,
+  },
+  {
     path: "/settings",
     element: <SettingsPage />,
   },
@@ -104,7 +108,7 @@ export const roleSpecificRoutes = [
     path: "/donations",
     element: <Donations />,
     allowedRoles: ["consumer"] as UserRole[],
-    requiresConsentVerification: true, // Added to ensure consumer consent is verified
+    requiresConsentVerification: true,
   },
   {
     path: "/retail-donations",
@@ -148,7 +152,6 @@ export const errorRoutes = [
   },
 ];
 
-// Route components that wrap routes with appropriate layouts and guards
 export const ProtectedRouteWrapper = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>
     <MainLayout>

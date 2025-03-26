@@ -15,6 +15,13 @@ export interface DonationItem {
     co2Reduced?: number; // lbs
     wasteReduced?: number; // lbs
   };
+  complianceData?: {
+    reviewed: boolean;
+    reviewedBy?: string;
+    reviewDate?: number;
+    complianceNotes?: string;
+    regulatoryStatus?: 'compliant' | 'pending' | 'non-compliant';
+  };
 }
 
 export interface SocialInteraction {
@@ -31,4 +38,34 @@ export interface UserInteraction {
   donations: DonationItem[];
   socialInteractions: SocialInteraction[];
   lastInteractionDate: number;
+}
+
+export interface AnalyticsDataPoint {
+  timestamp: number;
+  type: 'donation' | 'purchase' | 'social' | 'sustainability';
+  value: number;
+  metadata?: Record<string, any>;
+}
+
+export interface ComplianceStatus {
+  id: string;
+  area: string;
+  status: 'compliant' | 'warning' | 'violation';
+  compliance: number;
+  lastUpdated: number;
+  details: {
+    name: string;
+    status: 'compliant' | 'warning' | 'violation';
+    score: number;
+  }[];
+}
+
+export interface ComplianceAuditLog {
+  id: string;
+  date: number;
+  action: string;
+  result: 'Passed' | 'Action Required' | 'Failed';
+  compliance: string;
+  user: string;
+  notes?: string;
 }

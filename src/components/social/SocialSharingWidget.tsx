@@ -29,6 +29,7 @@ const SocialSharingWidget = ({
   const { userData } = useAuth();
   const { addSocialInteraction } = useUserInteractions();
   
+  // Define shareUrl here before using it
   const shareUrl = window.location.href;
   const shareTags = ['SustainableFashion', 'CircularEconomy', 'ReduceWaste'];
   
