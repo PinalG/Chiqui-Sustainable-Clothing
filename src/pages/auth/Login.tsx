@@ -45,6 +45,7 @@ const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showCookieBanner, setShowCookieBanner] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<number | null>(null);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true); // Ensure this is true to show demo accounts
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -154,8 +155,19 @@ const Login = () => {
     if (user) {
       form.setValue('email', user.email);
       form.setValue('password', user.password);
+      // Let the user know which account was selected
+      toast.info(`Demo ${type} account selected`, {
+        description: `Email: ${user.email}, Password: ${user.password}`
+      });
     }
   };
+
+  // Log the mock users to console for debugging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Mock users available:", MOCK_USERS);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg p-4">
@@ -236,9 +248,10 @@ const Login = () => {
               </form>
             </Form>
             
+            {/* Demo Accounts Section - Always show in development mode */}
             {process.env.NODE_ENV === 'development' && (
               <div className="mt-4">
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full" defaultValue="demo-accounts">
                   <AccordionItem value="demo-accounts">
                     <AccordionTrigger className="text-sm text-muted-foreground py-2">
                       <span className="flex items-center">
