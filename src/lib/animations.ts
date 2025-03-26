@@ -1,5 +1,5 @@
 
-import { animate, AnimationControls } from "framer-motion";
+import { animate } from "framer-motion";
 
 /**
  * Creates a default animation controller with presets for AI analysis
@@ -17,11 +17,13 @@ export const createDefaultAnimate = () => {
     fadeIn: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      return animate(
-        element, 
-        { opacity: 1 }, 
-        { ...defaultAnimationOptions, ...options, from: 0 }
-      );
+      // Use the correct syntax for animate function
+      return animate(element.style, {
+        opacity: [0, 1]
+      }, {
+        ...defaultAnimationOptions,
+        ...options
+      });
     },
     
     /**
@@ -30,11 +32,12 @@ export const createDefaultAnimate = () => {
     fadeOut: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      return animate(
-        element, 
-        { opacity: 0 }, 
-        { ...defaultAnimationOptions, ...options, from: 1 }
-      );
+      return animate(element.style, {
+        opacity: [1, 0]
+      }, {
+        ...defaultAnimationOptions,
+        ...options
+      });
     },
     
     /**
@@ -43,11 +46,12 @@ export const createDefaultAnimate = () => {
     slideInBottom: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      return animate(
-        element,
-        { y: 0 },
-        { ...defaultAnimationOptions, ...options, from: 20 }
-      );
+      return animate(element.style, {
+        transform: ["translateY(20px)", "translateY(0px)"]
+      }, {
+        ...defaultAnimationOptions,
+        ...options
+      });
     },
     
     /**
@@ -56,11 +60,12 @@ export const createDefaultAnimate = () => {
     slideOutBottom: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      return animate(
-        element,
-        { y: 20 },
-        { ...defaultAnimationOptions, ...options, from: 0 }
-      );
+      return animate(element.style, {
+        transform: ["translateY(0px)", "translateY(20px)"]
+      }, {
+        ...defaultAnimationOptions,
+        ...options
+      });
     },
     
     /**
@@ -69,28 +74,24 @@ export const createDefaultAnimate = () => {
     pulse: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      // For pulse, we'll use keyframes to create the animation
-      const opacityControl = animate(
-        element,
-        { opacity: [0.7, 1, 0.7] },
-        { 
-          duration: 1.5,
-          ease: "easeInOut",
-          repeat: Infinity,
-          ...options
-        }
-      );
+      // For pulse animation
+      const opacityControl = animate(element.style, {
+        opacity: [0.7, 1, 0.7]
+      }, { 
+        duration: 1.5,
+        ease: "easeInOut",
+        repeat: Infinity,
+        ...options
+      });
       
-      const scaleControl = animate(
-        element,
-        { scale: [1, 1.05, 1] },
-        { 
-          duration: 1.5,
-          ease: "easeInOut",
-          repeat: Infinity,
-          ...options
-        }
-      );
+      const scaleControl = animate(element.style, {
+        transform: ["scale(1)", "scale(1.05)", "scale(1)"]
+      }, { 
+        duration: 1.5,
+        ease: "easeInOut",
+        repeat: Infinity,
+        ...options
+      });
       
       // Return an object with controls for both animations
       return {
@@ -107,17 +108,19 @@ export const createDefaultAnimate = () => {
     scaleUp: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      const opacityControl = animate(
-        element,
-        { opacity: 1 },
-        { ...defaultAnimationOptions, ...options, from: 0 }
-      );
+      const opacityControl = animate(element.style, {
+        opacity: [0, 1]
+      }, {
+        ...defaultAnimationOptions,
+        ...options
+      });
       
-      const scaleControl = animate(
-        element,
-        { scale: 1 },
-        { ...defaultAnimationOptions, ...options, from: 0.9 }
-      );
+      const scaleControl = animate(element.style, {
+        transform: ["scale(0.9)", "scale(1)"]
+      }, {
+        ...defaultAnimationOptions,
+        ...options
+      });
       
       return {
         stop: () => {
