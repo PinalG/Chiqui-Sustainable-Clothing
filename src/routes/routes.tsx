@@ -30,6 +30,7 @@ const AnalyticsDashboard = lazy(() => import("@/pages/analytics/AnalyticsDashboa
 const InventoryPage = lazy(() => import("@/pages/inventory/InventoryPage"));
 const RetailerMarketplace = lazy(() => import("@/pages/retailer/RetailerMarketplace"));
 const Support = lazy(() => import("@/pages/Support"));
+const TaxBenefitsPage = lazy(() => import("@/pages/TaxBenefitsPage"));
 
 // Define route groups for better organization
 export const publicRoutes = [
@@ -111,6 +112,10 @@ export const protectedRoutes = [
   {
     path: "/support",
     element: <Support />,
+  },
+  {
+    path: "/tax-benefits",
+    element: <TaxBenefitsPage />,
   },
   {
     path: "/retailer/marketplace",
