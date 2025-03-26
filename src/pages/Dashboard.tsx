@@ -75,6 +75,10 @@ const Dashboard = () => {
     navigate("/inventory");
   };
 
+  const handleNavigateToRevenue = () => {
+    navigate("/analytics");
+  };
+
   return (
     <div className="space-y-6 animate-enter">
       <div>

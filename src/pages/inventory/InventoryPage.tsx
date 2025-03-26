@@ -8,11 +8,11 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbS
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { WarehouseManagement } from "@/components/logistics/WarehouseManagement";
+import WarehouseManagement from "@/components/logistics/WarehouseManagement";
 import SupplyChainOverview from "@/components/inventory/SupplyChainOverview";
 import InventoryAnalytics from "@/components/inventory/InventoryAnalytics";
-import { ShipmentTracking } from "@/components/logistics/ShipmentTracking";
-import { LogisticsPartners } from "@/components/logistics/LogisticsPartners";
+import ShipmentTracking from "@/components/logistics/ShipmentTracking";
+import LogisticsPartners from "@/components/logistics/LogisticsPartners";
 import { toast } from "@/hooks/use-toast";
 
 const InventoryPage = () => {
