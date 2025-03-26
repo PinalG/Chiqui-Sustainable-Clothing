@@ -49,7 +49,8 @@ const createMockAuth = () => {
     sendPasswordResetEmail: async () => {
       console.log("Mock password reset");
     },
-    currentUser: null
+    currentUser: null,
+    settings: {} // Add mock settings object to prevent "Cannot read properties of undefined (reading 'settings')" error
   };
 };
 
@@ -57,6 +58,10 @@ const createMockAuth = () => {
 try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
+  // Ensure the auth.settings exists to prevent the error
+  if (!auth.settings) {
+    auth.settings = {};
+  }
   db = getFirestore(app);
   storage = getStorage(app);
 
@@ -72,6 +77,8 @@ try {
     } catch (e) {
       console.log("Error connecting to emulators:", e);
       console.log("Using mock authentication in development mode");
+      // Create and use mock auth if emulator connection fails
+      auth = createMockAuth();
     }
   }
 } catch (error) {
