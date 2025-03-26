@@ -1,3 +1,4 @@
+
 import { lazy } from 'react';
 import { Error404 } from '@/pages/errors/404';
 
@@ -18,6 +19,11 @@ const Permissions = lazy(() => import('@/pages/admin/Permissions'));
 const SettingsAccessibility = lazy(() => import('@/pages/settings/SettingsAccessibility'));
 const SettingsProfile = lazy(() => import('@/pages/settings/SettingsProfile'));
 const RetailerMarketplace = lazy(() => import("@/pages/retailer/RetailerMarketplace"));
+const Login = lazy(() => import('@/pages/Login'));
+const Register = lazy(() => import('@/pages/Register'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const VerifyEmail = lazy(() => import('@/pages/VerifyEmail'));
 
 // Route Wrappers
 import { PublicRoute } from '@/routes/PublicRoute';
@@ -27,11 +33,11 @@ import { AdminRoute } from '@/routes/AdminRoute';
 
 // Public routes - accessible without authentication
 export const publicRoutes = [
-  { path: '/login', element: <PublicRoute><lazy(() => import('@/pages/Login')) /></PublicRoute> },
-  { path: '/register', element: <PublicRoute><lazy(() => import('@/pages/Register')) /></PublicRoute> },
-  { path: '/forgot-password', element: <PublicRoute><lazy(() => import('@/pages/ForgotPassword')) /></PublicRoute> },
-  { path: '/reset-password/:token', element: <PublicRoute><lazy(() => import('@/pages/ResetPassword')) /></PublicRoute> },
-  { path: '/verify-email/:token', element: <PublicRoute><lazy(() => import('@/pages/VerifyEmail')) /></PublicRoute> },
+  { path: '/login', element: <PublicRoute><Login /></PublicRoute> },
+  { path: '/register', element: <PublicRoute><Register /></PublicRoute> },
+  { path: '/forgot-password', element: <PublicRoute><ForgotPassword /></PublicRoute> },
+  { path: '/reset-password/:token', element: <PublicRoute><ResetPassword /></PublicRoute> },
+  { path: '/verify-email/:token', element: <PublicRoute><VerifyEmail /></PublicRoute> },
 ];
 
 // Protected routes - accessible only to authenticated users
@@ -83,7 +89,7 @@ export const roleSpecificRoutes = [
   },
   {
     path: "/retailer/marketplace",
-    element: <RetailerMarketplace />,
+    element: <RoleProtectedRoute allowedRoles={["retailer", "admin"]} requiresConsentVerification={false}><RetailerMarketplace /></RoleProtectedRoute>,
     allowedRoles: ["retailer", "admin"],
     requiresConsentVerification: false,
   },
