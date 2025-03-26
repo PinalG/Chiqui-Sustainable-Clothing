@@ -1,11 +1,10 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
 import { 
   Upload,
   ImagePlus,
@@ -19,7 +18,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ItemAnalysisResult } from "@/lib/geminiService";
-import { useGemini } from "@/hooks/use-gemini";
+import { useAiAnalysis } from "@/hooks/use-ai-analysis";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -29,7 +28,6 @@ interface ImageAnalyzerProps {
 }
 
 const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
-  const { toast } = useToast();
   const [image, setImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,8 +37,8 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
     isAnalyzing,
     progress,
     result: analysisResult,
-  } = useGemini({
-    onSuccess: (result) => {
+  } = useAiAnalysis({
+    onAnalysisComplete: (result) => {
       if (onAnalysisComplete) {
         onAnalysisComplete(result);
       }
@@ -53,20 +51,12 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
 
     const file = files[0];
     if (file.size > MAX_FILE_SIZE) {
-      toast({
-        title: "File too large",
-        description: "The image must be less than 5MB",
-        variant: "destructive",
-      });
+      alert("File too large. Maximum size is 5MB.");
       return;
     }
 
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Only JPG, PNG and WebP images are accepted",
-        variant: "destructive",
-      });
+      alert("Invalid file type. Only JPG, PNG and WebP images are allowed.");
       return;
     }
 
@@ -265,10 +255,6 @@ const ImageAnalyzer = ({ onAnalysisComplete }: ImageAnalyzerProps) => {
                   onClick={() => {
                     if (onAnalysisComplete && analysisResult) {
                       onAnalysisComplete(analysisResult);
-                      toast({
-                        title: "Analysis applied",
-                        description: "The AI analysis has been applied to your item",
-                      });
                     }
                   }}
                   className="gap-2"
