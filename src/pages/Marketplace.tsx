@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { 
   Search, 
   Filter, 
@@ -23,7 +25,14 @@ import {
   Leaf,
   Tags,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  Star,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown,
+  X,
+  CircleCheck,
+  ShoppingCart 
 } from "lucide-react";
 import { 
   Select, 
@@ -41,10 +50,27 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
+const Sparkles = (props) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    {...props}
+  >
+    <path d="m12 3-1.9 5.8a2 2 0 0 1-1.1 1.1L3.2 12l5.8 1.9a2 2 0 0 1 1.1 1.1L12 21l1.9-5.8a2 2 0 0 1 1.1-1.1L21 12l-5.8-1.9a2 2 0 0 1-1.1-1.1z"/>
+  </svg>
+);
 
 const mockProducts = [
   {
@@ -557,7 +583,9 @@ const Marketplace = () => {
   
   const handleAddToCart = (productId: string) => {
     setCartItems(prev => [...prev, productId]);
-    toast.success("Item added to cart", {
+    toast({
+      title: "Item added to cart",
+      description: "The item has been added to your shopping cart",
       action: {
         label: "View Cart",
         onClick: () => navigate("/checkout"),
@@ -568,10 +596,16 @@ const Marketplace = () => {
   const handleToggleWishlist = (productId: string) => {
     if (wishlistedItems.includes(productId)) {
       setWishlistedItems(prev => prev.filter(id => id !== productId));
-      toast("Removed from wishlist");
+      toast({
+        title: "Removed from wishlist",
+        description: "The item has been removed from your wishlist"
+      });
     } else {
       setWishlistedItems(prev => [...prev, productId]);
-      toast("Added to wishlist");
+      toast({
+        title: "Added to wishlist",
+        description: "The item has been added to your wishlist"
+      });
     }
   };
   
@@ -868,3 +902,4 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
+
