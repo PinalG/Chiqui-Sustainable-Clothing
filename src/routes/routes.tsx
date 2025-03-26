@@ -28,6 +28,7 @@ const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage"));
 const Rewards = lazy(() => import("@/pages/Rewards"));
 const AnalyticsDashboard = lazy(() => import("@/pages/analytics/AnalyticsDashboard"));
 const InventoryPage = lazy(() => import("@/pages/inventory/InventoryPage"));
+const RetailerMarketplace = lazy(() => import("@/pages/retailer/RetailerMarketplace"));
 
 // Define route groups for better organization
 export const publicRoutes = [
@@ -105,6 +106,16 @@ export const protectedRoutes = [
   {
     path: "/inventory",
     element: <InventoryPage />,
+  },
+  {
+    path: "/retailer/marketplace",
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <RetailerMarketplace />
+        </MainLayout>
+      </ProtectedRoute>
+    ),
   },
 ];
 

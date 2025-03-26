@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Truck, BarChart2, ClipboardList, AlertCircle, Users } from "lucide-react";
+import { Package, Truck, BarChart2, AlertCircle, Users } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +24,10 @@ const InventoryPage = () => {
 
   const navigateToQRGenerator = () => {
     navigate("/retail-donations", { state: { activeTab: "qrcode" } });
+  };
+
+  const navigateToRetailerMarketplace = () => {
+    navigate("/retailer/marketplace");
   };
 
   const handlePrintInventoryReport = () => {
@@ -68,12 +72,15 @@ const InventoryPage = () => {
           </p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={handlePrintInventoryReport}>
             Generate Report
           </Button>
-          <Button onClick={navigateToQRGenerator}>
+          <Button variant="outline" onClick={navigateToQRGenerator}>
             Generate QR Codes
+          </Button>
+          <Button onClick={navigateToRetailerMarketplace}>
+            View Marketplace
           </Button>
         </div>
       </div>
