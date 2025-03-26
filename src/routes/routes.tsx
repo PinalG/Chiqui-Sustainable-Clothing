@@ -1,4 +1,3 @@
-
 import React, { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -30,6 +29,7 @@ const Rewards = lazy(() => import("@/pages/Rewards"));
 const AnalyticsDashboard = lazy(() => import("@/pages/analytics/AnalyticsDashboard"));
 const InventoryPage = lazy(() => import("@/pages/inventory/InventoryPage"));
 const RetailerMarketplace = lazy(() => import("@/pages/retailer/RetailerMarketplace"));
+const Support = lazy(() => import("@/pages/Support"));
 
 // Define route groups for better organization
 export const publicRoutes = [
@@ -107,6 +107,10 @@ export const protectedRoutes = [
   {
     path: "/inventory",
     element: <InventoryPage />,
+  },
+  {
+    path: "/support",
+    element: <Support />,
   },
   {
     path: "/retailer/marketplace",
