@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -323,8 +322,8 @@ const ShippingBidSystem = () => {
                           <CardTitle>Selected Carrier</CardTitle>
                           {selectedBid?.isWinningBid && (
                             <Badge className="bg-soft-pink text-white">
-                              <BadgeCheck className="w-3 h-3 mr-1" />
-                              AI Recommended
+                              <TrendingDown className="w-3 h-3 mr-1" />
+                              Best Value
                             </Badge>
                           )}
                         </div>
@@ -444,7 +443,7 @@ const ShippingBidSystem = () => {
                                 </div>
                                 
                                 {bid.isWinningBid && (
-                                  <Badge size="sm" className="bg-soft-pink text-white">
+                                  <Badge className="bg-soft-pink text-white">
                                     <TrendingDown className="w-3 h-3 mr-1" />
                                     Best Value
                                   </Badge>

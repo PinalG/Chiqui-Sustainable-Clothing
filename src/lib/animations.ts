@@ -46,7 +46,6 @@ export const createDefaultAnimate = () => {
       return animate(
         element,
         { 
-          opacity: [0, 1],
           y: [20, 0]
         },
         { ...defaultAnimationOptions, ...options }
@@ -62,7 +61,6 @@ export const createDefaultAnimate = () => {
       return animate(
         element,
         { 
-          opacity: [1, 0],
           y: [0, 20]
         },
         { ...defaultAnimationOptions, ...options }
@@ -75,12 +73,10 @@ export const createDefaultAnimate = () => {
     pulse: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      return animate(
+      // For pulse, we'll use a multi-step animation with separate animate calls
+      const opacityControl = animate(
         element,
-        { 
-          scale: [1, 1.05, 1],
-          opacity: [0.7, 1, 0.7]
-        },
+        { opacity: [0.7, 1, 0.7] },
         { 
           duration: 1.5,
           ease: "easeInOut",
@@ -88,6 +84,25 @@ export const createDefaultAnimate = () => {
           ...options
         }
       );
+      
+      const scaleControl = animate(
+        element,
+        { scale: [1, 1.05, 1] },
+        { 
+          duration: 1.5,
+          ease: "easeInOut",
+          repeat: Infinity,
+          ...options
+        }
+      );
+      
+      // Return an object with controls for both animations
+      return {
+        stop: () => {
+          opacityControl.stop();
+          scaleControl.stop();
+        }
+      };
     },
     
     /**
@@ -96,14 +111,24 @@ export const createDefaultAnimate = () => {
     scaleUp: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      return animate(
+      const opacityControl = animate(
         element,
-        { 
-          scale: [0.9, 1],
-          opacity: [0, 1]
-        },
+        { opacity: [0, 1] },
         { ...defaultAnimationOptions, ...options }
       );
+      
+      const scaleControl = animate(
+        element,
+        { scale: [0.9, 1] },
+        { ...defaultAnimationOptions, ...options }
+      );
+      
+      return {
+        stop: () => {
+          opacityControl.stop();
+          scaleControl.stop();
+        }
+      };
     }
   };
 };
