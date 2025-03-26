@@ -1,153 +1,205 @@
+import React, { lazy } from "react";
+import { Navigate } from "react-router-dom";
+import MainLayout from "@/components/layout/MainLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { UserRole } from "@/types/AuthTypes";
+import { LazyComponent } from "@/components/ui/lazy-component";
+import NotFound from "@/pages/NotFound";
 
-import { lazy } from 'react';
-import { PublicRouteProps, ProtectedRouteProps, RoleProtectedRouteProps, AdminRouteProps } from '@/components/auth/ProtectedRoute';
+// Lazy loaded components
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Marketplace = lazy(() => import("@/pages/Marketplace"));
+const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
+const Checkout = lazy(() => import("@/pages/Checkout"));
+const Donations = lazy(() => import("@/pages/Donations"));
+const RetailDonations = lazy(() => import("@/pages/RetailDonations"));
+const Logistics = lazy(() => import("@/pages/logistics/Logistics"));
+const Login = lazy(() => import("@/pages/auth/Login"));
+const Signup = lazy(() => import("@/pages/auth/Signup"));
+const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"));
+const UserProfile = lazy(() => import("@/pages/UserProfile"));
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
+const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
+const ReportingDashboard = lazy(() => import("@/pages/admin/ReportingDashboard"));
+const SettingsPage = lazy(() => import("@/pages/settings/SettingsPage"));
+const PrivacyPage = lazy(() => import("@/pages/settings/PrivacyPage"));
+const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage"));
+const Rewards = lazy(() => import("@/pages/Rewards"));
+const AnalyticsDashboard = lazy(() => import("@/pages/analytics/AnalyticsDashboard"));
+const InventoryPage = lazy(() => import("@/pages/inventory/InventoryPage"));
+const RetailerMarketplace = lazy(() => import("@/pages/retailer/RetailerMarketplace"));
 
-// Create a custom Error404 component until the actual page is implemented
-const Error404 = () => <div>404 - Page Not Found</div>;
-
-// Create placeholder components for routes
-// In a real application, these would be actual components
-const Home = lazy(() => import('../pages/Dashboard')); // Use Dashboard as Home for now
-const Marketplace = lazy(() => import('../pages/Marketplace'));
-const RetailDonations = lazy(() => import('../pages/RetailDonations'));
-const Donations = lazy(() => import('../pages/Donations'));
-const Analytics = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const TaxBenefits = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const Logistics = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const Support = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const Inventory = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
-const UserManagement = lazy(() => import('../pages/admin/UserManagement'));
-const Reports = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const Permissions = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const SettingsAccessibility = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const SettingsProfile = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const RetailerMarketplace = lazy(() => import("../pages/retailer/RetailerMarketplace"));
-const Login = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const Register = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const ForgotPassword = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const ResetPassword = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-const VerifyEmail = lazy(() => import('../pages/Dashboard')); // Use Dashboard as placeholder
-
-// Create simple route wrapper components
-// These would normally be imported, but for now we'll create placeholder components
-const PublicRoute = ({ children }: { children: React.ReactNode }) => children;
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => children;
-const RoleProtectedRoute = ({ children, allowedRoles, requiresConsentVerification }: { children: React.ReactNode, allowedRoles: string[], requiresConsentVerification?: boolean }) => children;
-const AdminRoute = ({ children }: { children: React.ReactNode }) => children;
-
-// Public routes - accessible without authentication
+// Define route groups for better organization
 export const publicRoutes = [
-  { path: '/login', element: <PublicRoute><Login /></PublicRoute> },
-  { path: '/register', element: <PublicRoute><Register /></PublicRoute> },
-  { path: '/forgot-password', element: <PublicRoute><ForgotPassword /></PublicRoute> },
-  { path: '/reset-password/:token', element: <PublicRoute><ResetPassword /></PublicRoute> },
-  { path: '/verify-email/:token', element: <PublicRoute><VerifyEmail /></PublicRoute> },
+  {
+    path: "/auth/login",
+    element: <Login />,
+  },
+  {
+    path: "/auth/signup",
+    element: <Signup />,
+  },
+  {
+    path: "/auth/forgot-password",
+    element: <ForgotPassword />,
+  },
 ];
 
-// Protected routes - accessible only to authenticated users
 export const protectedRoutes = [
-  { path: '/', element: <ProtectedRoute><Home /></ProtectedRoute> },
-  { path: '/marketplace', element: <ProtectedRoute><Marketplace /></ProtectedRoute> },
-  { path: '/support', element: <ProtectedRoute><Support /></ProtectedRoute> },
-  { path: '/settings/accessibility', element: <ProtectedRoute><SettingsAccessibility /></ProtectedRoute> },
-  { path: '/settings/profile', element: <ProtectedRoute><SettingsProfile /></ProtectedRoute> },
-];
-
-// Role-specific routes - accessible only to users with specific roles
-export const roleSpecificRoutes = [
   {
-    path: '/donations',
-    element: <RoleProtectedRoute allowedRoles={['consumer']} requiresConsentVerification={false}><Donations /></RoleProtectedRoute>,
-    allowedRoles: ['consumer'],
-    requiresConsentVerification: false,
+    path: "/",
+    element: <Dashboard />,
   },
   {
-    path: '/retail-donations',
-    element: <RoleProtectedRoute allowedRoles={['retailer']} requiresConsentVerification={true}><RetailDonations /></RoleProtectedRoute>,
-    allowedRoles: ['retailer'],
-    requiresConsentVerification: true,
+    path: "/marketplace",
+    element: <Marketplace />,
   },
   {
-    path: '/inventory',
-    element: <RoleProtectedRoute allowedRoles={['retailer']} requiresConsentVerification={true}><Inventory /></RoleProtectedRoute>,
-    allowedRoles: ['retailer'],
-    requiresConsentVerification: true,
+    path: "/product/:id",
+    element: <ProductDetails />,
   },
   {
-    path: '/analytics',
-    element: <RoleProtectedRoute allowedRoles={['retailer']} requiresConsentVerification={true}><Analytics /></RoleProtectedRoute>,
-    allowedRoles: ['retailer'],
-    requiresConsentVerification: true,
+    path: "/checkout",
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <Checkout />
+        </MainLayout>
+      </ProtectedRoute>
+    ),
   },
   {
-    path: '/tax-benefits',
-    element: <RoleProtectedRoute allowedRoles={['retailer']} requiresConsentVerification={true}><TaxBenefits /></RoleProtectedRoute>,
-    allowedRoles: ['retailer'],
-    requiresConsentVerification: true,
+    path: "/profile",
+    element: <UserProfile />,
   },
   {
-    path: '/logistics',
-    element: <RoleProtectedRoute allowedRoles={['logistics']} requiresConsentVerification={false}><Logistics /></RoleProtectedRoute>,
-    allowedRoles: ['logistics'],
-    requiresConsentVerification: false,
+    path: "/logistics",
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <Logistics />
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/rewards",
+    element: <Rewards />,
+  },
+  {
+    path: "/analytics",
+    element: <AnalyticsDashboard />,
+  },
+  {
+    path: "/settings",
+    element: <SettingsPage />,
+  },
+  {
+    path: "/settings/privacy",
+    element: <PrivacyPage />,
+  },
+  {
+    path: "/settings/security",
+    element: <SecurityPage />,
+  },
+  {
+    path: "/inventory",
+    element: <InventoryPage />,
   },
   {
     path: "/retailer/marketplace",
-    element: <RoleProtectedRoute allowedRoles={["retailer", "admin"]} requiresConsentVerification={false}><RetailerMarketplace /></RoleProtectedRoute>,
-    allowedRoles: ["retailer", "admin"],
-    requiresConsentVerification: false,
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <RetailerMarketplace />
+        </MainLayout>
+      </ProtectedRoute>
+    ),
   },
 ];
 
-// Admin routes - accessible only to admin users
+export const roleSpecificRoutes = [
+  {
+    path: "/donations",
+    element: <Donations />,
+    allowedRoles: ["consumer"] as UserRole[],
+    requiresConsentVerification: true,
+  },
+  {
+    path: "/retail-donations",
+    element: <RetailDonations />,
+    allowedRoles: ["retailer"] as UserRole[],
+    requiresConsentVerification: true,
+  },
+];
+
 export const adminRoutes = [
   {
-    path: '/admin/dashboard',
-    element: <AdminRoute><AdminDashboard /></AdminRoute>,
+    path: "/admin/dashboard",
+    element: <AdminDashboard />,
   },
   {
-    path: '/admin/users',
-    element: <AdminRoute><UserManagement /></AdminRoute>,
+    path: "/admin/users",
+    element: <UserManagement />,
   },
   {
-    path: '/admin/reports',
-    element: <AdminRoute><Reports /></AdminRoute>,
+    path: "/admin/reports",
+    element: <ReportingDashboard />,
   },
-  {
-    path: '/admin/permissions',
-    element: <AdminRoute><Permissions /></AdminRoute>,
-  }
 ];
 
-// Error routes - fallback routes for errors and unknown paths
 export const errorRoutes = [
-  { path: '*', element: <Error404 /> },
+  {
+    path: "/unauthorized",
+    element: (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-6 max-w-md">
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p className="mb-4">You don't have permission to access this page.</p>
+          <a href="/" className="text-soft-pink hover:underline">Return to Home</a>
+        </div>
+      </div>
+    ),
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
 ];
-
-// Route Wrappers
-export const PublicRouteWrapper = ({ children }: { children: React.ReactNode }) => (
-  <PublicRoute>{children}</PublicRoute>
-);
 
 export const ProtectedRouteWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute>{children}</ProtectedRoute>
+  <ProtectedRoute>
+    <MainLayout>
+      <LazyComponent>{children}</LazyComponent>
+    </MainLayout>
+  </ProtectedRoute>
 );
 
-export const RoleProtectedRouteWrapper = ({
-  children,
+export const RoleProtectedRouteWrapper = ({ 
+  children, 
   allowedRoles,
-  requiresConsentVerification,
-}: {
-  children: React.ReactNode;
-  allowedRoles: string[];
-  requiresConsentVerification?: boolean;
+  requiresConsentVerification = false 
+}: { 
+  children: React.ReactNode, 
+  allowedRoles: UserRole[],
+  requiresConsentVerification?: boolean
 }) => (
-  <RoleProtectedRoute allowedRoles={allowedRoles} requiresConsentVerification={requiresConsentVerification}>
-    {children}
-  </RoleProtectedRoute>
+  <ProtectedRoute allowedRoles={allowedRoles} requiresConsentVerification={requiresConsentVerification}>
+    <MainLayout>
+      <LazyComponent>{children}</LazyComponent>
+    </MainLayout>
+  </ProtectedRoute>
 );
 
 export const AdminRouteWrapper = ({ children }: { children: React.ReactNode }) => (
-  <AdminRoute>{children}</AdminRoute>
+  <ProtectedRoute allowedRoles={["admin"] as UserRole[]}>
+    <MainLayout>
+      <LazyComponent>{children}</LazyComponent>
+    </MainLayout>
+  </ProtectedRoute>
+);
+
+export const PublicRouteWrapper = ({ children }: { children: React.ReactNode }) => (
+  <LazyComponent>{children}</LazyComponent>
 );

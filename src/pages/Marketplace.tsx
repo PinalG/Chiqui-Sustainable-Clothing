@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -11,28 +12,25 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { 
   Search, 
   Filter, 
   Sliders, 
-  ShoppingBag, 
-  Heart, 
   Tag, 
-  DollarSign,
-  Leaf,
-  Tags,
-  Check,
-  AlertTriangle,
-  Star,
+  DollarSign, 
+  Sparkles, 
+  ShoppingCart,
+  Star, 
+  Heart, 
+  Leaf, 
   ArrowUpDown,
-  ChevronUp,
-  ChevronDown,
-  X,
   CircleCheck,
-  ShoppingCart 
+  PackageCheck,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Store
 } from "lucide-react";
 import { 
   Select, 
@@ -41,37 +39,14 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { 
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const Sparkles = (props) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    {...props}
-  >
-    <path d="m12 3-1.9 5.8a2 2 0 0 1-1.1 1.1L3.2 12l5.8 1.9a2 2 0 0 1 1.1 1.1L12 21l1.9-5.8a2 2 0 0 1 1.1-1.1L21 12l-5.8-1.9a2 2 0 0 1-1.1-1.1z"/>
-  </svg>
-);
-
+// Mock product data with AI-generated details
 const mockProducts = [
   {
     id: "P001",
@@ -520,19 +495,25 @@ const Marketplace = () => {
   const [wishlistedItems, setWishlistedItems] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState(true);
   
+  // Check if user has retailer role
   const isRetailer = userData?.role === "retailer" || userData?.role === "admin";
   
+  // Filter products based on user selection
   const filterProducts = () => {
     return mockProducts.filter(product => {
+      // Apply search query filter
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       
+      // Apply category filter
       const matchesCategory = categoryFilter === "all" ? true : product.category === categoryFilter;
       
+      // Apply condition filter
       const matchesCondition = conditionFilter === "all" ? true : 
         product.condition.toLowerCase().includes(conditionFilter.toLowerCase());
       
+      // Apply price range filter
       let matchesPrice = true;
       if (priceRange === "under50") {
         matchesPrice = product.price < 50;
@@ -542,6 +523,7 @@ const Marketplace = () => {
         matchesPrice = product.price > 100;
       }
       
+      // Apply sustainability filter
       let matchesSustainability = true;
       if (sustainabilityFilter === "high") {
         matchesSustainability = product.sustainabilityScore >= 80;
@@ -551,6 +533,7 @@ const Marketplace = () => {
         matchesSustainability = product.sustainabilityScore < 50;
       }
       
+      // Apply active tab filter
       if (activeTab !== "all") {
         if (activeTab === "trending") {
           return matchesSearch && matchesCategory && matchesCondition && matchesPrice && 
@@ -564,6 +547,7 @@ const Marketplace = () => {
       
       return matchesSearch && matchesCategory && matchesCondition && matchesPrice && matchesSustainability;
     }).sort((a, b) => {
+      // Apply sorting
       switch (sortBy) {
         case "price-low":
           return a.price - b.price;
@@ -583,30 +567,21 @@ const Marketplace = () => {
   
   const handleAddToCart = (productId: string) => {
     setCartItems(prev => [...prev, productId]);
-    toast({
-      title: "Item added to cart",
-      description: "The item has been added to your shopping cart",
-      action: (
-        <Button variant="outline" onClick={() => navigate("/checkout")}>
-          View Cart
-        </Button>
-      ),
+    toast.success("Item added to cart", {
+      action: {
+        label: "View Cart",
+        onClick: () => navigate("/checkout"),
+      },
     });
   };
   
   const handleToggleWishlist = (productId: string) => {
     if (wishlistedItems.includes(productId)) {
       setWishlistedItems(prev => prev.filter(id => id !== productId));
-      toast({
-        title: "Removed from wishlist",
-        description: "The item has been removed from your wishlist"
-      });
+      toast("Removed from wishlist");
     } else {
       setWishlistedItems(prev => [...prev, productId]);
-      toast({
-        title: "Added to wishlist",
-        description: "The item has been added to your wishlist"
-      });
+      toast("Added to wishlist");
     }
   };
   
@@ -618,59 +593,64 @@ const Marketplace = () => {
     setShowFilters(!showFilters);
   };
   
-  const handleViewCart = () => {
-    navigate("/checkout");
-  };
-  
-  const handleViewWishlist = () => {
-    navigate("/wishlist");
-  };
-  
   return (
     <div className="space-y-6 animate-enter">
-      {isRetailer && (
-        <Alert className="bg-soft-pink/10 border-soft-pink mb-6">
-          <AlertTriangle className="h-4 w-4 text-soft-pink" />
-          <AlertTitle>Retailer View Available</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
-            <span>As a retailer, you can access the specialized retailer marketplace to monitor and manage your donations.</span>
-            <Button 
-              variant="outline" 
-              className="ml-4 border-soft-pink text-soft-pink hover:bg-soft-pink/10"
-              onClick={() => navigate('/retailer/marketplace')}
-            >
-              <Tags className="h-4 w-4 mr-2" />
-              Switch to Retailer View
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <motion.div 
+        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Marketplace</h1>
           <p className="text-muted-foreground">
-            Browse sustainable products from various retailers
+            Browse and purchase high-quality verified donated clothing.
           </p>
         </div>
         
         <div className="flex gap-2">
+          {isRetailer && (
+            <Button 
+              variant="outline"
+              onClick={() => navigate("/retailer/marketplace")}
+              className="flex items-center gap-2"
+            >
+              <Store className="h-4 w-4" />
+              Retailer View
+            </Button>
+          )}
           <Button 
-            onClick={handleViewCart}
-            variant="outline"
+            variant="outline" 
+            className="relative"
+            onClick={() => navigate("/checkout")}
           >
-            <ShoppingBag className="h-4 w-4 mr-1.5" />
-            Cart ({cartItems.length})
-          </Button>
-          <Button 
-            onClick={handleViewWishlist}
-            variant={wishlistedItems.length > 0 ? "default" : "outline"}
-          >
-            <Heart className="h-4 w-4 mr-1.5" />
-            Wishlist
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Cart
+            {cartItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-soft-pink text-white text-xs flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
           </Button>
         </div>
-      </div>
+      </motion.div>
+
+      {isRetailer && (
+        <Alert className="bg-soft-pink/10 border-soft-pink">
+          <Store className="h-4 w-4" />
+          <AlertTitle>Retailer Account Detected</AlertTitle>
+          <AlertDescription>
+            You are viewing the consumer marketplace. Click "Retailer View" to manage your donated items.
+            <Button 
+              variant="link" 
+              className="p-0 h-auto ml-2 text-soft-pink"
+              onClick={() => navigate("/retailer/marketplace")}
+            >
+              Go to Retailer Marketplace
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card className="glass-morphism">
         <CardHeader>
@@ -742,6 +722,7 @@ const Marketplace = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Sidebar Filters for Large Screens */}
               <div className="hidden lg:block">
                 <Card className="sticky top-4">
                   <CardHeader className="pb-2">
@@ -848,6 +829,7 @@ const Marketplace = () => {
                 </Card>
               </div>
               
+              {/* Mobile Filters */}
               <FilterSidebar 
                 isOpen={showFilters} 
                 onClose={handleToggleShowFilters} 
@@ -861,6 +843,7 @@ const Marketplace = () => {
                 setSustainabilityFilter={setSustainabilityFilter}
               />
               
+              {/* Product Grid */}
               <div className="lg:col-span-3">
                 {filteredProducts.length === 0 ? (
                   <div className="flex flex-col items-center justify-center text-center p-12 bg-muted rounded-lg">
@@ -903,3 +886,4 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
+
