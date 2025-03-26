@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -29,7 +28,8 @@ import {
   PackageCheck,
   X,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Store
 } from "lucide-react";
 import { 
   Select, 
@@ -42,6 +42,8 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Mock product data with AI-generated details
 const mockProducts = [
@@ -479,6 +481,7 @@ const FilterSidebar = ({
 
 const Marketplace = () => {
   const navigate = useNavigate();
+  const { userData } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
@@ -490,6 +493,9 @@ const Marketplace = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [wishlistedItems, setWishlistedItems] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState(true);
+  
+  // Check if user has retailer role
+  const isRetailer = userData?.role === "retailer" || userData?.role === "admin";
   
   // Filter products based on user selection
   const filterProducts = () => {
@@ -589,7 +595,7 @@ const Marketplace = () => {
   return (
     <div className="space-y-6 animate-enter">
       <motion.div 
-        className="flex justify-between items-start"
+        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -601,20 +607,49 @@ const Marketplace = () => {
           </p>
         </div>
         
-        <Button 
-          variant="outline" 
-          className="relative"
-          onClick={() => navigate("/checkout")}
-        >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Cart
-          {cartItems.length > 0 && (
-            <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-soft-pink text-white text-xs flex items-center justify-center">
-              {cartItems.length}
-            </span>
+        <div className="flex gap-2">
+          {isRetailer && (
+            <Button 
+              variant="outline"
+              onClick={() => navigate("/retailer/marketplace")}
+              className="flex items-center gap-2"
+            >
+              <Store className="h-4 w-4" />
+              Retailer View
+            </Button>
           )}
-        </Button>
+          <Button 
+            variant="outline" 
+            className="relative"
+            onClick={() => navigate("/checkout")}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Cart
+            {cartItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-soft-pink text-white text-xs flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
+          </Button>
+        </div>
       </motion.div>
+
+      {isRetailer && (
+        <Alert className="bg-soft-pink/10 border-soft-pink">
+          <Store className="h-4 w-4" />
+          <AlertTitle>Retailer Account Detected</AlertTitle>
+          <AlertDescription>
+            You are viewing the consumer marketplace. Click "Retailer View" to manage your donated items.
+            <Button 
+              variant="link" 
+              className="p-0 h-auto ml-2 text-soft-pink"
+              onClick={() => navigate("/retailer/marketplace")}
+            >
+              Go to Retailer Marketplace
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card className="glass-morphism">
         <CardHeader>
@@ -773,95 +808,3 @@ const Marketplace = () => {
                     <div>
                       <h4 className="font-medium mb-2">Sustainability</h4>
                       <div className="space-y-1">
-                        {[
-                          { value: "all", label: "All Scores" },
-                          { value: "high", label: "High (80+)" },
-                          { value: "medium", label: "Medium (50-80)" },
-                          { value: "low", label: "Low (0-50)" }
-                        ].map((option) => (
-                          <div 
-                            key={option.value}
-                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${sustainabilityFilter === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
-                            onClick={() => setSustainabilityFilter(option.value)}
-                          >
-                            <span>{option.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <Button 
-                      variant="outline" 
-                      className="w-full text-sm"
-                      onClick={() => {
-                        setCategoryFilter("all");
-                        setConditionFilter("all");
-                        setPriceRange("all");
-                        setSustainabilityFilter("all");
-                      }}
-                    >
-                      Reset All Filters
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Mobile Filters */}
-              <FilterSidebar 
-                isOpen={showFilters}
-                onClose={() => setShowFilters(false)}
-                categoryFilter={categoryFilter}
-                setCategoryFilter={setCategoryFilter}
-                conditionFilter={conditionFilter}
-                setConditionFilter={setConditionFilter}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                sustainabilityFilter={sustainabilityFilter}
-                setSustainabilityFilter={setSustainabilityFilter}
-              />
-              
-              {/* Product Grid */}
-              <div className="lg:col-span-3">
-                {filteredProducts.length > 0 ? (
-                  <>
-                    <div className="mb-4">
-                      <p className="text-sm text-muted-foreground">
-                        Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      <AnimatePresence>
-                        {filteredProducts.map((product) => (
-                          <ProductCard
-                            key={product.id}
-                            product={product}
-                            onAddToCart={handleAddToCart}
-                            onViewDetails={handleViewDetails}
-                            wishlisted={wishlistedItems.includes(product.id)}
-                            onToggleWishlist={handleToggleWishlist}
-                          />
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <PackageCheck className="h-16 w-16 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-1">No products found</h3>
-                    <p className="text-center text-muted-foreground">
-                      Try adjusting your filters or search terms to find what you're looking for.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-export default Marketplace;
