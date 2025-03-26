@@ -24,8 +24,8 @@ const isDevelopmentLike = process.env.NODE_ENV === 'development' ||
                            window.location.hostname.includes('lovableproject.com');
 
 // For debugging purposes
-console.log(`Environment: ${process.env.NODE_ENV}, Hostname: ${window.location.hostname}`);
-console.log(`Using development mode: ${isDevelopmentLike}`);
+console.log(`Firebase initialization - Environment: ${process.env.NODE_ENV}, Hostname: ${window.location.hostname}`);
+console.log(`Firebase initialization - Using development mode: ${isDevelopmentLike}`);
 
 // Initialize Firebase
 let app;

@@ -8,6 +8,7 @@ import { UserData, UserRole, UserPreferences, AuthContextType } from "@/types/Au
 import { useAuthMethods } from "@/hooks/AuthHooks";
 import { MOCK_USERS } from "@/types/AuthTypes";
 
+// Create the auth context with undefined as initial value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -26,9 +27,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Use real Firebase Auth if not in development-like environment
+    console.log("AuthProvider initialized, isDevelopmentLike:", isDevelopmentLike);
+    let unsubscribe: () => void = () => {};
+    
     if (!isDevelopmentLike) {
-      const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      // In production, use real Firebase Auth
+      unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        console.log("Auth state changed:", currentUser ? `Logged in as ${currentUser.email}` : "Not logged in");
         setUser(currentUser);
         
         if (currentUser) {
@@ -76,8 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         setIsLoading(false);
       });
-      
-      return () => unsubscribe();
     } else {
       // In development or preview, initialize with no user
       console.log("Using development mock auth in AuthContext");
@@ -85,6 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserData(null);
       setIsLoading(false);
     }
+    
+    // Clean up the listener
+    return () => unsubscribe();
   }, []);
 
   const signUp = async (
@@ -94,12 +100,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role: UserRole = "consumer",
     additionalData?: Partial<UserData>
   ) => {
+    console.log(`Attempting signup for ${email} with role ${role}`);
     const result = await authMethods.signUp(email, password, name, role, additionalData);
     setUser(result.user);
     setUserData(result.userData);
   };
 
   const signIn = async (email: string, password: string) => {
+    console.log(`Attempting signin for ${email}`);
     const result = await authMethods.signIn(email, password);
     setUser(result.user);
     if (result.userData) {
@@ -108,12 +116,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async (role: UserRole = "consumer") => {
+    console.log(`Attempting Google signin with role ${role}`);
     const result = await authMethods.signInWithGoogle(role);
     setUser(result.user);
     setUserData(result.userData);
   };
 
   const logout = async () => {
+    console.log("Attempting logout");
     await authMethods.logout();
     setUser(null);
     setUserData(null);

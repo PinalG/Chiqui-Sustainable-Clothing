@@ -210,9 +210,9 @@ export const RoleProtectedRouteWrapper = ({
 
 export const AdminRouteWrapper = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allowedRoles={["admin"] as UserRole[]}>
-    <MainLayout>
+    <AdminLayout>
       <LazyComponent>{children}</LazyComponent>
-    </MainLayout>
+    </AdminLayout>
   </ProtectedRoute>
 );
 
