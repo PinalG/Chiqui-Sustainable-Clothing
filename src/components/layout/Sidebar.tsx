@@ -60,7 +60,7 @@ const Sidebar = () => {
   ];
   
   const retailerItems = [
-    { icon: Tags, label: 'Paper Donations', href: '/paper-donations' },
+    { icon: Tags, label: 'Retail Donations', href: '/retail-donations' },
     { icon: BarChart2, label: 'Analytics', href: '/analytics' },
     { icon: FileText, label: 'Tax Benefits', href: '/tax-benefits' },
     { icon: Package, label: 'Inventory', href: '/inventory' },

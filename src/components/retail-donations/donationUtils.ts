@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 // Enhanced tax benefit calculation with more detailed parameters
@@ -153,7 +152,7 @@ export const generateShareableDonationSummary = (
 ): string => {
   // Different templates for different user types
   if (isRetailer) {
-    return `I just registered ${itemCount} items as a paper donation on Chiqui, saving an estimated ${formatCurrency(taxBenefit)} in tax benefits while promoting sustainable fashion! #ChiquiPaperDonation #SustainableRetail`;
+    return `I just registered ${itemCount} items as a Retail Donation on Chiqui, saving an estimated ${formatCurrency(taxBenefit)} in tax benefits while promoting sustainable fashion! #ChiquiRetailDonation #SustainableRetail`;
   } else {
     const categoryText = categories.length > 0 
       ? `including ${categories.slice(0, 2).join(' and ')}` 
@@ -211,7 +210,7 @@ export const generateDonationHashtags = (
   const baseHashtags = ['SustainableFashion', 'ChiquiDonation', 'FashionWithPurpose'];
   
   // Retailer-specific hashtags
-  const retailerHashtags = ['RetailInnovation', 'PaperDonation', 'SustainableInventory', 'TaxBenefits'];
+  const retailerHashtags = ['RetailInnovation', 'RetailDonation', 'SustainableInventory', 'TaxBenefits'];
   
   // Category-specific hashtags
   const categoryHashtags: Record<string, string[]> = {
