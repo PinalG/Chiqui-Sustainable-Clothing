@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SocialSharingWidget from "@/components/social/SocialSharingWidget";
 import { Share, Package } from "lucide-react";
+import DonationManagement from "@/components/donations/DonationManagement";
 
 const Donations = () => {
   const [activeTab, setActiveTab] = useState("donations");
@@ -30,19 +31,7 @@ const Donations = () => {
         </TabsList>
         
         <TabsContent value="donations" className="mt-6">
-          <Card className="glass-morphism">
-            <CardHeader>
-              <CardTitle>Donation Management</CardTitle>
-              <CardDescription>
-                Track and manage your clothing donations.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-20 text-muted-foreground">
-                Full donation management experience coming in step 3
-              </div>
-            </CardContent>
-          </Card>
+          <DonationManagement />
         </TabsContent>
         
         <TabsContent value="share" className="mt-6">
