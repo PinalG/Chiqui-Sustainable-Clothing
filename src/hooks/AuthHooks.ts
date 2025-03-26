@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   User,
@@ -15,6 +16,11 @@ import { toast } from "sonner";
 import { UserData, UserRole, MOCK_USERS, UserPreferences } from "@/types/AuthTypes";
 import { createMockUser, createMockUserData, getMockUserData } from "@/utils/AuthUtils";
 
+// Determine if we're in a development-like environment (includes Lovable preview links)
+const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
+                          window.location.hostname === 'localhost' || 
+                          window.location.hostname.includes('lovableproject.com');
+
 export function useAuthMethods() {
   const signUp = async (
     email: string, 
@@ -24,8 +30,8 @@ export function useAuthMethods() {
     additionalData?: Partial<UserData>
   ) => {
     try {
-      if (process.env.NODE_ENV === 'development') {
-        // In development mode, create a mock user without Firebase
+      if (isDevelopmentLike) {
+        // In development or preview mode, create a mock user without Firebase
         const mockUser = createMockUser(email, name);
         
         // Create mock user data
@@ -82,8 +88,8 @@ export function useAuthMethods() {
 
   const signIn = async (email: string, password: string) => {
     try {
-      if (process.env.NODE_ENV === 'development') {
-        // In development mode, find the mock user
+      if (isDevelopmentLike) {
+        // In development or preview mode, find the mock user
         const mockUser = MOCK_USERS.find(u => u.email === email && u.password === password);
         
         if (!mockUser) {

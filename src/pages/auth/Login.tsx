@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,14 +21,12 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-// Function to check for multiple failed login attempts
 const getLoginAttempts = (): number => {
   const attempts = localStorage.getItem('loginAttempts');
   return attempts ? parseInt(attempts, 10) : 0;
 };
 
 const incrementLoginAttempts = (): number => {
-  // Skip incrementing attempts in development mode
   if (process.env.NODE_ENV === 'development') {
     return 0;
   }
@@ -43,6 +40,10 @@ const resetLoginAttempts = (): void => {
   localStorage.removeItem('loginAttempts');
 };
 
+const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
+                          window.location.hostname === 'localhost' || 
+                          window.location.hostname.includes('lovableproject.com');
+
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -51,7 +52,6 @@ const Login = () => {
   const [showCookieBanner, setShowCookieBanner] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<number | null>(null);
   
-  // Set to true by default to always show demo accounts section
   const [showDemoAccounts, setShowDemoAccounts] = useState(true);
 
   const form = useForm<LoginFormValues>({
@@ -62,34 +62,29 @@ const Login = () => {
     },
   });
 
-  // Check for cookie consent and login attempts on mount
   useEffect(() => {
     const hasAcceptedCookies = localStorage.getItem('cookieConsent');
     if (!hasAcceptedCookies) {
       setShowCookieBanner(true);
     }
 
-    // Skip lockout check in development mode
     if (process.env.NODE_ENV === 'development') {
       localStorage.removeItem('lockoutUntil');
       localStorage.removeItem('loginAttempts');
       return;
     }
 
-    // Check if account is locked out
     const lockoutUntil = localStorage.getItem('lockoutUntil');
     if (lockoutUntil) {
       const lockoutTime = parseInt(lockoutUntil, 10);
       if (lockoutTime > Date.now()) {
         setLockoutTime(lockoutTime);
       } else {
-        // Lockout expired
         localStorage.removeItem('lockoutUntil');
       }
     }
   }, []);
 
-  // Update countdown timer for lockout
   useEffect(() => {
     if (!lockoutTime) return;
 
@@ -119,9 +114,7 @@ const Login = () => {
   };
 
   const onSubmit = async (data: LoginFormValues) => {
-    // Skip lockout check in development mode
-    if (process.env.NODE_ENV !== 'development') {
-      // Check if account is locked out
+    if (!isDevelopmentLike) {
       if (lockoutTime && lockoutTime > Date.now()) {
         const minutes = Math.ceil((lockoutTime - Date.now()) / 60000);
         toast.error(`Account temporarily locked. Try again in ${minutes} minutes.`);
@@ -132,18 +125,16 @@ const Login = () => {
     setIsLoading(true);
     try {
       await signIn(data.email, data.password);
-      resetLoginAttempts(); // Reset attempts on successful login
+      resetLoginAttempts();
       navigate("/");
     } catch (error) {
       console.error(error);
       
-      // Handle failed login attempts (skip in development mode)
-      if (process.env.NODE_ENV !== 'development') {
+      if (!isDevelopmentLike) {
         const attempts = incrementLoginAttempts();
         
         if (attempts >= 5) {
-          // Lock out the account for 15 minutes after 5 failed attempts
-          const lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
+          const lockoutUntil = Date.now() + 15 * 60 * 1000;
           localStorage.setItem('lockoutUntil', lockoutUntil.toString());
           setLockoutTime(lockoutUntil);
           toast.error("Too many failed login attempts. Account locked for 15 minutes.");
@@ -151,10 +142,8 @@ const Login = () => {
           toast.error(`Login failed. ${5 - attempts} attempts remaining before lockout.`);
         }
       } else {
-        // In development mode, specific handling for mock users
         const isMockUser = MOCK_USERS.some(u => u.email === data.email && u.password === data.password);
         if (isMockUser) {
-          // This is a valid mock user but the Firebase API key is invalid
           toast.error("Firebase API key is invalid. In development mode, click the 'Use' button for mock accounts.");
         } else {
           toast.error("Invalid email or password");
@@ -169,7 +158,7 @@ const Login = () => {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      resetLoginAttempts(); // Reset attempts on successful login
+      resetLoginAttempts();
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -186,13 +175,11 @@ const Login = () => {
     if (user) {
       form.setValue('email', user.email);
       form.setValue('password', user.password);
-      // Let the user know which account was selected
       toast.info(`Demo ${type} account selected`, {
         description: `Email: ${user.email}, Password: ${user.password}`
       });
       
-      // In development mode, automatically "sign in" with the mock user after a short delay
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopmentLike) {
         setIsLoading(true);
         setTimeout(() => {
           signIn(user.email, user.password)
@@ -207,14 +194,12 @@ const Login = () => {
     }
   };
 
-  // Log mock users to console for debugging
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (isDevelopmentLike) {
       console.log("Mock users available:", MOCK_USERS);
     }
   }, []);
 
-  // Check if we're in development mode to disable the lockout UI
   const isDevMode = process.env.NODE_ENV === 'development';
 
   return (
@@ -305,13 +290,12 @@ const Login = () => {
               </form>
             </Form>
             
-            {/* Always show demo accounts section */}
             <div className="mt-4">
               <Accordion 
                 type="single" 
                 collapsible 
                 className="w-full" 
-                defaultValue="demo-accounts" // Set default value to ensure it's open by default
+                defaultValue="demo-accounts"
               >
                 <AccordionItem value="demo-accounts">
                   <AccordionTrigger className="text-sm text-muted-foreground py-2">
@@ -433,7 +417,6 @@ const Login = () => {
         </Card>
       </div>
       
-      {/* Cookie Consent Banner */}
       {showCookieBanner && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-4 shadow-lg border-t border-gray-200 animate-slide-up z-50">
           <div className="container mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">

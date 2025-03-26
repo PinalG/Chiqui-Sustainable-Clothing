@@ -8,7 +8,7 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 // In development, we use a placeholder API key
 // In production, we use the real API key from environment variables
 const firebaseConfig = {
-  apiKey: process.env.NODE_ENV === 'development' 
+  apiKey: process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost' || window.location.hostname.includes('lovableproject.com')
     ? "mock-api-key-for-development" 
     : (import.meta.env.VITE_FIREBASE_API_KEY || ""),
   authDomain: "chiqui-platform.firebaseapp.com",
@@ -17,6 +17,11 @@ const firebaseConfig = {
   messagingSenderId: "123456789012",
   appId: "1:123456789012:web:abcdef1234567890"
 };
+
+// Determine if we're in a development-like environment (includes Lovable preview links)
+const isDevelopmentLike = process.env.NODE_ENV === 'development' || 
+                          window.location.hostname === 'localhost' || 
+                          window.location.hostname.includes('lovableproject.com');
 
 // Initialize Firebase
 let app;
@@ -65,8 +70,8 @@ try {
   db = getFirestore(app);
   storage = getStorage(app);
 
-  // For development mode, we'll use mock authentication if emulators aren't available
-  if (process.env.NODE_ENV === 'development') {
+  // For development or preview environments, we'll use mock authentication if emulators aren't available
+  if (isDevelopmentLike) {
     try {
       // Try to connect to emulators if they are running
       connectAuthEmulator(auth, "http://localhost:9099");
@@ -85,7 +90,7 @@ try {
   console.error("Error initializing Firebase:", error);
   
   // Create mock instances for development if initialization fails
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopmentLike) {
     console.log("Using mock Firebase services in development mode");
     // Create mock auth object that implements needed methods
     auth = createMockAuth();
@@ -119,7 +124,7 @@ try {
 
 // Gemini API key - this would normally be secured in a backend environment
 // For development purposes, we use a mock key
-export const GEMINI_API_KEY = process.env.NODE_ENV === 'development' 
+export const GEMINI_API_KEY = isDevelopmentLike
   ? "GEMINI_MOCK_KEY_FOR_DEVELOPMENT" 
   : (import.meta.env.VITE_GEMINI_API_KEY || ""); 
 
