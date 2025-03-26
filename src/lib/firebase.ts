@@ -24,6 +24,35 @@ let auth;
 let db;
 let storage;
 
+// Create a mock auth object for development
+const createMockAuth = () => {
+  console.log("Using mock Firebase auth in development mode");
+  // Return a mock auth object with the methods needed by the application
+  return {
+    onAuthStateChanged: (callback) => {
+      // Immediately invoke callback with null (not authenticated)
+      callback(null);
+      // Return unsubscribe function
+      return () => {};
+    },
+    signInWithEmailAndPassword: async () => {
+      console.log("Mock sign in");
+      return { user: null };
+    },
+    createUserWithEmailAndPassword: async () => {
+      console.log("Mock create user");
+      return { user: null };
+    },
+    signOut: async () => {
+      console.log("Mock sign out");
+    },
+    sendPasswordResetEmail: async () => {
+      console.log("Mock password reset");
+    },
+    currentUser: null
+  };
+};
+
 // Only initialize Firebase if API key is available or if we're in development mode
 try {
   app = initializeApp(firebaseConfig);
@@ -31,7 +60,7 @@ try {
   db = getFirestore(app);
   storage = getStorage(app);
 
-  // For development mode, we'll use mock authentication
+  // For development mode, we'll use mock authentication if emulators aren't available
   if (process.env.NODE_ENV === 'development') {
     try {
       // Try to connect to emulators if they are running
@@ -41,6 +70,7 @@ try {
       // connectFirestoreEmulator(db, 'localhost', 8080);
       // connectStorageEmulator(storage, 'localhost', 9199);
     } catch (e) {
+      console.log("Error connecting to emulators:", e);
       console.log("Using mock authentication in development mode");
     }
   }
@@ -50,13 +80,33 @@ try {
   // Create mock instances for development if initialization fails
   if (process.env.NODE_ENV === 'development') {
     console.log("Using mock Firebase services in development mode");
-    // These will not actually be used, mock functions will be used instead
-    auth = {} as any;
-    db = {} as any;
-    storage = {} as any;
+    // Create mock auth object that implements needed methods
+    auth = createMockAuth();
+    db = {
+      collection: () => ({
+        doc: () => ({
+          get: async () => ({ exists: false, data: () => null }),
+          set: async () => {}
+        }),
+        where: () => ({
+          get: async () => ({ docs: [] })
+        }),
+        add: async () => ({})
+      })
+    };
+    storage = {
+      ref: () => ({
+        put: async () => {},
+        getDownloadURL: async () => "https://placeholder.com/image.jpg"
+      })
+    };
   } else {
     // In production, we should log this error and provide fallbacks
     console.error("Firebase initialization failed in production. Some features may not work.");
+    // Create minimal mock to prevent crashes
+    auth = createMockAuth();
+    db = {} as any;
+    storage = {} as any;
   }
 }
 
