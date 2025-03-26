@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart2, ShoppingBag, TrendingUp, Users, Leaf, Droplet, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { BarChart2, ShoppingBag, TrendingUp, Users, Leaf, Droplet, ChevronDown, ChevronUp, ExternalLink, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
@@ -17,7 +16,8 @@ const Dashboard = () => {
     donations: false,
     paperDonations: false,
     retailPartners: false,
-    revenue: false
+    revenue: false,
+    inventory: false
   });
   
   // Toggle expansion state for a specific card
@@ -56,7 +56,6 @@ const Dashboard = () => {
   };
 
   const handleNavigateToPaperDonations = () => {
-    // Navigate to retail donations for retailers, regular donations for consumers
     if (userData?.role === 'retailer') {
       navigate("/retail-donations");
     } else {
@@ -65,7 +64,6 @@ const Dashboard = () => {
   };
 
   const handleNavigateToRetailPartners = () => {
-    // For admins, go to user management, for others to marketplace
     if (userData?.role === 'admin') {
       navigate("/admin/users");
     } else {
@@ -73,13 +71,8 @@ const Dashboard = () => {
     }
   };
 
-  const handleNavigateToRevenue = () => {
-    // For retailers/admins, go to analytics, for consumers to rewards
-    if (userData?.role === 'retailer' || userData?.role === 'admin') {
-      navigate("/analytics");
-    } else {
-      navigate("/rewards");
-    }
+  const handleNavigateToInventory = () => {
+    navigate("/inventory");
   };
 
   return (
@@ -293,72 +286,141 @@ const Dashboard = () => {
           </Card>
         </Collapsible>
         
-        <Collapsible open={expandedCards.revenue} onOpenChange={() => toggleCardExpansion('revenue')} className="col-span-1">
-          <Card className="glass-morphism">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-              <div className="flex items-center gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 p-0 text-soft-pink hover:bg-soft-pink/10"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNavigateToRevenue();
-                  }}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="sr-only">Go to revenue</span>
-                </Button>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                    {expandedCards.revenue ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">Toggle details</span>
-                  </Button>
-                </CollapsibleTrigger>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$12,234</div>
-              <p className="text-xs text-muted-foreground">
-                +18.2% from last month
-              </p>
-            </CardContent>
-            <CollapsibleContent>
-              <div className="px-4 pb-4">
-                <div className="p-3 bg-soft-pink/5 rounded-md text-sm">
-                  <h4 className="font-medium text-sm mb-1">Revenue Breakdown</h4>
-                  <ul className="space-y-1 text-xs text-muted-foreground">
-                    <li className="flex justify-between">
-                      <span>Marketplace Sales</span>
-                      <span>$8,450</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Platform Fees</span>
-                      <span>$3,184</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Subscription Revenue</span>
-                      <span>$600</span>
-                    </li>
-                  </ul>
+        {userData?.role === 'retailer' ? (
+          <Collapsible open={expandedCards.inventory} onOpenChange={() => toggleCardExpansion('inventory')} className="col-span-1">
+            <Card className="glass-morphism">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Inventory</CardTitle>
+                <div className="flex items-center gap-1">
                   <Button 
-                    variant="link" 
-                    size="sm" 
-                    className="text-soft-pink p-0 h-auto mt-2" 
-                    onClick={handleNavigateToRevenue}
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 p-0 text-soft-pink hover:bg-soft-pink/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateToInventory();
+                    }}
                   >
-                    View full revenue report
+                    <ExternalLink className="h-4 w-4" />
+                    <span className="sr-only">Go to inventory</span>
                   </Button>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                      {expandedCards.inventory ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">Toggle details</span>
+                    </Button>
+                  </CollapsibleTrigger>
                 </div>
-              </div>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">3,245</div>
+                <p className="text-xs text-muted-foreground">
+                  Items in stock
+                </p>
+              </CardContent>
+              <CollapsibleContent>
+                <div className="px-4 pb-4">
+                  <div className="p-3 bg-soft-pink/5 rounded-md text-sm">
+                    <h4 className="font-medium text-sm mb-1">Inventory Summary</h4>
+                    <ul className="space-y-1 text-xs text-muted-foreground">
+                      <li className="flex justify-between">
+                        <span>Warehouses</span>
+                        <span>3 active</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Low Stock Items</span>
+                        <span>18 items</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Total Value</span>
+                        <span>$195,450</span>
+                      </li>
+                    </ul>
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      className="text-soft-pink p-0 h-auto mt-2" 
+                      onClick={handleNavigateToInventory}
+                    >
+                      View full inventory
+                    </Button>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+        ) : (
+          <Collapsible open={expandedCards.revenue} onOpenChange={() => toggleCardExpansion('revenue')} className="col-span-1">
+            <Card className="glass-morphism">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 p-0 text-soft-pink hover:bg-soft-pink/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateToRevenue();
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    <span className="sr-only">Go to revenue</span>
+                  </Button>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                      {expandedCards.revenue ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">Toggle details</span>
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">$12,234</div>
+                <p className="text-xs text-muted-foreground">
+                  +18.2% from last month
+                </p>
+              </CardContent>
+              <CollapsibleContent>
+                <div className="px-4 pb-4">
+                  <div className="p-3 bg-soft-pink/5 rounded-md text-sm">
+                    <h4 className="font-medium text-sm mb-1">Revenue Breakdown</h4>
+                    <ul className="space-y-1 text-xs text-muted-foreground">
+                      <li className="flex justify-between">
+                        <span>Marketplace Sales</span>
+                        <span>$8,450</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Platform Fees</span>
+                        <span>$3,184</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Subscription Revenue</span>
+                        <span>$600</span>
+                      </li>
+                    </ul>
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      className="text-soft-pink p-0 h-auto mt-2" 
+                      onClick={handleNavigateToRevenue}
+                    >
+                      View full revenue report
+                    </Button>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

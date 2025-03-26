@@ -1,4 +1,3 @@
-
 import { cn } from '@/lib/utils';
 import { 
   Home, ShoppingBag, Heart, Tags, 
@@ -48,22 +47,20 @@ const Sidebar = () => {
     }
   }, [location.pathname, isMobile, closeSidebar]);
 
-  // Common sidebar items for all users
   const commonItems = [
     { icon: Home, label: 'Dashboard', href: '/' },
     { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace' },
   ];
   
-  // Role-specific sidebar items
   const consumerItems = [
     { icon: Heart, label: 'Donations', href: '/donations' },
   ];
   
   const retailerItems = [
     { icon: Tags, label: 'Retail Donations', href: '/retail-donations' },
+    { icon: Package, label: 'Inventory', href: '/inventory' },
     { icon: BarChart2, label: 'Analytics', href: '/analytics' },
     { icon: FileText, label: 'Tax Benefits', href: '/tax-benefits' },
-    { icon: Package, label: 'Inventory', href: '/inventory' },
   ];
   
   const logisticsItems = [
@@ -77,7 +74,6 @@ const Sidebar = () => {
     { icon: Shield, label: 'Permissions', href: '/admin/permissions' },
   ];
   
-  // Filter items based on user role
   let sidebarItems = [...commonItems];
   
   if (userData) {
@@ -92,12 +88,10 @@ const Sidebar = () => {
     }
   }
   
-  // Common support item at the end
   sidebarItems.push({ icon: HelpCircle, label: 'Support', href: '/support' });
 
   return (
     <>
-      {/* Overlay for mobile */}
       {isMobile && isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/40 z-30 transition-opacity animate-fade-in"
@@ -105,7 +99,6 @@ const Sidebar = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed md:sticky top-0 z-40 h-screen transition-all duration-300 ease-in-out",

@@ -27,6 +27,7 @@ const PrivacyPage = lazy(() => import("@/pages/settings/PrivacyPage"));
 const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage"));
 const Rewards = lazy(() => import("@/pages/Rewards"));
 const AnalyticsDashboard = lazy(() => import("@/pages/analytics/AnalyticsDashboard"));
+const InventoryPage = lazy(() => import("@/pages/inventory/InventoryPage"));
 
 // Define route groups for better organization
 export const publicRoutes = [
@@ -100,6 +101,10 @@ export const protectedRoutes = [
   {
     path: "/settings/security",
     element: <SecurityPage />,
+  },
+  {
+    path: "/inventory",
+    element: <InventoryPage />,
   },
 ];
 
