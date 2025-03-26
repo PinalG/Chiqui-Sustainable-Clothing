@@ -19,7 +19,7 @@ interface SocialSharingProps {
 const SocialSharingWidget = ({
   achievementType = 'impact',
   achievementTitle = 'My Sustainability Impact',
-  achievementDescription = 'I've helped reduce textile waste and supported sustainable fashion!',
+  achievementDescription = "I've helped reduce textile waste and supported sustainable fashion!",
   imageUrl = '/placeholder.svg'
 }: SocialSharingProps) => {
   const [activeTab, setActiveTab] = useState('social');
