@@ -29,6 +29,11 @@ const getLoginAttempts = (): number => {
 };
 
 const incrementLoginAttempts = (): number => {
+  // Skip incrementing attempts in development mode
+  if (process.env.NODE_ENV === 'development') {
+    return 0;
+  }
+  
   const attempts = getLoginAttempts() + 1;
   localStorage.setItem('loginAttempts', attempts.toString());
   return attempts;
@@ -62,6 +67,13 @@ const Login = () => {
     const hasAcceptedCookies = localStorage.getItem('cookieConsent');
     if (!hasAcceptedCookies) {
       setShowCookieBanner(true);
+    }
+
+    // Skip lockout check in development mode
+    if (process.env.NODE_ENV === 'development') {
+      localStorage.removeItem('lockoutUntil');
+      localStorage.removeItem('loginAttempts');
+      return;
     }
 
     // Check if account is locked out
@@ -107,11 +119,14 @@ const Login = () => {
   };
 
   const onSubmit = async (data: LoginFormValues) => {
-    // Check if account is locked out
-    if (lockoutTime && lockoutTime > Date.now()) {
-      const minutes = Math.ceil((lockoutTime - Date.now()) / 60000);
-      toast.error(`Account temporarily locked. Try again in ${minutes} minutes.`);
-      return;
+    // Skip lockout check in development mode
+    if (process.env.NODE_ENV !== 'development') {
+      // Check if account is locked out
+      if (lockoutTime && lockoutTime > Date.now()) {
+        const minutes = Math.ceil((lockoutTime - Date.now()) / 60000);
+        toast.error(`Account temporarily locked. Try again in ${minutes} minutes.`);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -122,17 +137,28 @@ const Login = () => {
     } catch (error) {
       console.error(error);
       
-      // Handle failed login attempts
-      const attempts = incrementLoginAttempts();
-      
-      if (attempts >= 5) {
-        // Lock out the account for 15 minutes after 5 failed attempts
-        const lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
-        localStorage.setItem('lockoutUntil', lockoutUntil.toString());
-        setLockoutTime(lockoutUntil);
-        toast.error("Too many failed login attempts. Account locked for 15 minutes.");
-      } else if (attempts >= 3) {
-        toast.error(`Login failed. ${5 - attempts} attempts remaining before lockout.`);
+      // Handle failed login attempts (skip in development mode)
+      if (process.env.NODE_ENV !== 'development') {
+        const attempts = incrementLoginAttempts();
+        
+        if (attempts >= 5) {
+          // Lock out the account for 15 minutes after 5 failed attempts
+          const lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
+          localStorage.setItem('lockoutUntil', lockoutUntil.toString());
+          setLockoutTime(lockoutUntil);
+          toast.error("Too many failed login attempts. Account locked for 15 minutes.");
+        } else if (attempts >= 3) {
+          toast.error(`Login failed. ${5 - attempts} attempts remaining before lockout.`);
+        }
+      } else {
+        // In development mode, specific handling for mock users
+        const isMockUser = MOCK_USERS.some(u => u.email === data.email && u.password === data.password);
+        if (isMockUser) {
+          // This is a valid mock user but the Firebase API key is invalid
+          toast.error("Firebase API key is invalid. In development mode, click the 'Use' button for mock accounts.");
+        } else {
+          toast.error("Invalid email or password");
+        }
       }
     } finally {
       setIsLoading(false);
@@ -147,6 +173,9 @@ const Login = () => {
       navigate("/");
     } catch (error) {
       console.error(error);
+      if (process.env.NODE_ENV === 'development') {
+        toast.error("Firebase API key is invalid. In development mode, use the mock accounts instead.");
+      }
     } finally {
       setGoogleLoading(false);
     }
@@ -161,6 +190,20 @@ const Login = () => {
       toast.info(`Demo ${type} account selected`, {
         description: `Email: ${user.email}, Password: ${user.password}`
       });
+      
+      // In development mode, automatically "sign in" with the mock user after a short delay
+      if (process.env.NODE_ENV === 'development') {
+        setIsLoading(true);
+        setTimeout(() => {
+          signIn(user.email, user.password)
+            .then(() => {
+              navigate("/");
+            })
+            .finally(() => {
+              setIsLoading(false);
+            });
+        }, 500);
+      }
     }
   };
 
@@ -170,6 +213,9 @@ const Login = () => {
       console.log("Mock users available:", MOCK_USERS);
     }
   }, []);
+
+  // Check if we're in development mode to disable the lockout UI
+  const isDevMode = process.env.NODE_ENV === 'development';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-bg p-4">
@@ -182,12 +228,21 @@ const Login = () => {
           <p className="text-muted-foreground">Transforming Sustainable Retail</p>
         </div>
         
-        {lockoutTime && (
+        {!isDevMode && lockoutTime && (
           <Alert className="mb-4 bg-red-50 border-red-200 text-red-800">
             <AlertCircle className="h-4 w-4 text-red-600" />
             <AlertDescription>
               Account temporarily locked due to multiple failed login attempts. 
               Try again in {Math.ceil((lockoutTime - Date.now()) / 60000)} minutes.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {isDevMode && (
+          <Alert className="mb-4 bg-blue-50 border-blue-200 text-blue-800">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription>
+              Development mode active. Use the demo accounts below to sign in.
             </AlertDescription>
           </Alert>
         )}
@@ -242,7 +297,7 @@ const Login = () => {
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={isLoading || (lockoutTime !== null && lockoutTime > Date.now())}
+                  disabled={isLoading || (!isDevMode && lockoutTime !== null && lockoutTime > Date.now())}
                 >
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Sign In
@@ -332,9 +387,10 @@ const Login = () => {
             <Button
               variant="outline"
               onClick={handleGoogleSignIn}
-              disabled={googleLoading}
+              disabled={googleLoading || isDevMode}
               className="w-full"
               aria-label="Sign in with Google"
+              title={isDevMode ? "Google sign-in is disabled in development mode" : ""}
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

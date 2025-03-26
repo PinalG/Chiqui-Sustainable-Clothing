@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   User,
@@ -98,8 +99,16 @@ export function useAuthMethods() {
         const userData = getMockUserData(mockUser.email);
         
         if (!userData) {
-          toast.error("User data not found");
-          throw new Error("User data not found");
+          console.warn("User data not found for mock user, creating default data");
+          const defaultUserData = createMockUserData(user, mockUser.role, {
+            sustainabilityScore: mockUser.sustainabilityScore,
+            rewardsPoints: mockUser.rewardsPoints,
+            organizationName: mockUser.organizationName,
+            taxId: mockUser.taxId
+          });
+          
+          toast.success("Signed in successfully");
+          return { user, userData: defaultUserData };
         }
         
         toast.success("Signed in successfully");
@@ -107,11 +116,21 @@ export function useAuthMethods() {
       }
       
       // In production, use real Firebase auth
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Signed in successfully");
-      return { user: result.user, userData: null }; // userData will be fetched separately
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        toast.success("Signed in successfully");
+        return { user: result.user, userData: null }; // userData will be fetched separately
+      } catch (firebaseError: any) {
+        // Check if the error is due to an invalid API key
+        if (firebaseError.code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') {
+          console.error("Firebase API key is invalid. If you're in development mode, try using mock users instead.");
+          throw new Error("Authentication service error. Please try again later.");
+        }
+        throw firebaseError;
+      }
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign in");
+      const errorMessage = error.message || "Failed to sign in";
+      toast.error(errorMessage);
       throw error;
     }
   };
