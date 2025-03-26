@@ -1,5 +1,5 @@
 
-import { animate } from "framer-motion";
+import { animate, Easing } from "framer-motion";
 
 /**
  * Creates a default animation controller with presets for AI analysis
@@ -7,7 +7,7 @@ import { animate } from "framer-motion";
 export const createDefaultAnimate = () => {
   const defaultAnimationOptions = {
     duration: 0.5,
-    ease: "easeInOut"
+    ease: "easeInOut" as Easing
   };
 
   return {
@@ -17,9 +17,8 @@ export const createDefaultAnimate = () => {
     fadeIn: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      // Use the correct syntax for animate function
       return animate(element.style, {
-        opacity: [0, 1]
+        opacity: ["0", "1"]
       }, {
         ...defaultAnimationOptions,
         ...options
@@ -33,7 +32,7 @@ export const createDefaultAnimate = () => {
       if (!element) return;
       
       return animate(element.style, {
-        opacity: [1, 0]
+        opacity: ["1", "0"]
       }, {
         ...defaultAnimationOptions,
         ...options
@@ -76,10 +75,10 @@ export const createDefaultAnimate = () => {
       
       // For pulse animation
       const opacityControl = animate(element.style, {
-        opacity: [0.7, 1, 0.7]
+        opacity: ["0.7", "1", "0.7"]
       }, { 
         duration: 1.5,
-        ease: "easeInOut",
+        ease: "easeInOut" as Easing,
         repeat: Infinity,
         ...options
       });
@@ -88,7 +87,7 @@ export const createDefaultAnimate = () => {
         transform: ["scale(1)", "scale(1.05)", "scale(1)"]
       }, { 
         duration: 1.5,
-        ease: "easeInOut",
+        ease: "easeInOut" as Easing,
         repeat: Infinity,
         ...options
       });
@@ -109,7 +108,7 @@ export const createDefaultAnimate = () => {
       if (!element) return;
       
       const opacityControl = animate(element.style, {
-        opacity: [0, 1]
+        opacity: ["0", "1"]
       }, {
         ...defaultAnimationOptions,
         ...options
