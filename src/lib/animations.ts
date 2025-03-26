@@ -1,5 +1,5 @@
 
-import { animate } from "framer-motion";
+import { animate, AnimationControls } from "framer-motion";
 
 /**
  * Creates a default animation controller with presets for AI analysis
@@ -18,9 +18,9 @@ export const createDefaultAnimate = () => {
       if (!element) return;
       
       return animate(
-        element,
-        { opacity: [0, 1] },
-        { ...defaultAnimationOptions, ...options }
+        element, 
+        { opacity: 1 }, 
+        { ...defaultAnimationOptions, ...options, from: 0 }
       );
     },
     
@@ -31,9 +31,9 @@ export const createDefaultAnimate = () => {
       if (!element) return;
       
       return animate(
-        element,
-        { opacity: [1, 0] },
-        { ...defaultAnimationOptions, ...options }
+        element, 
+        { opacity: 0 }, 
+        { ...defaultAnimationOptions, ...options, from: 1 }
       );
     },
     
@@ -45,10 +45,8 @@ export const createDefaultAnimate = () => {
       
       return animate(
         element,
-        { 
-          y: [20, 0]
-        },
-        { ...defaultAnimationOptions, ...options }
+        { y: 0 },
+        { ...defaultAnimationOptions, ...options, from: 20 }
       );
     },
     
@@ -60,10 +58,8 @@ export const createDefaultAnimate = () => {
       
       return animate(
         element,
-        { 
-          y: [0, 20]
-        },
-        { ...defaultAnimationOptions, ...options }
+        { y: 20 },
+        { ...defaultAnimationOptions, ...options, from: 0 }
       );
     },
     
@@ -73,7 +69,7 @@ export const createDefaultAnimate = () => {
     pulse: (element: HTMLElement, options = {}) => {
       if (!element) return;
       
-      // For pulse, we'll use a multi-step animation with separate animate calls
+      // For pulse, we'll use keyframes to create the animation
       const opacityControl = animate(
         element,
         { opacity: [0.7, 1, 0.7] },
@@ -113,14 +109,14 @@ export const createDefaultAnimate = () => {
       
       const opacityControl = animate(
         element,
-        { opacity: [0, 1] },
-        { ...defaultAnimationOptions, ...options }
+        { opacity: 1 },
+        { ...defaultAnimationOptions, ...options, from: 0 }
       );
       
       const scaleControl = animate(
         element,
-        { scale: [0.9, 1] },
-        { ...defaultAnimationOptions, ...options }
+        { scale: 1 },
+        { ...defaultAnimationOptions, ...options, from: 0.9 }
       );
       
       return {
