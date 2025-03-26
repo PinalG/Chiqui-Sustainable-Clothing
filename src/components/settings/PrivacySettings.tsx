@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useAuth, UserPreferences } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useI18n } from "@/contexts/I18nContext";
 import {
   Card,
@@ -12,7 +12,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Save, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { createDefaultAnimate } from "@/lib/animations";
 
 const PrivacySettings = () => {
   const { userData, updateConsentSettings } = useAuth();
@@ -23,6 +24,7 @@ const PrivacySettings = () => {
     dataSharing: false,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const animations = createDefaultAnimate();
 
   // Load user consent settings when component mounts
   useEffect(() => {

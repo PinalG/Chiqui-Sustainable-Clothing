@@ -1,10 +1,15 @@
 
 import { useEffect } from "react";
 import PrivacySettings from "@/components/settings/PrivacySettings";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const PrivacyPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userData } = useAuth();
   
   // If this page was accessed directly, send analytics
   useEffect(() => {
@@ -14,12 +19,32 @@ const PrivacyPage = () => {
     }
   }, [location]);
 
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Privacy & Consent Settings</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Privacy & Consent Settings</h1>
+        <Button 
+          variant="outline" 
+          onClick={handleBack}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
+      
       <p className="mb-8 text-muted-foreground max-w-3xl mx-auto">
         Please review and update your privacy preferences to comply with data protection regulations.
         These settings control how your data is processed and shared within our platform.
+        {userData?.role === "retailer" && " As a retail partner, consent settings are required for accessing donation features."}
       </p>
       
       <PrivacySettings />

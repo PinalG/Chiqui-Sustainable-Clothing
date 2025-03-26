@@ -1,113 +1,100 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Award, Gift, Trophy, Leaf, Share2, Users, HelpCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { RewardsTier } from "@/components/rewards/RewardsTier";
-import { ImpactDashboard } from "@/components/rewards/ImpactDashboard";
-import { SocialSharing } from "@/components/rewards/SocialSharing";
-import { EducationalContent } from "@/components/rewards/EducationalContent";
-import { useLocation } from "react-router-dom";
+import RewardsTier from "@/components/rewards/RewardsTier";
+import ImpactDashboard from "@/components/rewards/ImpactDashboard";
+import EducationalContent from "@/components/rewards/EducationalContent";
+import SocialSharingWidget from "@/components/social/SocialSharingWidget";
+import { Card } from "@/components/ui/card";
+import { Award, Share, BookOpen, BarChart2 } from "lucide-react";
 
 const Rewards = () => {
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState("tiers");
-  
-  useEffect(() => {
-    // Check if navigated from dashboard with specific tab request
-    if (location.state && location.state.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-  }, [location]);
+  const [activeTab, setActiveTab] = useState("rewards");
 
   return (
-    <div className="container mx-auto py-6 px-4 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient">Rewards & Impact</h1>
-          <p className="text-muted-foreground">Track your sustainability journey and earn rewards</p>
-        </div>
-        <Button className="bg-soft-pink hover:bg-soft-pink/90">
-          <Gift className="mr-2 h-4 w-4" />
-          Redeem Points
-        </Button>
+    <div className="space-y-6 animate-enter">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Rewards & Impact</h1>
+        <p className="text-muted-foreground">
+          Track your sustainability journey, earn rewards, and share your impact
+        </p>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="glass-card hover-lift">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm text-muted-foreground">Current Points</p>
-              <p className="text-3xl font-bold">2,450</p>
-            </div>
-            <Award className="h-12 w-12 text-soft-pink opacity-80" />
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-card hover-lift">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm text-muted-foreground">Current Tier</p>
-              <p className="text-3xl font-bold">Silver</p>
-            </div>
-            <Trophy className="h-12 w-12 text-heather-grey opacity-80" />
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-card hover-lift">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm text-muted-foreground">CO₂ Saved</p>
-              <p className="text-3xl font-bold">128 kg</p>
-            </div>
-            <Leaf className="h-12 w-12 text-green-500 opacity-80" />
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Tabs defaultValue="tiers" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
-          <TabsTrigger value="tiers" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
-            <Trophy className="mr-2 h-4 w-4" />
-            Rewards Tiers
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+          <TabsTrigger value="rewards" className="flex items-center gap-2">
+            <Award className="h-4 w-4" />
+            <span className="hidden md:inline">Rewards Tier</span>
+            <span className="inline md:hidden">Rewards</span>
           </TabsTrigger>
-          <TabsTrigger value="impact" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
-            <Leaf className="mr-2 h-4 w-4" />
-            Impact Dashboard
+          <TabsTrigger value="impact" className="flex items-center gap-2">
+            <BarChart2 className="h-4 w-4" />
+            <span className="hidden md:inline">Impact Dashboard</span>
+            <span className="inline md:hidden">Impact</span>
           </TabsTrigger>
-          <TabsTrigger value="sharing" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
-            <Share2 className="mr-2 h-4 w-4" />
-            Social Sharing
+          <TabsTrigger value="share" className="flex items-center gap-2">
+            <Share className="h-4 w-4" />
+            <span className="hidden md:inline">Social Sharing</span>
+            <span className="inline md:hidden">Share</span>
           </TabsTrigger>
-          <TabsTrigger value="learn" className="data-[state=active]:bg-soft-pink/10 data-[state=active]:text-soft-pink">
-            <HelpCircle className="mr-2 h-4 w-4" />
-            Learn
+          <TabsTrigger value="learn" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            <span className="hidden md:inline">Educational Content</span>
+            <span className="inline md:hidden">Learn</span>
           </TabsTrigger>
         </TabsList>
         
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <TabsContent value="tiers" className="mt-0">
-            <RewardsTier />
-          </TabsContent>
-          
-          <TabsContent value="impact" className="mt-0">
-            <ImpactDashboard />
-          </TabsContent>
-          
-          <TabsContent value="sharing" className="mt-0">
-            <SocialSharing />
-          </TabsContent>
-          
-          <TabsContent value="learn" className="mt-0">
-            <EducationalContent />
-          </TabsContent>
-        </motion.div>
+        <TabsContent value="rewards" className="mt-6">
+          <RewardsTier />
+        </TabsContent>
+        
+        <TabsContent value="impact" className="mt-6">
+          <ImpactDashboard />
+        </TabsContent>
+        
+        <TabsContent value="share" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SocialSharingWidget 
+              achievementType="impact"
+              achievementTitle="My Sustainability Journey"
+              achievementDescription="I've saved the equivalent of 15 gallons of water and prevented 2 lbs of textiles from entering landfills!"
+            />
+            
+            <Card className="p-6">
+              <h2 className="text-xl font-bold mb-4">Why Share Your Impact?</h2>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="bg-soft-pink/20 text-soft-pink p-1 rounded-full mt-0.5">
+                    <Award className="h-4 w-4" />
+                  </span>
+                  <span>Inspire others to make sustainable choices</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-soft-pink/20 text-soft-pink p-1 rounded-full mt-0.5">
+                    <Award className="h-4 w-4" />
+                  </span>
+                  <span>Earn additional reward points for social shares</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-soft-pink/20 text-soft-pink p-1 rounded-full mt-0.5">
+                    <Award className="h-4 w-4" />
+                  </span>
+                  <span>Help build a community of sustainable fashion advocates</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-soft-pink/20 text-soft-pink p-1 rounded-full mt-0.5">
+                    <Award className="h-4 w-4" />
+                  </span>
+                  <span>Track and showcase your environmental contributions</span>
+                </li>
+              </ul>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="learn" className="mt-6">
+          <EducationalContent />
+        </TabsContent>
       </Tabs>
     </div>
   );
