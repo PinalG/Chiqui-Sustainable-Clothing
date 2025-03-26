@@ -45,7 +45,9 @@ const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showCookieBanner, setShowCookieBanner] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<number | null>(null);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(true); // Ensure this is true to show demo accounts
+  
+  // Set to true by default to always show demo accounts section
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -162,7 +164,7 @@ const Login = () => {
     }
   };
 
-  // Log the mock users to console for debugging
+  // Log mock users to console for debugging
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       console.log("Mock users available:", MOCK_USERS);
@@ -248,72 +250,75 @@ const Login = () => {
               </form>
             </Form>
             
-            {/* Demo Accounts Section - Always show in development mode */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4">
-                <Accordion type="single" collapsible className="w-full" defaultValue="demo-accounts">
-                  <AccordionItem value="demo-accounts">
-                    <AccordionTrigger className="text-sm text-muted-foreground py-2">
-                      <span className="flex items-center">
-                        <Info className="h-4 w-4 mr-2" />
-                        Demo Accounts
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2 p-2 bg-muted/50 rounded-md text-sm">
-                        <div className="flex justify-between">
-                          <span>Consumer:</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-6 text-xs" 
-                            onClick={() => fillMockUser('consumer')}
-                          >
-                            Use
-                          </Button>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Retailer:</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-6 text-xs" 
-                            onClick={() => fillMockUser('retailer')}
-                          >
-                            Use
-                          </Button>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Logistics:</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-6 text-xs" 
-                            onClick={() => fillMockUser('logistics')}
-                          >
-                            Use
-                          </Button>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Admin:</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-6 text-xs" 
-                            onClick={() => fillMockUser('admin')}
-                          >
-                            Use
-                          </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          All mock accounts use password: password123
-                        </p>
+            {/* Always show demo accounts section */}
+            <div className="mt-4">
+              <Accordion 
+                type="single" 
+                collapsible 
+                className="w-full" 
+                defaultValue="demo-accounts" // Set default value to ensure it's open by default
+              >
+                <AccordionItem value="demo-accounts">
+                  <AccordionTrigger className="text-sm text-muted-foreground py-2">
+                    <span className="flex items-center">
+                      <Info className="h-4 w-4 mr-2" />
+                      Demo Accounts
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2 p-2 bg-muted/50 rounded-md text-sm">
+                      <div className="flex justify-between">
+                        <span>Consumer:</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs" 
+                          onClick={() => fillMockUser('consumer')}
+                        >
+                          Use
+                        </Button>
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </div>
-            )}
+                      <div className="flex justify-between">
+                        <span>Retailer:</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs" 
+                          onClick={() => fillMockUser('retailer')}
+                        >
+                          Use
+                        </Button>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Logistics:</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs" 
+                          onClick={() => fillMockUser('logistics')}
+                        >
+                          Use
+                        </Button>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Admin:</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 text-xs" 
+                          onClick={() => fillMockUser('admin')}
+                        >
+                          Use
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        All mock accounts use password: password123
+                      </p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
             
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
