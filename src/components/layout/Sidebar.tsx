@@ -1,3 +1,4 @@
+
 import { cn } from '@/lib/utils';
 import { 
   Home, ShoppingBag, Heart, Tags, 
@@ -92,6 +93,7 @@ const Sidebar = () => {
 
   return (
     <>
+      {/* Mobile overlay */}
       {isMobile && isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/40 z-30 transition-opacity animate-fade-in"
@@ -99,6 +101,7 @@ const Sidebar = () => {
         />
       )}
 
+      {/* Sidebar */}
       <aside
         className={cn(
           "fixed md:sticky top-0 z-40 h-screen transition-all duration-300 ease-in-out",
@@ -106,7 +109,7 @@ const Sidebar = () => {
             ? "translate-x-0 shadow-xl md:shadow-none" 
             : "-translate-x-full md:translate-x-0 md:w-20",
           "bg-white border-r border-border flex flex-col",
-          isSidebarOpen ? "w-72" : "w-20"
+          isMobile ? "w-72" : (isSidebarOpen ? "w-72" : "w-20")
         )}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b border-border">

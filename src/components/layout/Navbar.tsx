@@ -80,9 +80,9 @@ const Navbar = () => {
                   size="icon" 
                   onClick={toggleSidebar}
                   className="mr-2"
+                  aria-label="Toggle sidebar menu"
                 >
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle sidebar</span>
                 </Button>
               )}
               <div className="flex items-center md:gap-2">
