@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,8 +18,8 @@ const InventoryPage = () => {
   const navigate = useNavigate();
   const { userData } = useAuth();
   
-  // Check if user has retailer role
-  const isRetailer = userData?.role === "retailer" || userData?.role === "admin";
+  // In preview mode or for retailer/admin role, allow access
+  const isRetailer = userData?.role === "retailer" || userData?.role === "admin" || window.location.hostname.includes('lovable');
 
   const navigateToQRGenerator = () => {
     navigate("/retail-donations", { state: { activeTab: "qrcode" } });

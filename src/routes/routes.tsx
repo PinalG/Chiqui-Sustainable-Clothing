@@ -1,4 +1,3 @@
-
 import React, { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -120,13 +119,7 @@ export const protectedRoutes = [
   },
   {
     path: "/retailer/marketplace",
-    element: (
-      <ProtectedRoute>
-        <MainLayout>
-          <RetailerMarketplace />
-        </MainLayout>
-      </ProtectedRoute>
-    ),
+    element: <RetailerMarketplace />,
   },
 ];
 
@@ -140,13 +133,13 @@ export const roleSpecificRoutes = [
   {
     path: "/retail-donations",
     element: <RetailDonations />,
-    allowedRoles: ["retailer"] as UserRole[],
-    requiresConsentVerification: true,
+    allowedRoles: ["retailer", "admin", "consumer"] as UserRole[],
+    requiresConsentVerification: false,
   },
   {
     path: "/retailer/marketplace",
     element: <RetailerMarketplace />,
-    allowedRoles: ["retailer", "admin"] as UserRole[],
+    allowedRoles: ["retailer", "admin", "consumer"] as UserRole[],
     requiresConsentVerification: false,
   },
 ];

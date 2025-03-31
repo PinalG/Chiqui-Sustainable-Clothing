@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, db, isDevelopmentLike } from "@/lib/firebase";
@@ -32,14 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // For preview environments, auto-set a demo user
     if (window.location.hostname.includes('lovable')) {
-      console.log("Preview environment detected - auto-setting demo user");
+      console.log("Preview environment detected - auto-setting retailer demo user");
       const demoUser = auth.currentUser;
       setUser(demoUser);
       
-      // Use the consumer demo user data
-      const mockUserData = getMockUserData('consumer@example.com');
+      // Use the retailer demo user data instead of consumer
+      const mockUserData = getMockUserData('retailer@example.com');
       if (mockUserData) {
-        console.log("Setting mock user data for preview:", mockUserData);
+        console.log("Setting mock retailer user data for preview:", mockUserData);
         setUserData(mockUserData);
       } else {
         console.warn("Failed to get mock user data for preview");
