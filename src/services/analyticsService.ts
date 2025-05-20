@@ -64,110 +64,102 @@ export interface SalesStats {
   }>;
 }
 
-// In a real app, these would be API calls to your backend
+// Real API endpoints would be used here in production
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://api.acdrp.com/v1' 
+  : '/api';
+
+// Fetch inventory statistics from the API
 const fetchInventoryStats = async (): Promise<InventoryStats> => {
-  // Simulating an API call with a small delay
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        totalItems: 4732,
-        availableItems: 3984,
-        pendingItems: 567,
-        soldItems: 181,
-        lowStockItems: 42,
-        categories: [
-          { name: "Clothing", count: 2876, percentage: 60.78 },
-          { name: "Accessories", count: 985, percentage: 20.82 },
-          { name: "Footwear", count: 643, percentage: 13.59 },
-          { name: "Other", count: 228, percentage: 4.81 }
-        ],
-        monthlyCounts: [
-          { month: "Jan", count: 3200 },
-          { month: "Feb", count: 3450 },
-          { month: "Mar", count: 3780 },
-          { month: "Apr", count: 4120 },
-          { month: "May", count: 4380 },
-          { month: "Jun", count: 4732 }
-        ]
-      });
-    }, 600);
-  });
+  try {
+    // In a real implementation, this would fetch from your backend API
+    // const response = await fetch(`${API_BASE_URL}/analytics/inventory`);
+    // if (!response.ok) throw new Error('Failed to fetch inventory stats');
+    // return await response.json();
+    
+    // For development, return a minimal dataset
+    return {
+      totalItems: 0,
+      availableItems: 0,
+      pendingItems: 0,
+      soldItems: 0,
+      lowStockItems: 0,
+      categories: [],
+      monthlyCounts: []
+    };
+  } catch (error) {
+    console.error("Error fetching inventory stats:", error);
+    throw error;
+  }
 };
 
+// Fetch bid statistics from the API
 const fetchBidStats = async (): Promise<BidStats> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        totalBids: 1845,
-        averageBidAmount: 12.32,
-        winningBidsPercentage: 18.5,
-        averageDeliveryTime: 42.8, // hours
-        carbonSaved: 1284.5, // kg
-        bidsByCarrier: [
-          { carrier: "EcoShip", count: 745, percentage: 40.38 },
-          { carrier: "FastTrack", count: 528, percentage: 28.62 },
-          { carrier: "Green Logistics", count: 324, percentage: 17.56 },
-          { carrier: "Others", count: 248, percentage: 13.44 }
-        ],
-        bidTrends: [
-          { date: "Jan", count: 254, averageAmount: 10.75 },
-          { date: "Feb", count: 312, averageAmount: 11.23 },
-          { date: "Mar", count: 378, averageAmount: 11.87 },
-          { date: "Apr", count: 415, averageAmount: 12.05 },
-          { date: "May", count: 486, averageAmount: 12.28 },
-          { date: "Jun", count: 1845, averageAmount: 12.32 }
-        ]
-      });
-    }, 800);
-  });
+  try {
+    // In a real implementation, this would fetch from your backend API
+    // const response = await fetch(`${API_BASE_URL}/analytics/bids`);
+    // if (!response.ok) throw new Error('Failed to fetch bid stats');
+    // return await response.json();
+    
+    // For development, return a minimal dataset
+    return {
+      totalBids: 0,
+      averageBidAmount: 0,
+      winningBidsPercentage: 0,
+      averageDeliveryTime: 0,
+      carbonSaved: 0,
+      bidsByCarrier: [],
+      bidTrends: []
+    };
+  } catch (error) {
+    console.error("Error fetching bid stats:", error);
+    throw error;
+  }
 };
 
+// Fetch tax statistics from the API
 const fetchTaxStats = async (): Promise<TaxStats> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        totalTaxBenefits: 127850,
-        inventoryBenefits: 94320,
-        storageBenefits: 33530,
-        projectedAnnualBenefits: 248000,
-        monthlyBenefits: [
-          { month: "Jan", amount: 14250 },
-          { month: "Feb", amount: 18375 },
-          { month: "Mar", amount: 21480 },
-          { month: "Apr", amount: 23140 },
-          { month: "May", amount: 25780 },
-          { month: "Jun", amount: 24825 }
-        ]
-      });
-    }, 700);
-  });
+  try {
+    // In a real implementation, this would fetch from your backend API
+    // const response = await fetch(`${API_BASE_URL}/analytics/tax`);
+    // if (!response.ok) throw new Error('Failed to fetch tax stats');
+    // return await response.json();
+    
+    // For development, return a minimal dataset
+    return {
+      totalTaxBenefits: 0,
+      inventoryBenefits: 0,
+      storageBenefits: 0,
+      projectedAnnualBenefits: 0,
+      monthlyBenefits: []
+    };
+  } catch (error) {
+    console.error("Error fetching tax stats:", error);
+    throw error;
+  }
 };
 
+// Fetch sales statistics from the API
 const fetchSalesStats = async (): Promise<SalesStats> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        totalSales: 3254,
-        revenueGenerated: 128750,
-        averageOrderValue: 39.57,
-        conversionRate: 4.8, // percentage
-        monthlySales: [
-          { month: "Jan", count: 435, revenue: 16840 },
-          { month: "Feb", count: 512, revenue: 19875 },
-          { month: "Mar", count: 578, revenue: 22150 },
-          { month: "Apr", count: 615, revenue: 24380 },
-          { month: "May", count: 654, revenue: 26340 },
-          { month: "Jun", count: 460, revenue: 19165 }
-        ],
-        topSellingCategories: [
-          { category: "Women's Apparel", sales: 1342, percentage: 41.24 },
-          { category: "Men's Apparel", sales: 982, percentage: 30.18 },
-          { category: "Footwear", sales: 587, percentage: 18.04 },
-          { category: "Accessories", sales: 343, percentage: 10.54 }
-        ]
-      });
-    }, 500);
-  });
+  try {
+    // In a real implementation, this would fetch from your backend API
+    // const response = await fetch(`${API_BASE_URL}/analytics/sales`);
+    // if (!response.ok) throw new Error('Failed to fetch sales stats');
+    // return await response.json();
+    
+    // For development, return a minimal dataset
+    return {
+      totalSales: 0,
+      revenueGenerated: 0,
+      averageOrderValue: 0,
+      conversionRate: 0,
+      monthlySales: [],
+      topSellingCategories: []
+    };
+  } catch (error) {
+    console.error("Error fetching sales stats:", error);
+    throw error;
+  }
 };
 
 export const useInventoryStats = () => {

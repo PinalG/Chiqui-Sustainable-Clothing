@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,68 +27,50 @@ import {
   Shield,
   Tag,
   AlertTriangle,
+  Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { UserRole } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 
-// Mock user data
-const mockUsers = [
-  {
-    id: "1",
-    name: "Sarah Consumer",
-    email: "consumer@example.com",
-    role: "consumer" as UserRole,
-    status: "active",
-    joinDate: "2023-09-15",
-    lastActive: "2023-11-10",
-    rewardsPoints: 250,
-  },
-  {
-    id: "2",
-    name: "John Retailer",
-    email: "retailer@example.com",
-    role: "retailer" as UserRole,
-    status: "active",
-    joinDate: "2023-08-20",
-    lastActive: "2023-11-09",
-    organizationName: "EcoFashion Inc.",
-  },
-  {
-    id: "3",
-    name: "Mike Logistics",
-    email: "logistics@example.com",
-    role: "logistics" as UserRole,
-    status: "active",
-    joinDate: "2023-07-10",
-    lastActive: "2023-11-08",
-    organizationName: "FastShip Logistics",
-  },
-  {
-    id: "4",
-    name: "Jane Doe",
-    email: "jane@example.com",
-    role: "consumer" as UserRole,
-    status: "inactive",
-    joinDate: "2023-06-05",
-    lastActive: "2023-09-15",
-    rewardsPoints: 120,
-  },
-  {
-    id: "5",
-    name: "Robert Smith",
-    email: "robert@fashionco.com",
-    role: "retailer" as UserRole,
-    status: "pending",
-    joinDate: "2023-10-20",
-    lastActive: "2023-10-20",
-    organizationName: "Fashion Co.",
-  },
-];
+// User interface
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: string;
+  joinDate: string;
+  lastActive: string;
+  rewardsPoints?: number;
+  organizationName?: string;
+}
+
+// Fetch users from API
+const fetchUsers = async (): Promise<User[]> => {
+  try {
+    // In a real implementation, this would fetch from your backend API
+    // const response = await fetch('/api/admin/users');
+    // if (!response.ok) throw new Error('Failed to fetch users');
+    // return await response.json();
+    
+    // For development, return an empty array
+    return [];
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+};
 
 const UserManagement = () => {
-  const [users, setUsers] = useState(mockUsers);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Fetch users
+  const { data: users = [], isLoading, refetch } = useQuery({
+    queryKey: ["adminUsers"],
+    queryFn: fetchUsers,
+  });
   
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,31 +78,76 @@ const UserManagement = () => {
     (user.organizationName && user.organizationName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
   
-  const handleStatusChange = (userId: string, newStatus: string) => {
-    setUsers(
-      users.map(user => 
-        user.id === userId ? { ...user, status: newStatus } : user
-      )
-    );
-    toast.success(`User status updated to ${newStatus}`);
+  const handleStatusChange = async (userId: string, newStatus: string) => {
+    try {
+      // In a real implementation, this would update the user status via an API call
+      // const response = await fetch(`/api/admin/users/${userId}/status`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ status: newStatus })
+      // });
+      // if (!response.ok) throw new Error('Failed to update user status');
+      
+      // Refetch users to get updated data
+      refetch();
+      toast.success(`User status updated to ${newStatus}`);
+    } catch (error) {
+      toast.error("Failed to update user status");
+      console.error(error);
+    }
   };
   
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    setUsers(
-      users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      )
-    );
-    toast.success(`User role updated to ${newRole}`);
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+    try {
+      // In a real implementation, this would update the user role via an API call
+      // const response = await fetch(`/api/admin/users/${userId}/role`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ role: newRole })
+      // });
+      // if (!response.ok) throw new Error('Failed to update user role');
+      
+      // Refetch users to get updated data
+      refetch();
+      toast.success(`User role updated to ${newRole}`);
+    } catch (error) {
+      toast.error("Failed to update user role");
+      console.error(error);
+    }
   };
   
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter(user => user.id !== userId));
-    toast.success("User deleted successfully");
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      // In a real implementation, this would delete the user via an API call
+      // const response = await fetch(`/api/admin/users/${userId}`, {
+      //   method: 'DELETE'
+      // });
+      // if (!response.ok) throw new Error('Failed to delete user');
+      
+      // Refetch users to get updated data
+      refetch();
+      toast.success("User deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete user");
+      console.error(error);
+    }
   };
   
-  const handleSendEmail = (email: string) => {
-    toast.success(`Email notification sent to ${email}`);
+  const handleSendEmail = async (email: string) => {
+    try {
+      // In a real implementation, this would send an email via an API call
+      // const response = await fetch('/api/admin/send-email', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email })
+      // });
+      // if (!response.ok) throw new Error('Failed to send email');
+      
+      toast.success(`Email notification sent to ${email}`);
+    } catch (error) {
+      toast.error("Failed to send email");
+      console.error(error);
+    }
   };
   
   const getRoleBadge = (role: UserRole) => {
@@ -172,79 +199,85 @@ const UserManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-soft-pink/5">
-                    <TableCell className="font-medium">
-                      {user.name}
-                      {user.organizationName && (
-                        <div className="text-xs text-muted-foreground">
-                          {user.organizationName}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{getRoleBadge(user.role)}</TableCell>
-                    <TableCell>{getStatusBadge(user.status)}</TableCell>
-                    <TableCell>{user.joinDate}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[160px]">
-                          <DropdownMenuItem onClick={() => handleSendEmail(user.email)}>
-                            <Mail className="mr-2 h-4 w-4" />
-                            <span>Send Email</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusChange(user.id, "active")}>
-                            <Shield className="mr-2 h-4 w-4" />
-                            <span>Set Active</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusChange(user.id, "inactive")}>
-                            <AlertTriangle className="mr-2 h-4 w-4" />
-                            <span>Suspend</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleRoleChange(user.id, "admin" as UserRole)}>
-                            <Tag className="mr-2 h-4 w-4" />
-                            <span>Make Admin</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteUser(user.id)}
-                            className="text-red-500 focus:text-red-500"
-                          >
-                            <UserX className="mr-2 h-4 w-4" />
-                            <span>Delete User</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-soft-pink" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <TableRow key={user.id} className="hover:bg-soft-pink/5">
+                      <TableCell className="font-medium">
+                        {user.name}
+                        {user.organizationName && (
+                          <div className="text-xs text-muted-foreground">
+                            {user.organizationName}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{getRoleBadge(user.role)}</TableCell>
+                      <TableCell>{getStatusBadge(user.status)}</TableCell>
+                      <TableCell>{user.joinDate}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-[160px]">
+                            <DropdownMenuItem onClick={() => handleSendEmail(user.email)}>
+                              <Mail className="mr-2 h-4 w-4" />
+                              <span>Send Email</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusChange(user.id, "active")}>
+                              <Shield className="mr-2 h-4 w-4" />
+                              <span>Set Active</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusChange(user.id, "inactive")}>
+                              <AlertTriangle className="mr-2 h-4 w-4" />
+                              <span>Suspend</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRoleChange(user.id, "admin" as UserRole)}>
+                              <Tag className="mr-2 h-4 w-4" />
+                              <span>Make Admin</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="text-red-500 focus:text-red-500"
+                            >
+                              <UserX className="mr-2 h-4 w-4" />
+                              <span>Delete User</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      No users found.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    No users found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </AdminLayout>

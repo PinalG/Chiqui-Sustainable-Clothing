@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -25,7 +24,8 @@ import {
   AlertCircle,
   Settings,
   PackageCheck,
-  FileEdit
+  FileEdit,
+  Loader2
 } from "lucide-react";
 import { 
   Select, 
@@ -53,106 +53,68 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { motion } from "framer-motion";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { useQuery } from "@tanstack/react-query";
 
-// Mock data representing retailer's donated items in marketplace
-const mockRetailerItems = [
-  {
-    id: "P001",
-    name: "Classic White Shirt",
-    category: "clothing",
-    price: 35.99,
-    originalPrice: 89.99,
-    donationDate: "2023-09-12",
-    condition: "Like New",
-    conditionScore: 0.85,
-    sustainabilityScore: 88,
-    description: "Versatile piece that can be styled in multiple ways",
-    tags: ["casual", "cotton", "business"],
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1976&auto=format&fit=crop",
-    aiVerified: true,
-    marketStatus: "active",
-    views: 124,
-    clicks: 32,
-  },
-  {
-    id: "P002",
-    name: "Vintage Leather Jacket",
-    category: "outerwear",
-    price: 129.50,
-    originalPrice: 350.00,
-    donationDate: "2023-10-05",
-    condition: "Good",
-    conditionScore: 0.65,
-    sustainabilityScore: 72,
-    description: "Classic design with timeless appeal and durable construction",
-    tags: ["vintage", "leather", "fall"],
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=1935&auto=format&fit=crop",
-    aiVerified: true,
-    marketStatus: "active",
-    views: 89,
-    clicks: 18,
-  },
-  {
-    id: "P003",
-    name: "Designer Handbag",
-    category: "accessories",
-    price: 78.25,
-    originalPrice: 195.00,
-    donationDate: "2023-11-20",
-    condition: "Excellent",
-    conditionScore: 0.75,
-    sustainabilityScore: 82,
-    description: "Stylish accessory that complements many outfits",
-    tags: ["designer", "elegant", "practical"],
-    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1935&auto=format&fit=crop",
-    aiVerified: true,
-    marketStatus: "active",
-    views: 156,
-    clicks: 45,
-  },
-  {
-    id: "P004",
-    name: "Running Shoes",
-    category: "footwear",
-    price: 49.99,
-    originalPrice: 120.00,
-    donationDate: "2023-12-03",
-    condition: "Good",
-    conditionScore: 0.65,
-    sustainabilityScore: 75,
-    description: "Performance footwear with good tread and support",
-    tags: ["sports", "running", "comfortable"],
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1770&auto=format&fit=crop",
-    aiVerified: false,
-    marketStatus: "pending",
-    views: 0,
-    clicks: 0,
-  },
-  {
-    id: "P005",
-    name: "Silk Evening Dress",
-    category: "formalwear",
-    price: 89.00,
-    originalPrice: 225.00,
-    donationDate: "2024-01-15",
-    condition: "Excellent",
-    conditionScore: 0.80,
-    sustainabilityScore: 90,
-    description: "Elegant piece suitable for professional settings",
-    tags: ["formal", "silk", "evening"],
-    image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1908&auto=format&fit=crop",
-    aiVerified: true,
-    marketStatus: "active",
-    views: 67,
-    clicks: 15,
-  },
-];
+// Define RetailerItem interface
+interface RetailerItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  originalPrice: number;
+  donationDate: string;
+  condition: string;
+  conditionScore: number;
+  sustainabilityScore: number;
+  description: string;
+  tags: string[];
+  image: string;
+  aiVerified: boolean;
+  marketStatus: "active" | "pending" | "inactive";
+  views: number;
+  clicks: number;
+}
+
+// Fetch retailer items from API
+const fetchRetailerItems = async (): Promise<RetailerItem[]> => {
+  try {
+    // In a real implementation, this would fetch from your backend API
+    // const response = await fetch('/api/retailer/marketplace-items');
+    // if (!response.ok) throw new Error('Failed to fetch retailer items');
+    // return await response.json();
+    
+    // For development, return an empty array
+    return [];
+  } catch (error) {
+    console.error("Error fetching retailer items:", error);
+    return [];
+  }
+};
+
+// Update retailer item via API
+const updateRetailerItem = async (itemId: string, itemData: Partial<RetailerItem>): Promise<boolean> => {
+  try {
+    // In a real implementation, this would update the item via an API call
+    // const response = await fetch(`/api/retailer/marketplace-items/${itemId}`, {
+    //   method: 'PUT',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(itemData)
+    // });
+    // return response.ok;
+    
+    // For development, always return success
+    return true;
+  } catch (error) {
+    console.error("Error updating retailer item:", error);
+    return false;
+  }
+};
 
 interface RetailerItemCardProps {
-  item: typeof mockRetailerItems[0];
+  item: RetailerItem;
   onEdit: (itemId: string) => void;
   onReview: (itemId: string) => void;
 }
@@ -564,7 +526,7 @@ const RetailerMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState<RetailerItem | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const navigate = useNavigate();
@@ -572,10 +534,16 @@ const RetailerMarketplace = () => {
   
   // Check if user has retailer role
   const isRetailer = userData?.role === "retailer" || userData?.role === "admin";
+  
+  // Fetch retailer items
+  const { data: items = [], isLoading, refetch } = useQuery({
+    queryKey: ["retailerItems"],
+    queryFn: fetchRetailerItems,
+  });
 
   // Filter products based on user selection
   const filterItems = () => {
-    return mockRetailerItems.filter(item => {
+    return items.filter(item => {
       // Apply search query filter
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -613,16 +581,20 @@ const RetailerMarketplace = () => {
 
   const filteredItems = filterItems();
   
-  const handleEditItem = (itemId) => {
-    const item = mockRetailerItems.find(item => item.id === itemId);
-    setSelectedItem(item);
-    setIsEditDialogOpen(true);
+  const handleEditItem = (itemId: string) => {
+    const item = items.find(item => item.id === itemId);
+    if (item) {
+      setSelectedItem(item);
+      setIsEditDialogOpen(true);
+    }
   };
   
-  const handleReviewItem = (itemId) => {
-    const item = mockRetailerItems.find(item => item.id === itemId);
-    setSelectedItem(item);
-    setIsReviewDialogOpen(true);
+  const handleReviewItem = (itemId: string) => {
+    const item = items.find(item => item.id === itemId);
+    if (item) {
+      setSelectedItem(item);
+      setIsReviewDialogOpen(true);
+    }
   };
 
   if (!isRetailer) {
@@ -630,7 +602,7 @@ const RetailerMarketplace = () => {
       <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
         <AlertCircle className="h-16 w-16 text-soft-pink mb-4" />
         <h1 className="text-2xl font-bold mb-2">Access Restricted</h1>
-        <p className="text-gray-500 text-center mb-6">This page is only available to retail partners.</p>
+        <p className="text-center text-muted-foreground mb-6">This page is only available to retail partners.</p>
         <Button onClick={() => navigate("/")}>
           Return to Dashboard
         </Button>
@@ -743,7 +715,11 @@ const RetailerMarketplace = () => {
               </div>
             </div>
             
-            {filteredItems.length > 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-12 w-12 animate-spin text-soft-pink" />
+              </div>
+            ) : filteredItems.length > 0 ? (
               <>
                 <div className="mb-4">
                   <p className="text-sm text-muted-foreground">
