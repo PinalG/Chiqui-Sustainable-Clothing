@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,13 +23,15 @@ const ProtectedRoute = ({
     return <>{children}</>;
   }
 
-  // Rest of the protected route logic remains unchanged
+  // Show loading state while auth is being checked
   if (isLoading) {
     // You can replace this with a proper loading component
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
+  // Redirect to login if not authenticated
   if (!user) {
+    console.log("User not authenticated, redirecting to login");
     return <Navigate to="/auth/login" replace />;
   }
 

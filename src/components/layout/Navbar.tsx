@@ -1,3 +1,4 @@
+
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSidebar } from './SidebarContext';
 import { Menu, User, Bell, Settings, Search, X, LogOut } from 'lucide-react';
@@ -39,7 +40,8 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/auth/login');
+      // Force navigation to login page after logout
+      window.location.href = '/auth/login';
     } catch (error) {
       console.error("Logout failed:", error);
     }

@@ -36,15 +36,15 @@ const TaxBenefitsPage = lazy(() => import("@/pages/TaxBenefitsPage"));
 export const publicRoutes = [
   {
     path: "/auth/login",
-    element: <Login />,
+    element: <LazyComponent><Login /></LazyComponent>,
   },
   {
     path: "/auth/signup",
-    element: <Signup />,
+    element: <LazyComponent><Signup /></LazyComponent>,
   },
   {
     path: "/auth/forgot-password",
-    element: <ForgotPassword />,
+    element: <LazyComponent><ForgotPassword /></LazyComponent>,
   },
 ];
 
