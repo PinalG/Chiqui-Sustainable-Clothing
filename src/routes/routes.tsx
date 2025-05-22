@@ -76,16 +76,6 @@ export const protectedRoutes = [
     element: <UserProfile />,
   },
   {
-    path: "/logistics",
-    element: (
-      <ProtectedRoute>
-        <MainLayout>
-          <Logistics />
-        </MainLayout>
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: "/rewards",
     element: <Rewards />,
   },
@@ -106,20 +96,8 @@ export const protectedRoutes = [
     element: <SecurityPage />,
   },
   {
-    path: "/inventory",
-    element: <InventoryPage />,
-  },
-  {
     path: "/support",
     element: <Support />,
-  },
-  {
-    path: "/tax-benefits",
-    element: <TaxBenefitsPage />,
-  },
-  {
-    path: "/retailer/marketplace",
-    element: <RetailerMarketplace />,
   },
 ];
 
@@ -127,7 +105,7 @@ export const roleSpecificRoutes = [
   {
     path: "/donations",
     element: <Donations />,
-    allowedRoles: ["consumer"] as UserRole[],
+    allowedRoles: ["consumer", "user"] as UserRole[],
     requiresConsentVerification: true,
   },
   {
@@ -135,6 +113,27 @@ export const roleSpecificRoutes = [
     element: <RetailDonations />,
     allowedRoles: ["retailer", "admin", "consumer"] as UserRole[],
     requiresConsentVerification: false,
+  },
+  {
+    path: "/logistics",
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <Logistics />
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+    allowedRoles: ["logistics", "admin"] as UserRole[],
+  },
+  {
+    path: "/inventory",
+    element: <InventoryPage />,
+    allowedRoles: ["retailer", "admin"] as UserRole[],
+  },
+  {
+    path: "/tax-benefits",
+    element: <TaxBenefitsPage />,
+    allowedRoles: ["retailer", "admin"] as UserRole[],
   },
   {
     path: "/retailer/marketplace",

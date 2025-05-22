@@ -2,7 +2,7 @@
 import { User } from "firebase/auth";
 import { AvailableLanguage } from "@/lib/translations";
 
-export type UserRole = "consumer" | "retailer" | "admin" | "logistics";
+export type UserRole = "consumer" | "retailer" | "admin" | "logistics" | "user";
 
 export interface UserPreferences {
   language: AvailableLanguage | string;
@@ -43,7 +43,7 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: (role?: UserRole) => Promise<void>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>; // Changed from Promise<boolean> to Promise<void>
+  resetPassword: (email: string) => Promise<void>;
   updateUserPreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
   updateConsentSettings: (settings: Partial<UserData['consentSettings']>) => Promise<void>;
 }
@@ -81,5 +81,12 @@ export const MOCK_USERS = [
     name: "Admin User",
     role: "admin" as UserRole,
     sustainabilityScore: 95
+  },
+  {
+    email: "user@example.com",
+    password: "password123",
+    name: "Regular User",
+    role: "user" as UserRole,
+    sustainabilityScore: 50
   }
 ];

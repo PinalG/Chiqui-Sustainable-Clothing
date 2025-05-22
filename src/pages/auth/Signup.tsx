@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, User, Building2, Truck, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Loader2, User as UserIcon, Building2, Truck, CheckCircle2, XCircle, AlertCircle, UserRound } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -36,7 +36,7 @@ const signupSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: passwordSchema,
   confirmPassword: z.string(),
-  role: z.enum(["consumer", "retailer", "logistics"]),
+  role: z.enum(["consumer", "retailer", "logistics", "user"]),
   organizationName: z.string().optional(),
   taxId: z.string().optional(),
   termsAccepted: z.boolean().refine((val) => val === true, {
@@ -80,7 +80,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("consumer");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("user"); // Changed default to "user"
   const [passwordStrength, setPasswordStrength] = useState(0);
 
   const form = useForm<SignupFormValues>({
@@ -90,7 +90,7 @@ const Signup = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "consumer",
+      role: "user", // Changed default to "user"
       organizationName: "",
       taxId: "",
       termsAccepted: false,
@@ -233,9 +233,19 @@ const Signup = () => {
                           className="flex flex-col space-y-1"
                         >
                           <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-muted transition-colors">
+                            <RadioGroupItem value="user" id="user" />
+                            <label htmlFor="user" className="flex items-center cursor-pointer w-full">
+                              <UserRound className="mr-2 h-4 w-4 text-soft-pink" />
+                              <div className="flex flex-col">
+                                <span className="font-medium">User</span>
+                                <span className="text-xs text-muted-foreground">Regular user account</span>
+                              </div>
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-muted transition-colors">
                             <RadioGroupItem value="consumer" id="consumer" />
                             <label htmlFor="consumer" className="flex items-center cursor-pointer w-full">
-                              <User className="mr-2 h-4 w-4 text-soft-pink" />
+                              <UserIcon className="mr-2 h-4 w-4 text-soft-pink" />
                               <div className="flex flex-col">
                                 <span className="font-medium">Consumer</span>
                                 <span className="text-xs text-muted-foreground">Donate and shop sustainable fashion</span>

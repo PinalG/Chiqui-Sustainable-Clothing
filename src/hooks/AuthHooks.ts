@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   User,
@@ -21,7 +20,7 @@ export function useAuthMethods() {
     email: string, 
     password: string, 
     name: string, 
-    role: UserRole = "consumer",
+    role: UserRole = "user", // Changed default role to "user" from "consumer"
     additionalData?: Partial<UserData>
   ) => {
     try {
@@ -53,10 +52,10 @@ export function useAuthMethods() {
         email: result.user.email,
         displayName: name,
         photoURL: null,
-        role: role,
+        role: role, // Now default is "user" via the function parameter
         createdAt: Date.now(),
         sustainabilityScore: 0,
-        rewardsPoints: role === "consumer" ? 100 : 0, // Give consumers some initial rewards points
+        rewardsPoints: role === "consumer" ? 100 : 0, // Still give consumers some initial rewards points
         consentSettings: {
           marketing: false,
           cookies: true,
@@ -137,7 +136,7 @@ export function useAuthMethods() {
     }
   };
 
-  const signInWithGoogle = async (role: UserRole = "consumer") => {
+  const signInWithGoogle = async (role: UserRole = "user") => { // Changed default role to "user"
     try {
       if (isDevelopmentLike) {
         // In development mode, create a mock Google user

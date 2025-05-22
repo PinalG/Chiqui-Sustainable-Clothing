@@ -1,4 +1,3 @@
-
 import { cn } from '@/lib/utils';
 import { 
   Home, ShoppingBag, Heart, Tags, 
@@ -53,6 +52,10 @@ const Sidebar = () => {
     { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace' },
   ];
   
+  const userItems = [
+    { icon: Heart, label: 'Donations', href: '/donations' },
+  ];
+  
   const consumerItems = [
     { icon: Heart, label: 'Donations', href: '/donations' },
   ];
@@ -78,7 +81,9 @@ const Sidebar = () => {
   let sidebarItems = [...commonItems];
   
   if (userData) {
-    if (userData.role === 'consumer') {
+    if (userData.role === 'user') {
+      sidebarItems = [...sidebarItems, ...userItems];
+    } else if (userData.role === 'consumer') {
       sidebarItems = [...sidebarItems, ...consumerItems];
     } else if (userData.role === 'retailer') {
       sidebarItems = [...sidebarItems, ...retailerItems];

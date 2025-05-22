@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, db, isDevelopmentLike } from "@/lib/firebase";
@@ -55,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser);
         
         if (currentUser) {
-          const userData = getMockUserData(currentUser.email || 'consumer@example.com');
+          const userData = getMockUserData(currentUser.email || 'user@example.com');
           setUserData(userData);
         } else {
           setUserData(null);
@@ -83,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 email: currentUser.email,
                 displayName: currentUser.displayName,
                 photoURL: currentUser.photoURL,
-                role: "consumer", // Default role
+                role: "user", // Default role is now "user" instead of "consumer"
                 createdAt: Date.now(),
                 sustainabilityScore: 0,
                 rewardsPoints: 0,
@@ -119,6 +118,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Clean up the listener
     return () => unsubscribe();
   }, []);
+
+  // Let's add a helper function to get role permissions
+  const hasRole = (requiredRoles: UserRole[] = []): boolean => {
+    if (!userData || !userData.role) return false;
+    return requiredRoles.includes(userData.role);
+  };
 
   const signUp = async (
     email: string, 
@@ -190,7 +195,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     resetPassword,
     updateUserPreferences,
-    updateConsentSettings
+    updateConsentSettings,
+    hasRole // Added this helper function for role checking
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
