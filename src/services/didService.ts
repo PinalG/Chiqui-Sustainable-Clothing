@@ -18,11 +18,14 @@ class MockDidResolver {
     
     // Generate verification method with mock keys
     const verificationMethodId = `${did}#keys-1`;
+    // Use browser-compatible base64 encoding instead of Node.js Buffer
+    const publicKeyMultibase = `z${btoa(userId).replace(/=/g, '')}`;
+    
     const verificationMethod: VerificationMethod = {
       id: verificationMethodId,
       type: "MockKey2023",
       controller: did,
-      publicKeyMultibase: `z${Buffer.from(userId).toString('base64').replace(/=/g, '')}`,
+      publicKeyMultibase
     };
 
     const didDocument: DidDocument = {
