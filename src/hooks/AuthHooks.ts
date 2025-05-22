@@ -193,7 +193,9 @@ export function useAuthMethods() {
   const logout = async () => {
     try {
       if (isDevelopmentLike) {
-        // In development mode, just clear the user state
+        // In development mode, just clear the auth state in localStorage if needed
+        console.log("Using mock logout in development mode");
+        localStorage.removeItem('mock-auth-user');
         toast.success("Signed out successfully");
         return true;
       }
@@ -203,6 +205,7 @@ export function useAuthMethods() {
       toast.success("Signed out successfully");
       return true;
     } catch (error: any) {
+      console.error("Logout error:", error);
       toast.error(error.message || "Failed to sign out");
       throw error;
     }

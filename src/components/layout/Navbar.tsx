@@ -1,7 +1,6 @@
-
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSidebar } from './SidebarContext';
-import { Menu, User, Bell, Settings, Search, X } from 'lucide-react';
+import { Menu, User, Bell, Settings, Search, X, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -38,8 +37,12 @@ const Navbar = () => {
   };
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/auth/login');
+    try {
+      await logout();
+      navigate('/auth/login');
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const getInitials = (name: string | null | undefined) => {
@@ -192,7 +195,8 @@ const Navbar = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={handleLogout}>
-                    Log out
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

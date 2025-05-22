@@ -156,9 +156,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     console.log("Attempting logout");
-    await authMethods.logout();
-    setUser(null);
-    setUserData(null);
+    try {
+      // First clear the local state
+      setUser(null);
+      setUserData(null);
+      
+      // Then call the logout method from authMethods
+      await authMethods.logout();
+      
+      // Show a success message
+      toast.success("Logged out successfully");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast.error(error.message || "Failed to log out");
+      throw error;
+    }
   };
 
   const resetPassword = async (email: string): Promise<void> => {
@@ -196,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetPassword,
     updateUserPreferences,
     updateConsentSettings,
-    hasRole // Added this helper function for role checking
+    hasRole
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
