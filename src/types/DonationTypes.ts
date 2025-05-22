@@ -69,3 +69,34 @@ export interface ComplianceAuditLog {
   user: string;
   notes?: string;
 }
+
+export interface ProductItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  originalPrice: number;
+  condition: string;
+  conditionScore: number;
+  sustainabilityScore: number;
+  description: string;
+  tags: string[];
+  image: string;
+  aiVerified: boolean;
+  additionalImages?: string[];
+  material?: string;
+  care?: string;
+  brand?: string;
+  size?: string;
+  dimensions?: string;
+  donatedBy?: string;
+}
+
+export interface ProductFilter {
+  category?: string;
+  condition?: string;
+  priceRange?: string;
+  sustainabilityFilter?: string;
+  searchQuery?: string;
+  sortBy?: string;
+}

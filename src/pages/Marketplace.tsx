@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Card, 
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle,
-  CardFooter
+  CardTitle
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,19 +18,13 @@ import {
   Filter, 
   Sliders, 
   Tag, 
-  DollarSign, 
-  Sparkles, 
-  ShoppingCart,
-  Star, 
-  Heart, 
-  Leaf, 
-  ArrowUpDown,
-  CircleCheck,
-  PackageCheck,
-  X,
   ChevronDown,
   ChevronUp,
-  Store
+  Store,
+  ShoppingCart,
+  X,
+  Sparkles,
+  Star
 } from "lucide-react";
 import { 
   Select, 
@@ -41,280 +35,69 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-// Mock product data with AI-generated details
-const mockProducts = [
-  {
-    id: "P001",
-    name: "Classic White Shirt",
-    category: "clothing",
-    price: 35.99,
-    originalPrice: 89.99,
-    condition: "Like New",
-    conditionScore: 0.85,
-    sustainabilityScore: 88,
-    description: "Versatile piece that can be styled in multiple ways",
-    tags: ["casual", "cotton", "business"],
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1976&auto=format&fit=crop",
-    aiVerified: true,
-  },
-  {
-    id: "P002",
-    name: "Vintage Leather Jacket",
-    category: "outerwear",
-    price: 129.50,
-    originalPrice: 350.00,
-    condition: "Good",
-    conditionScore: 0.65,
-    sustainabilityScore: 72,
-    description: "Classic design with timeless appeal and durable construction",
-    tags: ["vintage", "leather", "fall"],
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=1935&auto=format&fit=crop",
-    aiVerified: true,
-  },
-  {
-    id: "P003",
-    name: "Designer Handbag",
-    category: "accessories",
-    price: 78.25,
-    originalPrice: 195.00,
-    condition: "Excellent",
-    conditionScore: 0.75,
-    sustainabilityScore: 82,
-    description: "Stylish accessory that complements many outfits",
-    tags: ["designer", "elegant", "practical"],
-    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1935&auto=format&fit=crop",
-    aiVerified: true,
-  },
-  {
-    id: "P004",
-    name: "Running Shoes",
-    category: "footwear",
-    price: 49.99,
-    originalPrice: 120.00,
-    condition: "Good",
-    conditionScore: 0.65,
-    sustainabilityScore: 75,
-    description: "Performance footwear with good tread and support",
-    tags: ["sports", "running", "comfortable"],
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1770&auto=format&fit=crop",
-    aiVerified: true,
-  },
-  {
-    id: "P005",
-    name: "Silk Evening Dress",
-    category: "formalwear",
-    price: 89.00,
-    originalPrice: 225.00,
-    condition: "Excellent",
-    conditionScore: 0.80,
-    sustainabilityScore: 90,
-    description: "Elegant piece suitable for professional settings",
-    tags: ["formal", "silk", "evening"],
-    image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1908&auto=format&fit=crop",
-    aiVerified: true,
-  },
-  {
-    id: "P006",
-    name: "Athletic Performance Shirt",
-    category: "sportswear",
-    price: 25.50,
-    originalPrice: 65.00,
-    condition: "Like New",
-    conditionScore: 0.85,
-    sustainabilityScore: 78,
-    description: "Performance wear with moisture-wicking properties",
-    tags: ["athletic", "performance", "breathable"],
-    image: "https://images.unsplash.com/photo-1565693413579-8a3c9944d5d7?q=80&w=1773&auto=format&fit=crop",
-    aiVerified: true,
-  },
-];
-
-interface ProductCardProps {
-  product: typeof mockProducts[0];
-  onAddToCart: (productId: string) => void;
-  onViewDetails: (productId: string) => void;
-  wishlisted: boolean;
-  onToggleWishlist: (productId: string) => void;
-}
-
-const ProductCard = ({ 
-  product, 
-  onAddToCart, 
-  onViewDetails,
-  wishlisted,
-  onToggleWishlist
-}: ProductCardProps) => {
-  const discountPercentage = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-    >
-      <Card className="h-full overflow-hidden hover:shadow-md transition-all">
-        <div 
-          className="relative cursor-pointer"
-          onClick={() => onViewDetails(product.id)}
-        >
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
-          />
-          <div className="absolute top-2 left-2">
-            <Badge className="bg-soft-pink text-white">
-              {discountPercentage}% OFF
-            </Badge>
-          </div>
-          {product.aiVerified && (
-            <div className="absolute top-2 right-2">
-              <Badge variant="outline" className="bg-white/70 backdrop-blur-sm">
-                <Sparkles className="h-3 w-3 mr-1 text-soft-pink" />
-                Verified
-              </Badge>
-            </div>
-          )}
-        </div>
-        
-        <CardContent className="p-4">
-          <div className="mb-1.5">
-            <Badge variant="outline" className="mb-2">
-              {product.category}
-            </Badge>
-            <h3 
-              className="font-medium line-clamp-1 hover:text-soft-pink cursor-pointer"
-              onClick={() => onViewDetails(product.id)}
-            >
-              {product.name}
-            </h3>
-            <div className="flex justify-between items-center mt-1">
-              <div className="flex items-center">
-                <span className="font-bold text-soft-pink">${product.price.toFixed(2)}</span>
-                <span className="ml-2 text-sm text-muted-foreground line-through">${product.originalPrice.toFixed(2)}</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <CircleCheck className="h-3.5 w-3.5 mr-1" />
-                {product.condition}
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-1 my-2 flex-wrap">
-            {product.tags.map((tag, index) => (
-              <span key={index} className="px-1.5 py-0.5 text-xs bg-gray-100 rounded-full">
-                {tag}
-              </span>
-            ))}
-          </div>
-          
-          <div className="flex justify-between items-center mt-2 text-xs">
-            <div className="flex items-center gap-0.5">
-              <Leaf className="h-3.5 w-3.5 text-green-500" />
-              <span className="text-green-600">Sustainability: {product.sustainabilityScore}/100</span>
-            </div>
-          </div>
-        </CardContent>
-        
-        <CardFooter className="p-3 pt-0 gap-2">
-          <Button 
-            className="w-full" 
-            size="sm"
-            onClick={() => onAddToCart(product.id)}
-          >
-            <ShoppingCart className="h-4 w-4 mr-1.5" />
-            Add to Cart
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="shrink-0"
-            onClick={() => onToggleWishlist(product.id)}
-          >
-            <Heart className={`h-4 w-4 ${wishlisted ? "fill-soft-pink text-soft-pink" : "text-muted-foreground"}`} />
-          </Button>
-        </CardFooter>
-      </Card>
-    </motion.div>
-  );
-};
+import { ProductCard } from "@/components/products/ProductCard";
+import { useProductFiltering } from "@/hooks/use-product-filtering";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FilterSidebar = ({ 
-  isOpen, 
+  isOpen,
   onClose,
-  categoryFilter,
-  setCategoryFilter,
-  conditionFilter,
-  setConditionFilter,
-  priceRange,
-  setPriceRange,
-  sustainabilityFilter,
-  setSustainabilityFilter
+  filters,
+  updateFilters,
+  resetFilters
 }) => {
   const [priceValues, setPriceValues] = useState([0, 350]);
   const [sustainabilityValues, setSustainabilityValues] = useState([0, 100]);
   
   useEffect(() => {
-    if (priceRange === "under50") {
+    if (filters.priceRange === "under50") {
       setPriceValues([0, 50]);
-    } else if (priceRange === "50to100") {
+    } else if (filters.priceRange === "50to100") {
       setPriceValues([50, 100]);
-    } else if (priceRange === "over100") {
+    } else if (filters.priceRange === "over100") {
       setPriceValues([100, 350]);
     } else {
       setPriceValues([0, 350]);
     }
-  }, [priceRange]);
+  }, [filters.priceRange]);
   
   useEffect(() => {
-    if (sustainabilityFilter === "high") {
+    if (filters.sustainabilityFilter === "high") {
       setSustainabilityValues([80, 100]);
-    } else if (sustainabilityFilter === "medium") {
+    } else if (filters.sustainabilityFilter === "medium") {
       setSustainabilityValues([50, 80]);
-    } else if (sustainabilityFilter === "low") {
+    } else if (filters.sustainabilityFilter === "low") {
       setSustainabilityValues([0, 50]);
     } else {
       setSustainabilityValues([0, 100]);
     }
-  }, [sustainabilityFilter]);
+  }, [filters.sustainabilityFilter]);
   
   const handlePriceChange = (values) => {
     setPriceValues(values);
     if (values[0] === 0 && values[1] === 350) {
-      setPriceRange("all");
+      updateFilters({ priceRange: "all" });
     } else if (values[1] <= 50) {
-      setPriceRange("under50");
+      updateFilters({ priceRange: "under50" });
     } else if (values[0] >= 50 && values[1] <= 100) {
-      setPriceRange("50to100");
+      updateFilters({ priceRange: "50to100" });
     } else {
-      setPriceRange("over100");
+      updateFilters({ priceRange: "over100" });
     }
   };
   
   const handleSustainabilityChange = (values) => {
     setSustainabilityValues(values);
     if (values[0] >= 80) {
-      setSustainabilityFilter("high");
+      updateFilters({ sustainabilityFilter: "high" });
     } else if (values[0] >= 50) {
-      setSustainabilityFilter("medium");
+      updateFilters({ sustainabilityFilter: "medium" });
     } else {
-      setSustainabilityFilter("low");
+      updateFilters({ sustainabilityFilter: "low" });
     }
-  };
-  
-  const handleReset = () => {
-    setCategoryFilter("all");
-    setConditionFilter("all");
-    setPriceRange("all");
-    setPriceValues([0, 350]);
-    setSustainabilityFilter("all");
-    setSustainabilityValues([0, 100]);
   };
   
   return (
@@ -339,8 +122,8 @@ const FilterSidebar = ({
               {["all", "clothing", "accessories", "footwear", "outerwear", "sportswear", "formalwear"].map((category) => (
                 <div 
                   key={category}
-                  className={`flex items-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${categoryFilter === category ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
-                  onClick={() => setCategoryFilter(category)}
+                  className={`flex items-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${filters.category === category ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                  onClick={() => updateFilters({ category })}
                 >
                   <span className="capitalize">{category === "all" ? "All Categories" : category}</span>
                 </div>
@@ -356,8 +139,8 @@ const FilterSidebar = ({
               {["all", "new", "like new", "excellent", "good", "fair"].map((condition) => (
                 <div 
                   key={condition}
-                  className={`flex items-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${conditionFilter === condition ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
-                  onClick={() => setConditionFilter(condition)}
+                  className={`flex items-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${filters.condition === condition ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                  onClick={() => updateFilters({ condition })}
                 >
                   <span className="capitalize">{condition === "all" ? "All Conditions" : condition}</span>
                 </div>
@@ -386,26 +169,26 @@ const FilterSidebar = ({
             
             <div className="grid grid-cols-2 gap-2 mt-4">
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "under50" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setPriceRange("under50")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.priceRange === "under50" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ priceRange: "under50" })}
               >
                 Under $50
               </div>
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "50to100" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setPriceRange("50to100")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.priceRange === "50to100" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ priceRange: "50to100" })}
               >
                 $50 - $100
               </div>
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "over100" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setPriceRange("over100")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.priceRange === "over100" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ priceRange: "over100" })}
               >
                 Over $100
               </div>
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${priceRange === "all" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setPriceRange("all")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.priceRange === "all" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ priceRange: "all" })}
               >
                 All Prices
               </div>
@@ -433,26 +216,26 @@ const FilterSidebar = ({
             
             <div className="grid grid-cols-2 gap-2 mt-4">
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "high" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setSustainabilityFilter("high")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.sustainabilityFilter === "high" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ sustainabilityFilter: "high" })}
               >
                 High (80+)
               </div>
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "medium" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setSustainabilityFilter("medium")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.sustainabilityFilter === "medium" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ sustainabilityFilter: "medium" })}
               >
                 Medium (50-80)
               </div>
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "low" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setSustainabilityFilter("low")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.sustainabilityFilter === "low" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ sustainabilityFilter: "low" })}
               >
                 Low (0-50)
               </div>
               <div 
-                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${sustainabilityFilter === "all" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
-                onClick={() => setSustainabilityFilter("all")}
+                className={`text-center px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors border ${filters.sustainabilityFilter === "all" ? 'bg-soft-pink/10 border-soft-pink text-soft-pink' : ''}`}
+                onClick={() => updateFilters({ sustainabilityFilter: "all" })}
               >
                 All Scores
               </div>
@@ -464,7 +247,7 @@ const FilterSidebar = ({
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={handleReset}
+            onClick={resetFilters}
           >
             Reset All Filters
           </Button>
@@ -480,117 +263,68 @@ const FilterSidebar = ({
   );
 };
 
+const ProductsLoadingSkeleton = () => {
+  return (
+    <>
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="space-y-3">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-5 w-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <div className="flex gap-1">
+            <Skeleton className="h-3 w-12" />
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-10" />
+          </div>
+          <div className="flex justify-between pt-3">
+            <Skeleton className="h-9 w-3/4" />
+            <Skeleton className="h-9 w-9" />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
+
 const Marketplace = () => {
   const navigate = useNavigate();
   const { userData } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [conditionFilter, setConditionFilter] = useState("all");
-  const [priceRange, setPriceRange] = useState("all");
-  const [sustainabilityFilter, setSustainabilityFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("featured");
-  const [activeTab, setActiveTab] = useState("all");
-  const [cartItems, setCartItems] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [wishlistedItems, setWishlistedItems] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
+  
+  // Use our custom hook for product filtering
+  const { 
+    filteredProducts,
+    loading,
+    error,
+    filters,
+    updateFilters,
+    resetFilters,
+    wishlistedItems,
+    toggleWishlistItem,
+    cartItems,
+    refreshProducts
+  } = useProductFiltering();
   
   // Check if user has retailer role
   const isRetailer = userData?.role === "retailer" || userData?.role === "admin";
   
-  // Filter products based on user selection
-  const filterProducts = () => {
-    return mockProducts.filter(product => {
-      // Apply search query filter
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      // Apply category filter
-      const matchesCategory = categoryFilter === "all" ? true : product.category === categoryFilter;
-      
-      // Apply condition filter
-      const matchesCondition = conditionFilter === "all" ? true : 
-        product.condition.toLowerCase().includes(conditionFilter.toLowerCase());
-      
-      // Apply price range filter
-      let matchesPrice = true;
-      if (priceRange === "under50") {
-        matchesPrice = product.price < 50;
-      } else if (priceRange === "50to100") {
-        matchesPrice = product.price >= 50 && product.price <= 100;
-      } else if (priceRange === "over100") {
-        matchesPrice = product.price > 100;
-      }
-      
-      // Apply sustainability filter
-      let matchesSustainability = true;
-      if (sustainabilityFilter === "high") {
-        matchesSustainability = product.sustainabilityScore >= 80;
-      } else if (sustainabilityFilter === "medium") {
-        matchesSustainability = product.sustainabilityScore >= 50 && product.sustainabilityScore < 80;
-      } else if (sustainabilityFilter === "low") {
-        matchesSustainability = product.sustainabilityScore < 50;
-      }
-      
-      // Apply active tab filter
-      if (activeTab !== "all") {
-        if (activeTab === "trending") {
-          return matchesSearch && matchesCategory && matchesCondition && matchesPrice && 
-                 matchesSustainability && product.sustainabilityScore > 80;
-        } else if (activeTab === "new-arrivals") {
-          return matchesSearch && matchesCategory && matchesCondition && matchesPrice && 
-                 matchesSustainability && product.conditionScore > 0.8;
-        }
-        return false;
-      }
-      
-      return matchesSearch && matchesCategory && matchesCondition && matchesPrice && matchesSustainability;
-    }).sort((a, b) => {
-      // Apply sorting
-      switch (sortBy) {
-        case "price-low":
-          return a.price - b.price;
-        case "price-high":
-          return b.price - a.price;
-        case "newest":
-          return a.id > b.id ? -1 : 1;
-        case "rating":
-          return b.sustainabilityScore - a.sustainabilityScore;
-        default:
-          return 0;
-      }
-    });
-  };
-  
-  const filteredProducts = filterProducts();
-  
-  const handleAddToCart = (productId: string) => {
-    setCartItems(prev => [...prev, productId]);
-    toast.success("Item added to cart", {
-      action: {
-        label: "View Cart",
-        onClick: () => navigate("/checkout"),
-      },
-    });
-  };
-  
-  const handleToggleWishlist = (productId: string) => {
-    if (wishlistedItems.includes(productId)) {
-      setWishlistedItems(prev => prev.filter(id => id !== productId));
-      toast("Removed from wishlist");
-    } else {
-      setWishlistedItems(prev => [...prev, productId]);
-      toast("Added to wishlist");
+  // Handle tab change to apply special filters
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    
+    if (value === "trending") {
+      updateFilters({ sustainabilityFilter: "high" });
+    } else if (value === "new-arrivals") {
+      updateFilters({ condition: "like new" });
+    } else if (value === "all") {
+      resetFilters();
     }
-  };
-  
-  const handleViewDetails = (productId: string) => {
-    navigate(`/product/${productId}`);
-  };
-  
-  const handleToggleShowFilters = () => {
-    setShowFilters(!showFilters);
   };
   
   return (
@@ -668,8 +402,8 @@ const Marketplace = () => {
                 <Input
                   placeholder="Search products..."
                   className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={filters.searchQuery}
+                  onChange={(e) => updateFilters({ searchQuery: e.target.value })}
                 />
               </div>
             </div>
@@ -679,7 +413,7 @@ const Marketplace = () => {
         <CardContent>
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between gap-4">
-              <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+              <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="w-full sm:w-auto">
                 <TabsList className="w-full grid grid-cols-3">
                   <TabsTrigger value="all">All Products</TabsTrigger>
                   <TabsTrigger value="trending">
@@ -694,10 +428,10 @@ const Marketplace = () => {
               </Tabs>
               
               <div className="flex gap-2 justify-end flex-wrap">
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select value={filters.sortBy} onValueChange={(value) => updateFilters({ sortBy: value })}>
                   <SelectTrigger className="w-[140px]">
                     <div className="flex items-center">
-                      <ArrowUpDown className="h-3.5 w-3.5 mr-1.5" />
+                      <Sliders className="h-3.5 w-3.5 mr-1.5" />
                       <span>Sort By</span>
                     </div>
                   </SelectTrigger>
@@ -713,10 +447,10 @@ const Marketplace = () => {
                 <Button 
                   variant={showFilters ? "default" : "outline"} 
                   size="icon"
-                  onClick={handleToggleShowFilters}
+                  onClick={() => setShowFilters(!showFilters)}
                   className={showFilters ? "bg-soft-pink text-white" : ""}
                 >
-                  <Sliders className="h-4 w-4" />
+                  <Filter className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -753,8 +487,8 @@ const Marketplace = () => {
                               {["all", "clothing", "accessories", "footwear", "outerwear", "sportswear", "formalwear"].map((category) => (
                                 <div 
                                   key={category}
-                                  className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${categoryFilter === category ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
-                                  onClick={() => setCategoryFilter(category)}
+                                  className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${filters.category === category ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                                  onClick={() => updateFilters({ category })}
                                 >
                                   <span className="capitalize">{category === "all" ? "All Categories" : category}</span>
                                 </div>
@@ -773,8 +507,8 @@ const Marketplace = () => {
                         {["all", "new", "like new", "excellent", "good", "fair"].map((condition) => (
                           <div 
                             key={condition}
-                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${conditionFilter === condition ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
-                            onClick={() => setConditionFilter(condition)}
+                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${filters.condition === condition ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                            onClick={() => updateFilters({ condition })}
                           >
                             <span className="capitalize">{condition === "all" ? "All Conditions" : condition}</span>
                           </div>
@@ -795,8 +529,8 @@ const Marketplace = () => {
                         ].map((option) => (
                           <div 
                             key={option.value}
-                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${priceRange === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
-                            onClick={() => setPriceRange(option.value)}
+                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${filters.priceRange === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                            onClick={() => updateFilters({ priceRange: option.value })}
                           >
                             <span>{option.label}</span>
                           </div>
@@ -817,14 +551,22 @@ const Marketplace = () => {
                         ].map((option) => (
                           <div 
                             key={option.value}
-                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${sustainabilityFilter === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
-                            onClick={() => setSustainabilityFilter(option.value)}
+                            className={`flex items-center px-2 py-1 rounded-md text-sm cursor-pointer hover:bg-muted transition-colors ${filters.sustainabilityFilter === option.value ? 'bg-soft-pink/10 text-soft-pink' : ''}`}
+                            onClick={() => updateFilters({ sustainabilityFilter: option.value })}
                           >
                             <span>{option.label}</span>
                           </div>
                         ))}
                       </div>
                     </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      className="mt-4 w-full"
+                      onClick={resetFilters}
+                    >
+                      Reset All Filters
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -832,35 +574,31 @@ const Marketplace = () => {
               {/* Mobile Filters */}
               <FilterSidebar 
                 isOpen={showFilters} 
-                onClose={handleToggleShowFilters} 
-                categoryFilter={categoryFilter}
-                setCategoryFilter={setCategoryFilter}
-                conditionFilter={conditionFilter}
-                setConditionFilter={setConditionFilter}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                sustainabilityFilter={sustainabilityFilter}
-                setSustainabilityFilter={setSustainabilityFilter}
+                onClose={() => setShowFilters(false)} 
+                filters={filters}
+                updateFilters={updateFilters}
+                resetFilters={resetFilters}
               />
               
               {/* Product Grid */}
               <div className="lg:col-span-3">
-                {filteredProducts.length === 0 ? (
+                {loading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <ProductsLoadingSkeleton />
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center justify-center p-12 bg-muted rounded-lg">
+                    <p className="text-red-500 mb-4">Error loading products: {error}</p>
+                    <Button onClick={refreshProducts}>Try again</Button>
+                  </div>
+                ) : filteredProducts.length === 0 ? (
                   <div className="flex flex-col items-center justify-center text-center p-12 bg-muted rounded-lg">
                     <Tag className="h-12 w-12 mb-4 text-muted-foreground" />
                     <h3 className="text-lg font-medium mb-2">No products found</h3>
                     <p className="text-muted-foreground max-w-md mb-6">
                       We couldn't find any products matching your current filters. Try adjusting your search criteria or browse our other categories.
                     </p>
-                    <Button onClick={() => {
-                      setCategoryFilter("all");
-                      setConditionFilter("all");
-                      setPriceRange("all");
-                      setSustainabilityFilter("all");
-                      setSearchQuery("");
-                    }}>
-                      Reset Filters
-                    </Button>
+                    <Button onClick={resetFilters}>Reset Filters</Button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -868,10 +606,8 @@ const Marketplace = () => {
                       <ProductCard 
                         key={product.id}
                         product={product}
-                        onAddToCart={handleAddToCart}
-                        onViewDetails={handleViewDetails}
                         wishlisted={wishlistedItems.includes(product.id)}
-                        onToggleWishlist={handleToggleWishlist}
+                        onToggleWishlist={toggleWishlistItem}
                       />
                     ))}
                   </div>
@@ -886,4 +622,3 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
-

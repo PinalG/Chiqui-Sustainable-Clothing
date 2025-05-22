@@ -17,7 +17,6 @@ import {
   Search, 
   Sliders, 
   Tag, 
-  DollarSign, 
   Edit,
   Monitor,
   CircleCheck,
@@ -42,7 +41,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { 
   Sheet,
@@ -53,7 +51,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { motion } from "framer-motion";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
@@ -283,9 +281,8 @@ const EditItemDetails = ({ item, onClose }) => {
   };
 
   const handleSubmit = () => {
-    toast({
-      title: "Item updated",
-      description: "Item details have been updated successfully",
+    toast(`Item updated`, {
+      description: "Item details have been updated successfully"
     });
     onClose();
   };
@@ -369,6 +366,10 @@ const EditItemDetails = ({ item, onClose }) => {
 };
 
 const ItemDetailsReview = ({ item, onClose }) => {
+  const handleOverrideToast = (message) => {
+    toast(message);
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -496,9 +497,8 @@ const ItemDetailsReview = ({ item, onClose }) => {
                     variant="outline" 
                     size="sm"
                     onClick={() => {
-                      toast({
-                        title: "Re-analysis requested",
-                        description: "The item will be re-analyzed by our AI system",
+                      toast("Re-analysis requested", {
+                        description: "The item will be re-analyzed by our AI system"
                       });
                     }}
                   >
@@ -521,9 +521,8 @@ const ItemDetailsReview = ({ item, onClose }) => {
                   <Button 
                     variant="outline"
                     onClick={() => {
-                      toast({
-                        title: "Price override requested",
-                        description: "Your request will be reviewed by an administrator",
+                      toast("Price override requested", {
+                        description: "Your request will be reviewed by an administrator"
                       });
                     }}
                   >
@@ -542,9 +541,8 @@ const ItemDetailsReview = ({ item, onClose }) => {
                   variant="destructive" 
                   className="w-full"
                   onClick={() => {
-                    toast({
-                      title: "Removal requested",
-                      description: "Your request to remove this item has been submitted",
+                    toast("Removal requested", {
+                      description: "Your request to remove this item has been submitted"
                     });
                   }}
                 >
